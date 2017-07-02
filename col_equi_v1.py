@@ -54,4 +54,4 @@ for i in range(0, N):
     plt.ylim((-3e3,0))
     ax1.set_xlim((-5,20))
     ax2.set_xlim((-0.01,0.04))
-plt.savefig('test_var_diff.pdf')
+plt.savefig('test_con_diff.pdf')
