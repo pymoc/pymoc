@@ -1,105 +1,57 @@
-"""
-One dimensionsional ocean column model at equilibrium.
-"""
-
 import math
 import numpy as np
 import scipy
 from scipy import integrate
 from matplotlib import pyplot as plt
 
-f = 1.2e-4 # Coriolis parameter (in the north of basin)
+f = 1.2e-4 # coriolis frequency
 b_s = 0.025 # surface buoyancy in the basin
-# kappa is the value used for constant diffusivity:
-kappa = 6e-5 
-#  the folowing three are parameters for 
-#  vertically varying diffusivity
-#  add or remove comments in main loop to use constant or varying diff.
+a = 6.37e6 # planetary radius (used in basin area calculation)
+A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48))) # area of upwelling
+kappa = 6e-5 # constant diffusivity
 kappa_back = 1e-5
 kappa_s = 3e-5
 kappa_4k = 3e-4
-a = 6.37e6 # planetary radius (used in basin area calculation)
-# Area over which diapycnal upwelling occurs:
-A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48)))
-#  Diffusive buoyancy loss to abyss (vector to compute multiple cases):
-B_int = [3e3, 1.2e4, 3e3, 1.2e4]
-# Depth of SO upwelling (vector to compute multiple cases):
 H_max_so = [2000, 2000, 1500, 1500]
-# Maximum value of SO upwelling (in SV):
-psi_max_so = 4.
+B_int=[3e3, 1.2e4, 3e3, 1.2e4]
+zi = np.asarray(np.linspace(-1,0,100)) # vertical grid
+psi_so_max = 4.
+N = 4
 
-N = len(B_int)
-z = np.zeros(())
-zz = np.linspace(-1,0,100) # vertical grid
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+ax2 = ax1.twiny()
 
-def bound_cond(ya, yb, p, bz, b): 
+def psi_so(z, H_so, H):
+    pre = psi_so_max * 1e6 / (f * H**3)
+    return pre * np.sin([-np.pi * max(H * x, -H_so) / H_so for x in z])**2
+
+def ode_fun(z, y, p, H_so, alpha, kap, dkap_dz):
     H = p[0]
-    res =  np.array([ya[0], ya[1], ya[3] + bz(H), yb[0], yb[2] - b/H]) # fixed bottom b_z,psi, and psi_z
-    return res
-def fun(z, y, H, a, A, dkap_dz, psi_so):
-    return np.vstack((y[1], y[2], y[3], a(z, H) * (y[0] - psi_so(z, H).T - A / H**2 * dkap_dz(z, H)) * y[3]))
-def psi(z, H, H_max_so, f, psi_max_so):
-    d = list(map(lambda x: (-np.pi * max(x*H, -H_max_so) / H_max_so), z))
-    return psi_max_so * 1E6 / f / (H**3) * np.sin(d)**2
+    return np.vstack((y[1], y[2], y[3], alpha(z,H) * y[3] * (y[0] - psi_so(z, H_so, H) - A * dkap_dz(z, H)/(H**2))))
 
 for i in range(0, N):
-    zi = np.linspace(0, H_max_so[i], zz.size) # vertical z grid on which to solve the ode
-    kap = lambda z, H: kappa/(H**2/f)
-    dkap_dz = lambda z, H: 0
-    # For vertically varying kappa, use the next two lines
-    # kap = lambda z, H: 1/H**2/f*(kappa_back + kappa_s*np.exp(z*H/100) + kappa_4k*np.exp(-z*H/1000 - 4)) # nondim kapp
-    # dkap_dz = lambda z, H: 1/H/f*(kappa_s/100*np.exp(z*H/100) - kappa_4k/1000*np.exp(-z*H/1000 - 4)) # nondimensional d(kappa)/dz  
-    a = lambda z, H: 1 / (kap(z, H) * A) * (H**2) # 1/(kappa A) nondimensionalized
-    # nondim. surface buoyancy: (still needs to be div. by H, which 
-    # will be done in BC itself, so it doesn't need to be function)
+    H_so = H_max_so[i]
+    # kap = lambda z, H: kappa / (f * H**2)
+    # dkap_dz = lambda z, H: 0
+    kap = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
+    dkap_dz=lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
+    alpha = lambda z, H: H**2 / (A * kap(0, H))
     b = -b_s/(f**2)
-    # (Nondim.) stratification at bottom of cell:
-    bz = lambda H: B_int[i]/(A*kap(-1,H))/(f**3)/(H**2)
-    # Southern ocean upwelling
-    psi_so = lambda z, H: psi(z, H, H_max_so[i], f, psi_max_so)
-    # psi_so = lambda z, H: psi_max_so * 1e6 / f / H[0]**3 * \
-    #     np.sin(list(map(lambda x: -np.pi * max(x * H[0], -H_max_so[i]) / H_max_so[i], z)))**2
-    # Initial guess for solver:
-    # if the solver doesn't converge, it often helps to play a little with the initial guess
+    bz = lambda H: B_int[i] / (f**3 * H**2 * A * kap(0, H))
+    ode = lambda z, y, p: ode_fun(z, y, p, H_so, alpha, kap, dkap_dz)
+    bc = lambda ya, yb, p: np.array([ ya[0], yb[0], ya[1], ya[3] + bz(p[0]), yb[2] - b/p[0]])
     sol_init = np.zeros((4, zi.size))
     sol_init[0,:] = np.ones((zi.size))
     sol_init[2,:] = -0.1*np.ones((zi.size))
     sol_init[3,:] = -bz(H_max_so[i] + 200) * np.ones((zi.size))
-    # sol_init = np.ones((4,100)) * np.expand_dims([1,0,-0.1,-bz(H_max_so[i] + 200)], 1)
-    # This is the actual differential equation we are solving
-    # (see Jansen ????)
-    # (y(1)=psi,y(2)=psi_z,y(3)=psi_zz,y(4)=psi_zzz) 
-    ode = lambda z, y, H: fun(z,y,H,a,A,dkap_dz,psi_so)
-    # Boundary conditions for differential equation:
-    # (Notice that the eq. is 4th order, but we are also solving for H
-    # hence 4 BCs are needed)
-    bc = lambda ya, yb, p: bound_cond(ya, yb, p, bz, b)
-    # This is where the equation actually gets solved:
-    # sol = bvp4c(ode,bc,solinit);
-    res = integrate.solve_bvp(ode, bc, zz, sol_init, p=[-H_max_so[i] + 200], max_nodes=100000, verbose=0, tol=10000)
-    # evaluate solution at points in z for plotting
-    # y = res.sol(zi)
+    res = integrate.solve_bvp(ode, bc, zi, sol_init, p=[H_max_so[i] - 200])
+    Hf = res.p[0]
     print(res.status)
-    H = res.p[0]
-    print(H)
-
-    # if i == 0:
-    plt.plot(f*(H**3)*res.y[0,:]/1e6, -res.x*H)
-    # plt.plot(-(f**2)*H*res.y[2,:], -res.x*H)
-    plt.xlim((-5,20))
+    print(Hf)
+    ax1.plot(res.y[0,:]*f*Hf**3/1e6, res.x*Hf)
+    ax2.plot(-res.y[2,:]*f**2*Hf, res.x*Hf)
     plt.ylim((-3e3,0))
+    ax1.set_xlim((-5,20))
+    ax2.set_xlim((-0.01,0.04))
 plt.show()
-        # line(y(1,:)*H^3*f/1e6,zz*H,'linestyle','--','color',[Bint(i)./max(Bint),0.5*Bint(i)./max(Bint),1-Bint(i)./max(Bint)]); hold on;
-        # ax1=gca;
-        # xlabel('$\Psi_{N} \; [SV]$','interpreter','Latex','fontsize',20)
-        # ylabel('depth $[m]$','interpreter','Latex','fontsize',20)
-        # ax1_pos = ax1.Position; % position of first axes
-        # set(ax1,'xlim',[-5 20],'ylim',[-3000 0],'fontsize',15)
-        # ax2 = axes('Position',ax1_pos,'XAxisLocation','top',...
-        # 'YAxisLocation','right','XTick',(-0.01:0.01:0.04),...
-        # 'Color','none','xlim',[-0.01 0.04],'ylim',[-3000 0],'fontsize',15);
-        # xlabel(ax2,'$b \; [ms^{-2}]$','interpreter','Latex','fontsize',20)
-        # plt.plot() 
-    # else:
-
-    # H = sol.parameters % H is the depth of the overturning cell
