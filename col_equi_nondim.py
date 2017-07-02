@@ -32,18 +32,18 @@ N = len(B_int)
 z = np.zeros(())
 zz = np.linspace(-1,0,100) # vertical grid
 
-def bound_cond(ya, yb, p, bz, b): 
+def bound_cond(ya, yb, p, bs, f, B, A, kappa): 
     H = p[0]
-    res =  np.array([ya[0], ya[1], ya[3] + bz(H), yb[0], yb[2] - b/H]) # fixed bottom b_z,psi, and psi_z
-    return res
+    return np.array([ya[0], yb[0], ya[1], ya[2] + b_s/f, yb[3] + B/(A*f*kappa)])
 def fun(z, y, H, a, A, dkap_dz, psi_so):
-    return np.vstack((y[1], y[2], y[3], a(z, H) * (y[0] - psi_so(z, H).T - A / H**2 * dkap_dz(z, H)) * y[3]))
+    return np.vstack((y[1], y[2], y[3], y[3]*(y[0] - psi_so(z, H).T - A*dkap_dz(z, H))/(kappa * A)))
 def psi(z, H, H_max_so, f, psi_max_so):
-    d = list(map(lambda x: (-np.pi * max(x*H, -H_max_so) / H_max_so), z))
-    return psi_max_so * 1E6 / f / (H**3) * np.sin(d)**2
+    d = list(map(lambda x: (np.pi * max(x*H, -H_max_so) / H_max_so), z))
+    return psi_max_so * np.sin(d)**2
 
 for i in range(0, N):
-    zi = np.linspace(0, H_max_so[i], zz.size) # vertical z grid on which to solve the ode
+    # zi = np.linspace(0, H_max_so[i], zz.size) # vertical z grid on which to solve the ode
+    zi = H_max_so[i] * zz
     kap = lambda z, H: kappa/(H**2/f)
     dkap_dz = lambda z, H: 0
     # For vertically varying kappa, use the next two lines
@@ -54,7 +54,7 @@ for i in range(0, N):
     # will be done in BC itself, so it doesn't need to be function)
     b = -b_s/(f**2)
     # (Nondim.) stratification at bottom of cell:
-    bz = lambda H: B_int[i]/(A*kap(-1,H))/(f**3)/(H**2)
+    bz = lambda H: B_int[i]/(A*kappa/H)
     # Southern ocean upwelling
     psi_so = lambda z, H: psi(z, H, H_max_so[i], f, psi_max_so)
     # psi_so = lambda z, H: psi_max_so * 1e6 / f / H[0]**3 * \
@@ -62,9 +62,9 @@ for i in range(0, N):
     # Initial guess for solver:
     # if the solver doesn't converge, it often helps to play a little with the initial guess
     sol_init = np.zeros((4, zi.size))
-    sol_init[0,:] = np.ones((zi.size))
-    sol_init[2,:] = -0.1*np.ones((zi.size))
-    sol_init[3,:] = -bz(H_max_so[i] + 200) * np.ones((zi.size))
+    sol_init[0,:] = np.ones((zi.size)) * f * H_max_so[i]**2
+    sol_init[2,:] = -0.1*np.ones((zi.size)) * f
+    sol_init[3,:] = B_int[i] / (A*H_max_so[i] * f**2) * np.ones((zi.size))
     # sol_init = np.ones((4,100)) * np.expand_dims([1,0,-0.1,-bz(H_max_so[i] + 200)], 1)
     # This is the actual differential equation we are solving
     # (see Jansen ????)
@@ -73,10 +73,10 @@ for i in range(0, N):
     # Boundary conditions for differential equation:
     # (Notice that the eq. is 4th order, but we are also solving for H
     # hence 4 BCs are needed)
-    bc = lambda ya, yb, p: bound_cond(ya, yb, p, bz, b)
+    bc = lambda ya, yb, p: bound_cond(ya, yb, p, b_s, f, B_int[i], A, kappa)
     # This is where the equation actually gets solved:
     # sol = bvp4c(ode,bc,solinit);
-    res = integrate.solve_bvp(ode, bc, zz, sol_init, p=[-H_max_so[i] + 200], max_nodes=100000, verbose=0, tol=10000)
+    res = integrate.solve_bvp(ode, bc, zi, sol_init, p=[-H_max_so[i] - 200], max_nodes=1e20, verbose=0, tol=1e4)
     # evaluate solution at points in z for plotting
     # y = res.sol(zi)
     print(res.status)
@@ -84,9 +84,11 @@ for i in range(0, N):
     print(H)
 
     # if i == 0:
-    plt.plot(f*(H**3)*res.y[0,:]/1e6, -res.x*H)
+    # plt.plot(-res.y[0,:]/1E6, res.x)
+    print(np.shape(res.y))
+    plt.plot(res.y[0,:], res.x)
     # plt.plot(-(f**2)*H*res.y[2,:], -res.x*H)
-    plt.xlim((-5,20))
+    # plt.xlim((-5,20))
     plt.ylim((-3e3,0))
 plt.show()
         # line(y(1,:)*H^3*f/1e6,zz*H,'linestyle','--','color',[Bint(i)./max(Bint),0.5*Bint(i)./max(Bint),1-Bint(i)./max(Bint)]); hold on;
