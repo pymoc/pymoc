@@ -15,6 +15,10 @@ zi = np.asarray(np.linspace(-1,0,100)) # vertical grid
 psi_so_max = 4.
 N = 4
 
+fig = plt.figure()
+ax1 = fig.add_subplot(111)
+ax2 = ax1.twiny()
+
 def psi_so(z, H_so, H):
     pre = psi_so_max * 1e6 / (f * H**3)
     return pre * np.sin([-np.pi * max(H * x, -H_so) / H_so for x in z])**2
@@ -39,6 +43,9 @@ for i in range(0, N):
     Hf = res.p[0]
     print(res.status)
     print(Hf)
-    plt.plot(res.y[2,:], res.x*Hf)
+    ax1.plot(res.y[0,:]*f*Hf**3/1e6, res.x*Hf)
+    ax2.plot(-res.y[2,:]*f**2*Hf, res.x*Hf)
     plt.ylim((-3e3,0))
+    ax1.set_xlim((-5,20))
+    ax2.set_xlim((-0.01,0.04))
 plt.show()
