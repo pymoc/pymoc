@@ -24,7 +24,7 @@ A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48)))
 #  Diffusive buoyancy loss to abyss (vector to compute multiple cases):
 B_int = [3e3, 1.2e4, 3e3, 1.2e4]
 # Depth of SO upwelling (vector to compute multiple cases):
-H_max_so = [2000, 2000, 1500, 1500]
+H_max_so = [-2000, -2000, -1500, -1500]
 # Maximum value of SO upwelling (in SV):
 psi_max_so = 4.
 
@@ -36,14 +36,15 @@ def bound_cond(ya, yb, p, bs, f, B, A, kappa):
     H = p[0]
     return np.array([ya[0], yb[0], ya[1], ya[2] + b_s/f, yb[3] + B/(A*f*kappa)])
 def fun(z, y, H, a, A, dkap_dz, psi_so):
-    return np.vstack((y[1], y[2], y[3], y[3]*(y[0] - psi_so(z, H).T - A*dkap_dz(z, H))))
+    print(H)
+    return np.vstack((y[1], y[2], y[3], y[3]*(y[0] - psi_so(z, H[0]).T - A*dkap_dz(z, H[0]))))
 def psi(z, H, H_max_so, f, psi_max_so):
-    d = list(map(lambda x: (np.pi * max(x*H, -H_max_so) / H_max_so), z))
+    d = list(map(lambda x: (np.pi * max(x, -H_max_so) / H_max_so), z))
     return psi_max_so * np.sin(d)**2
 
 for i in range(0, N):
     # zi = np.linspace(0, H_max_so[i], zz.size) # vertical z grid on which to solve the ode
-    zi = H_max_so[i] * zz
+    zi = -H_max_so[i] * zz
     kap = lambda z, H: kappa/(H**2/f)
     dkap_dz = lambda z, H: 0
     # For vertically varying kappa, use the next two lines
@@ -64,7 +65,7 @@ for i in range(0, N):
     sol_init = np.zeros((4, zi.size))
     sol_init[0,:] = np.ones((zi.size)) * f * H_max_so[i]**2
     sol_init[2,:] = -0.1*np.ones((zi.size)) * f
-    sol_init[3,:] = B_int[i] / (A*H_max_so[i] * f**2) * np.ones((zi.size))
+    sol_init[3,:] = -B_int[i] / (A*H_max_so[i] * f**2) * np.ones((zi.size))
     # sol_init = np.ones((4,100)) * np.expand_dims([1,0,-0.1,-bz(H_max_so[i] + 200)], 1)
     # This is the actual differential equation we are solving
     # (see Jansen ????)
