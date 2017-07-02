@@ -18,7 +18,7 @@ zi = np.asarray(np.linspace(-1,0,100)) # vertical grid
 psi_so_max = 4.
 N = 4
 
-fig = plt.figure()
+fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
 
@@ -32,10 +32,10 @@ def ode_fun(z, y, p, H_so, alpha, kap, dkap_dz):
 
 for i in range(0, N):
     H_so = H_max_so[i]
-    # kap = lambda z, H: kappa / (f * H**2)
-    # dkap_dz = lambda z, H: 0
-    kap = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
-    dkap_dz=lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
+    kap = lambda z, H: kappa / (f * H**2)
+    dkap_dz = lambda z, H: 0
+    # kap = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
+    # dkap_dz=lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
     alpha = lambda z, H: H**2 / (A * kap(0, H))
     b = -b_s/(f**2)
     bz = lambda H: B_int[i] / (f**3 * H**2 * A * kap(0, H))
@@ -54,4 +54,4 @@ for i in range(0, N):
     plt.ylim((-3e3,0))
     ax1.set_xlim((-5,20))
     ax2.set_xlim((-0.01,0.04))
-plt.show()
+plt.savefig('test_var_diff.pdf')
