@@ -87,7 +87,7 @@ psiso=@(z,H) psimaxso*1e6/f/H^3*sin(-pi*max(z*H,-Hmaxso(i))/Hmaxso(i)).^2;
 % Initial conditions for solver:
 % if the solver doesn't converge, it often helps to play a little with the initial guess
 % the number of z points here specifies (among other things) the minimum number of mesh points used
-solinit = bvpinit(linspace(-1,0,50),[1,0,-0.1,-bz(Hmaxso(i)+200)],Hmaxso(i)+200);
+solinit = bvpinit(linspace(-1,0,50),[1,0,-0.1,-bz(Hmaxso(i)+100)],Hmaxso(i)+100);
 
 % This is the actual differential equation we are solving
 % (see Jansen ????)
