@@ -7,7 +7,6 @@ class Model(object):
             self,
             f=1.2e-4,
             b_s=0.025,
-            a=6.37e6,
             kappa=6e-5,
             kappa_back=1e-5,
             kappa_s=3e-5,
@@ -16,15 +15,12 @@ class Model(object):
             B_int=3e3,
             psi_so_max=4.,
             nz=100,
-            A=None,
+            A=7e13,
             sol_init=None,
             diff_type='constant',
     ):
         self.f = f
-        if A:
-            self.A = A
-        else:
-            self.A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48))) 
+        self.A = A
         self.zi=np.asarray(np.linspace(-1, 0, nz))
 
         if diff_type == 'constant':
