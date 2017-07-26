@@ -79,6 +79,7 @@ a=@(z,H) 1/(kap(z,H)*A)*H^2; % 1/(kappa A) nondimensionalized
 % will be done in BC itself, so it doesn't need to be function)
 b=-bs/f^2; 
 % (Nondim.) stratification at bottom of cell:
+
 bz=@(H)Bint(i)/(A*kap(-1,H))/f^3/H^2;
 
 % Southern ocean upwelling:
