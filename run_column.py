@@ -3,13 +3,12 @@ import math
 import numpy as np
 from matplotlib import pyplot as plt
 
-N = 4
-H_max_so = [2000, 2000, 1500, 1500]
-B_int=[3e3,1.2e4, 3e3, 1.2e4]
+N = 4 # number of cases to be considered
+H_max_so = [2000, 2000, 1500, 1500] # depth extent of upwelling in SO
+B_int=[3e3,1.2e4, 3e3, 1.2e4] # abyssal buoyancy loss
 
-a=6.37e6
-A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48)))
-
+# Area of the basin (this is for idealized single-basin model)
+a=6.37e6; A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48)))
 
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
