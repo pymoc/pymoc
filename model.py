@@ -30,8 +30,11 @@ class Model(object):
         if diff_type == 'constant':
             self.kappa = lambda z, H: kappa / (f * H**2)
             self.dkappa_dz = lambda z, H: 0
+        elif diff_type == 'function':
+            self.kappa = lambda z, H: kappa(z) / (f * H**2)
+            self.dkappa_dz = lambda z, H: self.dkdz(H * z, kappa) / (f * H)
         else:
-            self.kappa = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
+            self.kappa = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100) + kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
             self.dkappa_dz = lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
         self.b = -b_s / f**2
         self.B_int = B_int
@@ -58,6 +61,11 @@ class Model(object):
     def psi_so(self, z, H):
         pre = self.psi_so_max * 1e6 / (self.f * H**3)
         return pre * np.sin([-np.pi * max(H * x, -self.H_max_so) / self.H_max_so for x in z])**2
+
+    def dkdz(self, z, kappa):
+        if type(kappa(z) is int):
+            return 0;
+        return np.gradient(kappa(z), z)
 
     def ode(self, z, y, p):
         H = p[0]

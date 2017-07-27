@@ -9,8 +9,10 @@ fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
 
+kappa = lambda z: 6e-5 
+
 for i in range(0, N):
-    m = Model(H_max_so=H_max_so[i], B_int=B_int[i], diff_type='variable')
+    m = Model(H_max_so=H_max_so[i], B_int=B_int[i], diff_type='function', kappa=kappa)
     res = m.solve()
     H = res['H']
     z = res['z']
