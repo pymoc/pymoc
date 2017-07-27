@@ -1,5 +1,6 @@
 from model import Model
 from matplotlib import pyplot as plt
+import numpy as np
 
 H_max_so = [2000, 2000, 1500, 1500]
 B_int=[3e3, 1.2e4, 3e3, 1.2e4]
@@ -9,7 +10,11 @@ fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
 
-kappa = lambda z: 6e-5 
+# kappa = lambda z: 6e-5 
+kappa_back = 1e-5
+kappa_s = 3e-5
+kappa_4k = 3e-4
+kappa = lambda z: kappa_back + kappa_s*np.exp(z/100.) + kappa_4k*np.exp(-z/1000. - 4.)
 
 for i in range(0, N):
     m = Model(H_max_so=H_max_so[i], B_int=B_int[i], diff_type='function', kappa=kappa)
