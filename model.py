@@ -1,4 +1,3 @@
-import math
 import numpy as np
 from scipy import integrate
 
@@ -7,28 +6,28 @@ class Model(object):
             self,
             f=1.2e-4,
             b_s=0.025,
-            kappa=6e-5,
-            kappa_back=1e-5,
-            kappa_s=3e-5,
-            kappa_4k=3e-4,
+            kappa_const=6e-5,
             H_max_so=2000,
             B_int=3e3,
             psi_so_max=4.,
             nz=100,
             A=7e13,
             sol_init=None,
-            diff_type='constant',
+            kappa=None,
+            dkappa_dz=None,
     ):
+   
         self.f = f
         self.A = A
         self.zi=np.asarray(np.linspace(-1, 0, nz))
-
-        if diff_type == 'constant':
-            self.kappa = lambda z, H: kappa / (f * H**2)
-            self.dkappa_dz = lambda z, H: 0
+        if kappa and dkappa_dz:  
+            self.kappa= lambda z,H: kappa(z,H)/ (H**2 * f)
+            self.dkappa_dz=lambda z,H: dkappa_dz(z,H) / (H * f)
+        elif kappa or dkappa_dz:
+           raise ValueError('If you want kappa profile you need to provide both kappa and dkappa_dz')
         else:
-            self.kappa = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
-            self.dkappa_dz = lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
+            self.kappa= lambda z,H: kappa_const/ (H**2 * f)
+            self.dkappa_dz=lambda z,H: 0    
         self.b = -b_s / f**2
         self.B_int = B_int
         self.psi_so_max = psi_so_max
