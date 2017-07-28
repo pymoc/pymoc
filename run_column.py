@@ -13,7 +13,7 @@ psi_so_max=4.
 a=6.37e6; A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radians(-48)))
 
 # The next few lines are a an example for a reasonable vertically varying kappa profile:
-# (to use const. kappa, you can instead just provide kappa_const to the Model)    
+# (to use const. kappa, simply define kappa as scalar, and don't provide dkappa_dz - it won't be used if you do)    
 kappa_back=1e-5
 kappa_s=3e-5
 kappa_4k=3e-4
@@ -26,7 +26,7 @@ ax2 = ax1.twiny()
 
 # Main loop which solves column model subject to different parameters:
 for i in range(0, N):
-    psi_so= lambda z:  (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
+    psi_so= lambda z: (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
     m = Model(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
     res = m.solve()
     H = res['H']

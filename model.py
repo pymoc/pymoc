@@ -6,12 +6,11 @@ class Model(object):
             self,
             f=1.2e-4,
             b_s=0.025,
-            kappa_const=6e-5,
             B_int=3e3,
             nz=100,
             A=7e13,
             sol_init=None,
-            kappa=None,
+            kappa=6e-5,
             dkappa_dz=None,
             psi_so=None,
     ):
@@ -19,14 +18,17 @@ class Model(object):
         self.f = f
         self.A = A
         self.zi=np.asarray(np.linspace(-1, 0, nz))
-        if kappa and dkappa_dz:  
-            self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
-            self.dkappa_dz=lambda z,H: dkappa_dz(z*H) / (H * self.f)
-        elif kappa or dkappa_dz:
-           raise ValueError('If you want kappa profile you need to provide both kappa and dkappa_dz')
+        
+        if callable(kappa): 
+            if callable(dkappa_dz):  
+                self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
+                self.dkappa_dz=lambda z,H: dkappa_dz(z*H) / (H * self.f)
+            else:
+                raise ValueError('If you want kappa profile you need to provide both kappa and dkappa_dz')
         else:
-            self.kappa= lambda z,H: kappa_const/ (H**2 * self.f)
+            self.kappa= lambda z,H: kappa/ (H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
+ 
         if psi_so:
             self.psi_so=lambda z,H: psi_so(z*H)/ (self.f * H**3) # non-dimensionalize (incl. norm. of vertical coordinate)
         else:
