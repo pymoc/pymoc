@@ -14,6 +14,7 @@ a=6.37e6; A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radian
 
 # The next few lines are a an example for a reasonable vertically varying kappa profile:
 # (to use const. kappa, simply define kappa as scalar, and don't provide dkappa_dz - it won't be used if you do)    
+# (if kappa is defined but dkappa_dz isn't, dkappa_dz will be computet numerically by the model)
 kappa_back=1e-5
 kappa_s=3e-5
 kappa_4k=3e-4

@@ -20,11 +20,11 @@ class Model(object):
         self.zi=np.asarray(np.linspace(-1, 0, nz))
         
         if callable(kappa): 
+            self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
             if callable(dkappa_dz):  
-                self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
                 self.dkappa_dz=lambda z,H: dkappa_dz(z*H) / (H * self.f)
             else:
-                raise ValueError('If you want kappa profile you need to provide both kappa and dkappa_dz')
+                self.dkappa_dz=lambda z,H: np.gradient(kappa(z*H), z*H) / (H * self.f)
         else:
             self.kappa= lambda z,H: kappa/ (H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
@@ -45,6 +45,7 @@ class Model(object):
             sol_init[3,:] = -self.bz(2000.) * np.ones((nz))
             self.sol_init = sol_init
 
+    
     def alpha(self, z, H):
         return H**2 / (self.A * self.kappa(0, H))
 
