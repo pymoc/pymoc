@@ -17,8 +17,8 @@ a=6.37e6; A = 2*np.pi*a**2*59/360*(np.sin(math.radians(69)) - np.sin(math.radian
 kappa_back=1e-5
 kappa_s=3e-5
 kappa_4k=3e-4
-kappa = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4))  
-dkappa_dz = lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4))   
+kappa = lambda z: (kappa_back + kappa_s*np.exp(z/100)+kappa_4k*np.exp(-z/1000 - 4))  
+dkappa_dz = lambda z: (kappa_s/100*np.exp(z/100)-kappa_4k/1000*np.exp(-z/1000-4))   
 
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
@@ -26,7 +26,7 @@ ax2 = ax1.twiny()
 
 # Main loop which solves column model subject to different parameters:
 for i in range(0, N):
-    psi_so= lambda z, H:  (psi_so_max * 1e6 * np.sin([-np.pi * max(H * x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
+    psi_so= lambda z:  (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
     m = Model(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
     res = m.solve()
     H = res['H']

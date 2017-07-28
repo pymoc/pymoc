@@ -20,15 +20,15 @@ class Model(object):
         self.A = A
         self.zi=np.asarray(np.linspace(-1, 0, nz))
         if kappa and dkappa_dz:  
-            self.kappa= lambda z,H: kappa(z,H)/ (H**2 * self.f)
-            self.dkappa_dz=lambda z,H: dkappa_dz(z,H) / (H * self.f)
+            self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
+            self.dkappa_dz=lambda z,H: dkappa_dz(z*H) / (H * self.f)
         elif kappa or dkappa_dz:
            raise ValueError('If you want kappa profile you need to provide both kappa and dkappa_dz')
         else:
             self.kappa= lambda z,H: kappa_const/ (H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
         if psi_so:
-            self.psi_so=lambda z,H: psi_so(z,H)/ (self.f * H**3)
+            self.psi_so=lambda z,H: psi_so(z*H)/ (self.f * H**3) # non-dimensionalize (incl. norm. of vertical coordinate)
         else:
             self.psi_so=lambda z,H: 0
             
@@ -51,7 +51,6 @@ class Model(object):
     
     def bc(self, ya, yb, p):
         return np.array([ya[0], yb[0], ya[1], ya[3] + self.bz(p[0]), yb[2] - self.b/p[0]])
-
 
     def ode(self, z, y, p):
         H = p[0]
