@@ -20,6 +20,8 @@ class Model(object):
             sol_init=None,
             diff_type='constant',
     ):
+        if not self.check_numpy_version():
+            raise ImportError('Versions of NumPy earlier than 1.13.0 are not supported. Please upgrade your NumPy libary and try again')
         self.f = f
         if A:
             self.A = A
@@ -79,3 +81,9 @@ class Model(object):
         y[0, :] = y[0, :] * self.f * H**3 / 1e6
         y[2, :] = -y[2, :] * self.f**2 * H
         return dict({'z': z, 'psi': y, 'H': H})
+
+    def check_numpy_version(self):
+        v = [int(i) for i in np.version.version.split('.')]
+        if v[0] <= 1 and v[1] < 13:
+            return False
+        return True
