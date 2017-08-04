@@ -2,7 +2,6 @@ from model import Model
 import math
 import numpy as np
 from matplotlib import pyplot as plt
-import numpy as np
 
 N = 4 # number of cases to be considered
 H_max_so = [2000, 2000, 1500, 1500] # depth extent of upwelling in SO
@@ -25,12 +24,6 @@ dkappa_dz = lambda z: (kappa_s/100*np.exp(z/100)-kappa_4k/1000*np.exp(-z/1000-4)
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
-
-# kappa = lambda z: 6e-5 
-# kappa_back = 1e-5
-# kappa_s = 3e-5
-# kappa_4k = 3e-4
-# kappa = lambda z: kappa_back + kappa_s*np.exp(z/100.) + kappa_4k*np.exp(-z/1000. - 4.)
 
 # Main loop which solves column model subject to different parameters:
 for i in range(0, N):
