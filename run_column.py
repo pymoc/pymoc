@@ -29,13 +29,14 @@ ax2 = ax1.twiny()
 for i in range(0, N):
     psi_so= lambda z: (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
     m = Model(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
-    res = m.solve()
-    H = res['H']
-    zg = res['z']
-    psi = res['psi']
+    m.solve()
+    H = m.H
+    zg = m.z
+    psi = m.psi
+    b=m.b
     print(H)
-    ax1.plot(psi[0,:], zg)
-    ax2.plot(psi[2,:], zg)
+    ax1.plot(psi, zg)
+    ax2.plot(b, zg)
     plt.ylim((-3e3,0))
     ax1.set_xlim((-5,20))
     ax2.set_xlim((-0.01,0.04))

@@ -7,16 +7,21 @@ class Model(object):
             f=1.2e-4,
             b_s=0.025,
             B_int=3e3,
-            nz=100,
             A=7e13,
+            nz=100,
             sol_init=None,
             kappa=6e-5,
             dkappa_dz=None,
             psi_so=None,
+            z=None,
+            psi=None,
+            b=None,
+            H=None,
     ):
  
         self.f = f
         self.A = A
+        self.z = z
         self.zi=np.asarray(np.linspace(-1, 0, nz))
         
         if callable(kappa): 
@@ -47,6 +52,11 @@ class Model(object):
             sol_init[3,:] = -self.bz(2000.) * np.ones((nz))
             self.sol_init = sol_init
 
+    def check_numpy_version(self):
+        v = [int(i) for i in np.version.version.split('.')]
+        if v[0] <= 1 and v[1] < 13:
+            return False
+        return True
     
     def alpha(self, z, H):
         return H**2 / (self.A * self.kappa(0, H))
@@ -63,15 +73,17 @@ class Model(object):
 
     def solve(self):
         res = integrate.solve_bvp(self.ode, self.bc, self.zi, self.sol_init, p=[2000.])
-        H = res.p[0]
-        z = res.x * H
-        y = res.y
-        y[0, :] = y[0, :] * self.f * H**3 / 1e6
-        y[2, :] = -y[2, :] * self.f**2 * H
-        return dict({'z': z, 'psi': y, 'H': H})
-
-    def check_numpy_version(self):
-        v = [int(i) for i in np.version.version.split('.')]
-        if v[0] <= 1 and v[1] < 13:
-            return False
-        return True
+        self.H = res.p[0]
+        # if self.z does not yet exist use mesh from solver
+        if self.z is None:
+            self.z   = res.x * self.H
+            self.psi = res.y[0, :] * self.f * self.H**3 / 1e6
+            self.b   =-res.y[2, :] * self.f**2 * self.H
+        # if self.z does exist, compute solution at those points (setting all points below z=-H to NaN)
+        else:
+            self.psi = res.sol(self.z/self.H)[0, :] * self.f * self.H**3 / 1e6
+            self.psi[self.z<-self.H]= np.NaN
+            self.b   =-res.sol(self.z/self.H)[2, :] * self.f**2 * self.H
+            self.b[self.z<-self.H]= np.NaN
+ 
+         
