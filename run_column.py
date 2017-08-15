@@ -26,7 +26,6 @@ kappa_4k=3e-4
 kappa = lambda z: (kappa_back + kappa_s*np.exp(z/100)+kappa_4k*np.exp(-z/1000 - 4))  
 dkappa_dz = lambda z: (kappa_s/100*np.exp(z/100)-kappa_4k/1000*np.exp(-z/1000-4))   
 
-
 # create figure in which results will be plottet
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)

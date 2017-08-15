@@ -64,12 +64,14 @@ class Model(object):
             dkappa_dz= np.gradient(kappa, z)
             self.dkappa_dz= lambda z,H: np.interp(z*H,self.z,dkappa_dz)/(H * self.f)
         else:
-            self.kappa= lambda z,H: kappa/ (H**2 * self.f)
+            self.kappa= lambda z,H: kappa /(H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
  
         # Initialize Southern Ocean Streamfunction   
-        if psi_so:
-            self.psi_so=lambda z,H: psi_so(z*H)/ (self.f * H**3) # non-dimensionalize (incl. norm. of vertical coordinate)
+        if callable(psi_so):
+            self.psi_so=lambda z,H: psi_so(z*H) /(self.f * H**3) # non-dimensionalize (incl. norm. of vertical coordinate)
+        elif isinstance(psi_so,np.ndarray):
+            self.psi_so=lambda z,H: np.interp(z*H,self.z,psi_so) /(self.f * H**3) 
         else:
             self.psi_so=lambda z,H: 0
             
