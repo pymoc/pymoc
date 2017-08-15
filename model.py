@@ -1,29 +1,54 @@
+# This script defines a model class, which can be used to solve a 1D column model
+# for the AMOC.
+# 
+# The model is written in terms of a boundary value problem
+# 
+# In dimensional units, the ODE is
+# d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}( \Psi_{N} - \Psi_{SO} - A d_z(\kappa)d_{zzz}(\Psi_N)
+#
+# This equation is solved subject to the boundary conditions:
+# (1) \Psi_N(0) = 0
+# (2) \Psi_N(-H) = 0 
+# (3) d_z\psi_N(-H) = 0
+# (4) b(0)=-f \partial_{zz} \Psi_N (0) = b_s
+# (5) d_z b(-H) = -f d_{zzz} \Psi_N (-H) =  (A \kappa(-H))^{-1} B_{int}
+# Where H is the total depth of the upper cell, which is also solved for
+# 
+# The solution is found by non-dimensionalizing the equations using H and f as length and time scales
+# The model is then solved between z^*=z/H=0..1
+# Notice that H then appears as a parameter (to be determined) in the equation and boundary conditions
+# 5 boundary conditions are neede because we are dealing with a 4th order ODE
+# but are also solving for the parameter H
+
+
 import numpy as np
 from scipy import integrate
 
 class Model(object):
     def __init__(
             self,
-            f=1.2e-4,
-            b_s=0.025,
-            B_int=3e3,
-            A=7e13,
-            nz=100,
-            sol_init=None,
-            kappa=6e-5,
-            dkappa_dz=None,
-            psi_so=None,
-            z=None,
-            psi=None,
-            b=None,
-            H=None,
+            f=1.2e-4,         # Coriolis parameter (input)
+            b_s=0.025,        # surface buoyancy (input)
+            B_int=3e3,        # integrated downward buoyancy flux at the bottom of the upper cell (input)
+            A=7e13,           # Area of the basin (input) 
+            nz=100,           # minimum number of vert. layers for numerical solver (input)
+            sol_init=None,    # Initial conditions for ODE solver (input)
+            kappa=6e-5,       # Diapycnal diffusivity (input; can be const. or function)
+            dkappa_dz=None,   # Vertical derivative of diffusivity profile (input; function or nothing)
+            psi_so=None,      # SO streamfunction (input; function)
+            z=None,           # vertical grid for I/O (input / output) 
+            psi=None,         # streamfunction (output)
+            b=None,           # streamfunction (output)
+            H=None,           # depth of cell (output)
     ):
  
         self.f = f
         self.A = A
         self.z = z
-        self.zi=np.asarray(np.linspace(-1, 0, nz))
+        self.zi=np.asarray(np.linspace(-1, 0, nz)) # grid for initial conditions for solver
         
+        
+        # Initialize vertical diffusivity profile:
         if callable(kappa): 
             self.kappa= lambda z,H: kappa(z*H)/ (H**2 * self.f) # non-dimensionalize (incl. norm. of vertical coordinate)
             if callable(dkappa_dz):  
@@ -36,13 +61,17 @@ class Model(object):
             self.kappa= lambda z,H: kappa/ (H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
  
+        # Initialize Southern Ocean Streamfunction   
         if psi_so:
             self.psi_so=lambda z,H: psi_so(z*H)/ (self.f * H**3) # non-dimensionalize (incl. norm. of vertical coordinate)
         else:
             self.psi_so=lambda z,H: 0
             
+        # initialize non-dimensional surface buoyancy and abyssal buoyancy flux boundary condition    
         self.b = -b_s / f**2
         self.B_int = B_int
+        
+        # Set initial conditions for ODE solver
         if sol_init:
             self.sol_init = sol_init
         else:
@@ -52,25 +81,33 @@ class Model(object):
             sol_init[3,:] = -self.bz(2000.) * np.ones((nz))
             self.sol_init = sol_init
 
+    # ============= Method definitions ===============================
+    
+    # Method to check numpy version (version >= 1.13 needed to automatically compute db/dz)
     def check_numpy_version(self):
         v = [int(i) for i in np.version.version.split('.')]
         if v[0] <= 1 and v[1] < 13:
             return False
         return True
     
+    # This method returns the factor on the RHS of the ODE  
     def alpha(self, z, H):
         return H**2 / (self.A * self.kappa(0, H))
-
+    
+    # This method returns the properly non-dimensionalized stratification at the bottom of the cell
     def bz(self, H): 
         return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(0, H))
     
+    # This method returns the bottom boundary conditions for the ODE
     def bc(self, ya, yb, p):
         return np.array([ya[0], yb[0], ya[1], ya[3] + self.bz(p[0]), yb[2] - self.b/p[0]])
 
+    #  This Method returns the ODE to be solved 
     def ode(self, z, y, p):
         H = p[0]
         return np.vstack((y[1], y[2], y[3], self.alpha(z, H) * y[3] * (y[0] - self.psi_so(z, H) - self.A * self.dkappa_dz(z, H)/(H**2))))
 
+    # This Method actually solves the boundary value problem:
     def solve(self):
         res = integrate.solve_bvp(self.ode, self.bc, self.zi, self.sol_init, p=[2000.])
         self.H = res.p[0]
