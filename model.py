@@ -1,4 +1,4 @@
-# This script defines a model class, which can be used to solve a 1D column model
+# This script defines a model class that can be used to solve a 1D column model
 # for the AMOC.
 # 
 # The model is written in terms of a boundary value problem
@@ -57,6 +57,12 @@ class Model(object):
                 if not self.check_numpy_version():
                     raise ImportError('You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary or provide functional form of dkappa_dz.')
                 self.dkappa_dz=lambda z,H: np.gradient(kappa(z*H), z*H) / (H * self.f)
+        elif isinstance(kappa,np.ndarray):
+            self.kappa= lambda z,H: np.interp(z*H,self.z,kappa)/(H**2 * self.f)
+            if not self.check_numpy_version():
+                raise ImportError('You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.')
+            dkappa_dz= np.gradient(kappa, z)
+            self.dkappa_dz= lambda z,H: np.interp(z*H,self.z,dkappa_dz)/(H * self.f)
         else:
             self.kappa= lambda z,H: kappa/ (H**2 * self.f)
             self.dkappa_dz=lambda z,H: 0   
@@ -122,5 +128,4 @@ class Model(object):
             self.psi[self.z<-self.H]= np.NaN
             self.b   =-res.sol(self.z/self.H)[2, :] * self.f**2 * self.H
             self.b[self.z<-self.H]= np.NaN
- 
-         
+    

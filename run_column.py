@@ -26,6 +26,7 @@ kappa_4k=3e-4
 kappa = lambda z: (kappa_back + kappa_s*np.exp(z/100)+kappa_4k*np.exp(-z/1000 - 4))  
 dkappa_dz = lambda z: (kappa_s/100*np.exp(z/100)-kappa_4k/1000*np.exp(-z/1000-4))   
 
+
 # create figure in which results will be plottet
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
@@ -39,7 +40,7 @@ for i in range(0, N):
     m = Model(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
     # solve the model:
     m.solve()
-    # output depth ov overtruning cell:
+    # output depth of overtruning cell:
     print(m.H)
     # plot overturning and buoyancy profile:
     ax1.plot(m.psi, m.z)
