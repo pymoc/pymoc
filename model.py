@@ -1,25 +1,26 @@
-# This script defines a model class that can be used to solve a 1D column model
-# for the AMOC.
-# 
-# The model is written in terms of a boundary value problem
-# 
-# In dimensional units, the ODE is
-# d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}( \Psi_{N} - \Psi_{SO} - A d_z(\kappa)d_{zzz}(\Psi_N)
-#
-# This equation is solved subject to the boundary conditions:
-# (1) \Psi_N(0) = 0
-# (2) \Psi_N(-H) = 0 
-# (3) d_z\psi_N(-H) = 0
-# (4) b(0)=-f \partial_{zz} \Psi_N (0) = b_s
-# (5) d_z b(-H) = -f d_{zzz} \Psi_N (-H) =  (A \kappa(-H))^{-1} B_{int}
-# Where H is the total depth of the upper cell, which is also solved for
-# 
-# The solution is found by non-dimensionalizing the equations using H and f as length and time scales
-# The model is then solved between z^*=z/H=0..1
-# Notice that H then appears as a parameter (to be determined) in the equation and boundary conditions
-# 5 boundary conditions are neede because we are dealing with a 4th order ODE
-# but are also solving for the parameter H
+'''
+This script defines a model class that can be used to solve a 1D column model
+for the AMOC.
+ 
+The model is written in terms of a boundary value problem
+ 
+In dimensional units, the ODE is
+d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}( \Psi_{N} - \Psi_{SO} - A d_z(\kappa)d_{zzz}(\Psi_N)
 
+This equation is solved subject to the boundary conditions:
+(1) \Psi_N(0) = 0
+(2) \Psi_N(-H) = 0 
+(3) d_z\psi_N(-H) = 0
+(4) b(0)=-f \partial_{zz} \Psi_N (0) = b_s
+(5) d_z b(-H) = -f d_{zzz} \Psi_N (-H) =  (A \kappa(-H))^{-1} B_{int}
+Where H is the total depth of the upper cell, which is also solved for
+
+The solution is found by non-dimensionalizing the equations using H and f as length and time scales
+The model is then solved between z^*=z/H=0..1
+Notice that H then appears as a parameter (to be determined) in the equation and boundary conditions
+5 boundary conditions are neede because we are dealing with a 4th order ODE
+but are also solving for the parameter H
+'''
 
 import numpy as np
 from scipy import integrate
@@ -45,8 +46,7 @@ class Model(object):
         self.f = f
         self.A = A
         self.z = z
-        self.zi=np.asarray(np.linspace(-1, 0, nz)) # grid for initial conditions for solver
-        
+        self.zi=np.asarray(np.linspace(-1, 0, nz)) # grid for initial conditions for solver        
         
         # Initialize vertical diffusivity profile:
         if callable(kappa): 
@@ -87,44 +87,44 @@ class Model(object):
             sol_init[0,:] = np.ones((nz))
             sol_init[2,:] = -0.1 * np.ones((nz))
             sol_init[3,:] = -self.bz(2000.) * np.ones((nz))
-            self.sol_init = sol_init
-
-    # ============= Method definitions ===============================
+            self.sol_init = sol_init    
+    # end of init
+        
     
-    # Method to check numpy version (version >= 1.13 needed to automatically compute db/dz)
     def check_numpy_version(self):
+        # check numpy version (version >= 1.13 needed to automatically compute db/dz)    
         v = [int(i) for i in np.version.version.split('.')]
         if v[0] <= 1 and v[1] < 13:
             return False
         return True
     
-    # This method returns the factor on the RHS of the ODE  
     def alpha(self, z, H):
+        #return factor on the RHS of ODE
         return H**2 / (self.A * self.kappa(0, H))
     
-    # This method returns the properly non-dimensionalized stratification at the bottom of the cell
     def bz(self, H): 
+        # return the properly non-dimensionalized stratification at the bottom of the cell
         return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(0, H))
     
-    # This method returns the bottom boundary conditions for the ODE
     def bc(self, ya, yb, p):
+         #return the bottom boundary conditions for the ODE
         return np.array([ya[0], yb[0], ya[1], ya[3] + self.bz(p[0]), yb[2] - self.b/p[0]])
 
-    #  This Method returns the ODE to be solved 
     def ode(self, z, y, p):
+        #return the ODE to be solved 
         H = p[0]
         return np.vstack((y[1], y[2], y[3], self.alpha(z, H) * y[3] * (y[0] - self.psi_so(z, H) - self.A * self.dkappa_dz(z, H)/(H**2))))
 
-    # This Method actually solves the boundary value problem:
     def solve(self):
+        #Solve the boundary value problem
         res = integrate.solve_bvp(self.ode, self.bc, self.zi, self.sol_init, p=[2000.])
         self.H = res.p[0]
-        # if self.z does not yet exist use mesh from solver
+        # if self.z does not yet exist use mesh from solver:
         if self.z is None:
             self.z   = res.x * self.H
             self.psi = res.y[0, :] * self.f * self.H**3 / 1e6
             self.b   =-res.y[2, :] * self.f**2 * self.H
-        # if self.z does exist, compute solution at those points (setting all points below z=-H to NaN)
+        # if self.z does exist, compute solution at those points (setting all points below z=-H to NaN):
         else:
             self.psi = res.sol(self.z/self.H)[0, :] * self.f * self.H**3 / 1e6
             self.psi[self.z<-self.H]= np.NaN

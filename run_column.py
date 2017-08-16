@@ -1,7 +1,9 @@
-# This script shows an example of how to use the column model
-# it solves for the overturning circulation in 4 different cases
-# combining two differnt profiles for the prescribed upwelling in the SO
-# and two different values for the abyssal stratification    
+'''
+This script shows an example of how to use the column model
+it solves for the overturning circulation in 4 different cases
+combining two differnt profiles for the prescribed upwelling in the SO
+and two different values for the abyssal stratification    
+'''
 
 from model import Model
 import math
