@@ -1,11 +1,11 @@
 '''
-This script shows an example of how to use the column model
-it solves for the overturning circulation in 4 different cases
+This script shows an example of how to use the equilibrium column model
+It solves for the overturning circulation in 4 different cases
 combining two differnt profiles for the prescribed upwelling in the SO
 and two different values for the abyssal stratification    
 '''
 
-from model import Model
+from model_Equi import Model_Equi
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -38,7 +38,7 @@ for i in range(0, N):
     # create SO upwelling profile:
     psi_so= lambda z: (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
     # create column model instance
-    m = Model(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
+    m = Model_Equi(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
     # solve the model:
     m.solve()
     # output depth of overtruning cell:

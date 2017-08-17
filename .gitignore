@@ -399,3 +399,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Stupid MacOS files
+.DS_Store

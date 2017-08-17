@@ -25,7 +25,7 @@ but are also solving for the parameter H
 import numpy as np
 from scipy import integrate
 
-class Model(object):
+class Model_Equi(object):
     def __init__(
             self,
             f=1.2e-4,         # Coriolis parameter (input)
@@ -107,7 +107,7 @@ class Model(object):
         return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(0, H))
     
     def bc(self, ya, yb, p):
-         #return the bottom boundary conditions for the ODE
+         #return the boundary conditions for the ODE
         return np.array([ya[0], yb[0], ya[1], ya[3] + self.bz(p[0]), yb[2] - self.b/p[0]])
 
     def ode(self, z, y, p):
