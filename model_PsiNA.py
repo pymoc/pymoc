@@ -70,9 +70,12 @@ class Model_PsiNA(object):
         res = integrate.solve_bvp(self.ode, self.bc, self.z, self.sol_init)
         # interpolate solution for overturning circulation onto original grid (and change units to SV)
         self.Psi_N = res.sol(self.z)[0, :] / 1e6  
-        # turn b_basin and b_N into arrays for output
-        self.b_basin= self.b_basin(self.z)
-        self.b_N = self.b_N(self.z)
-        
-        
+       
+    
+    def update(self,b_basin=None,b_N=None):
+        # update buoyancy profiles     
+        if b_basin is not None:
+            self.b_basin=self.make_func(b_basin,'b_basin',self.z)
+        if b_N is not None:
+            self.b_N=self.make_func(b_N,'b_N',self.z)
         
