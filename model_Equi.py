@@ -85,8 +85,8 @@ class Model_Equi(object):
         else:
             sol_init = np.zeros((4, nz))
             sol_init[0,:] = np.ones((nz))
-            sol_init[2,:] = -0.1 * np.ones((nz))
-            sol_init[3,:] = -self.bz(2000.) * np.ones((nz))
+            sol_init[2,:] = 0.0 * np.ones((nz))
+            sol_init[3,:] = -self.bz(1500.) * np.ones((nz))
             self.sol_init = sol_init    
     # end of init
         
@@ -100,11 +100,11 @@ class Model_Equi(object):
     
     def alpha(self, z, H):
         #return factor on the RHS of ODE
-        return H**2 / (self.A * self.kappa(0, H))
+        return H**2 / (self.A * self.kappa(z, H))
     
     def bz(self, H): 
         # return the properly non-dimensionalized stratification at the bottom of the cell
-        return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(0, H))
+        return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(-1, H))
     
     def bc(self, ya, yb, p):
          #return the boundary conditions for the ODE
@@ -117,7 +117,7 @@ class Model_Equi(object):
 
     def solve(self):
         #Solve the boundary value problem
-        res = integrate.solve_bvp(self.ode, self.bc, self.zi, self.sol_init, p=[2000.])
+        res = integrate.solve_bvp(self.ode, self.bc, self.zi, self.sol_init, p=[1500.])
         self.H = res.p[0]
         # if self.z does not yet exist use mesh from solver:
         if self.z is None:

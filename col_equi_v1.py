@@ -32,20 +32,20 @@ def ode_fun(z, y, p, H_so, alpha, kap, dkap_dz):
 
 for i in range(0, N):
     H_so = H_max_so[i]
-    kap = lambda z, H: kappa / (f * H**2)
-    dkap_dz = lambda z, H: 0
-    # kap = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
-    # dkap_dz=lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
-    alpha = lambda z, H: H**2 / (A * kap(0, H))
+    #kap = lambda z, H: kappa / (f * H**2)
+    #dkap_dz = lambda z, H: 0
+    kap = lambda z, H: (kappa_back + kappa_s*np.exp(z*H/100)+kappa_4k*np.exp(-z*H/1000 - 4)) / (H**2 * f) # nondim kappa
+    dkap_dz=lambda z, H: (kappa_s/100*np.exp(z*H/100)-kappa_4k/1000*np.exp(-z*H/1000-4)) / (H * f) #nondimensional d(kappa)/dz  
+    alpha = lambda z, H: H**2 / (A * kap(z, H))
     b = -b_s/(f**2)
-    bz = lambda H: B_int[i] / (f**3 * H**2 * A * kap(0, H))
+    bz = lambda H: B_int[i] / (f**3 * H**2 * A * kap(-1, H))
     ode = lambda z, y, p: ode_fun(z, y, p, H_so, alpha, kap, dkap_dz)
     bc = lambda ya, yb, p: np.array([ ya[0], yb[0], ya[1], ya[3] + bz(p[0]), yb[2] - b/p[0]])
     sol_init = np.zeros((4, zi.size))
     sol_init[0,:] = np.ones((zi.size))
-    sol_init[2,:] = -0.1*np.ones((zi.size))
-    sol_init[3,:] = -bz(H_max_so[i] + 200) * np.ones((zi.size))
-    res = integrate.solve_bvp(ode, bc, zi, sol_init, p=[H_max_so[i] - 200])
+    sol_init[2,:] = 0.0*np.ones((zi.size))
+    sol_init[3,:] = -bz(H_max_so[i]) * np.ones((zi.size))
+    res = integrate.solve_bvp(ode, bc, zi, sol_init, p=[H_max_so[i]])
     Hf = res.p[0]
     print(res.status)
     print(Hf)
@@ -54,4 +54,4 @@ for i in range(0, N):
     plt.ylim((-3e3,0))
     ax1.set_xlim((-5,20))
     ax2.set_xlim((-0.01,0.04))
-plt.savefig('test_con_diff.pdf')
+plt.savefig('test_var_diff.pdf')
