@@ -19,7 +19,7 @@ class Model_VertAdvDiff(object):
             dkappa_dz=None, # vertical derivative diffusivity profile (optional input)
             bs=0.025,       # surface buoyancy bound. cond (input)
             bbot=0.0,       # bottom buoyancy boundary condition (input)  
-            b=None,         # Buoyancy profile (input, output)
+            b=0.0,          # Buoyancy profile (input, output)
     ):
  
         # initialize grid:
@@ -37,17 +37,8 @@ class Model_VertAdvDiff(object):
             self.dkappa_dz=lambda z: np.gradient(self.kappa(z), z)
     
         self.bs=bs
-        self.bbot=bbot
-         
-        if isinstance(b,np.ndarray):
-           self.b=b
-        elif callable(b):
-           self.b=b(self.z)
-        elif isinstance(b,float):
-           self.b=b+0*self.z 
-        else:
-           raise TypeError(name,'needs to be either function, numpy array, or float') 
-            
+        self.bbot=bbot        
+        self.b=self.make_array(b,'b')     
         
         if self.check_numpy_version():
            self.bz=np.gradient(self.b, z)
@@ -63,18 +54,30 @@ class Model_VertAdvDiff(object):
        
     
     def make_func(self,myst,name):
-    # turn array or float into callable function (if needed)    
+    # turn mysterious object into callable function (if needed)    
         if callable(myst):
             return myst
         elif isinstance(myst,np.ndarray):
             def funfun(z): return np.interp(z,self.z,myst)
             return funfun
         elif isinstance(myst,float):
-            def funfun(z): return myst +0*z
+            def funfun(z): return myst +0*self.z
             return funfun
         else:
             raise TypeError(name,'needs to be either function, numpy array, or float') 
-     
+    
+    def make_array(self,myst,name):
+    # turn mysterious object into array(if needed)    
+        if isinstance(myst,np.ndarray):
+            return myst
+        elif callable(myst):
+            return myst(self.z)
+        elif isinstance(myst,float):
+            return myst+0*self.z
+        else:
+            raise TypeError(name,'needs to be either function, numpy array, or float') 
+    
+    
     def bc(self, ya, yb):
         #return the boundary conditions
         return np.array([ya[0]-self.bbot, yb[0]-self.bs])
@@ -93,5 +96,19 @@ class Model_VertAdvDiff(object):
         self.b = res.sol(self.z)[0, :]  
         self.bz = res.sol(self.z)[1, :]  
         
+    def timestep(self,w,dt=1.):
+        #Integrate buoyancy profile evolution for one time-step
+        if not isinstance(w,np.ndarray):
+           w=self.make_array(w,'w')
+        # apply boundary conditions:
+        self.b[0]=self.bbot;self.b[-1]=self.bs;
+        dz=self.z[1:]-self.z[0:-1];
+        bz=(self.b[1:]-self.b[0:-1])/dz;
+        bz_up=bz[1:];bz_down=bz[0:-1];
+        bzz=(bz_up-bz_down)/(0.5*(dz[1:]+dz[0:-1]))
+        bz=0.5*(bz_up+bz_down);
+        dbdt=-(w[1:-1]-self.dkappa_dz(self.z[1:-1]))*bz+self.kappa(self.z[1:-1])*bzz
+        self.b[1:-1]=self.b[1:-1]+dt*dbdt
         
+    
         
