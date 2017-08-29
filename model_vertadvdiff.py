@@ -19,6 +19,7 @@ class Model_VertAdvDiff(object):
             dkappa_dz=None, # vertical derivative diffusivity profile (optional input)
             bs=0.025,       # surface buoyancy bound. cond (input)
             bbot=0.0,       # bottom buoyancy boundary condition (input)  
+            bzbot=None,     # bottom strat. as alternative boundary condition (input) 
             b=0.0,          # Buoyancy profile (input, output)
     ):
  
@@ -37,7 +38,9 @@ class Model_VertAdvDiff(object):
             self.dkappa_dz=lambda z: np.gradient(self.kappa(z), z)
     
         self.bs=bs
-        self.bbot=bbot        
+        self.bbot=bbot    
+        self.bzbot=bzbot    
+    
         self.b=self.make_array(b,'b')     
         
         if self.check_numpy_version():
@@ -61,7 +64,7 @@ class Model_VertAdvDiff(object):
             def funfun(z): return np.interp(z,self.z,myst)
             return funfun
         elif isinstance(myst,float):
-            def funfun(z): return myst +0*self.z
+            def funfun(z): return myst +0*z
             return funfun
         else:
             raise TypeError(name,'needs to be either function, numpy array, or float') 
@@ -80,7 +83,10 @@ class Model_VertAdvDiff(object):
     
     def bc(self, ya, yb):
         #return the boundary conditions
-        return np.array([ya[0]-self.bbot, yb[0]-self.bs])
+        if self.bzbot is None:
+            return np.array([ya[0]-self.bbot, yb[0]-self.bs])
+        else:
+            return np.array([ya[1]-self.bzbot, yb[0]-self.bs])
 
     def ode(self, z, y):
         #return the equation to be solved 
@@ -111,9 +117,13 @@ class Model_VertAdvDiff(object):
         #Integrate buoyancy profile evolution for one time-step
         if not isinstance(w,np.ndarray):
            w=self.make_array(w,'w')
-        # apply boundary conditions:
-        self.b[0]=self.bbot;self.b[-1]=self.bs;
         dz=self.z[1:]-self.z[0:-1];
+        # apply boundary conditions:        
+        self.b[-1]=self.bs;
+        if self.bzbot is None:
+            self.b[0]=self.bbot;
+        else:
+            self.b[0]=self.b[1]-self.bzbot*dz[0]       
         bz=(self.b[1:]-self.b[0:-1])/dz;
         bz_up=bz[1:];bz_down=bz[0:-1];
         bzz=(bz_up-bz_down)/(0.5*(dz[1:]+dz[0:-1]))
