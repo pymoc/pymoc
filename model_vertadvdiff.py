@@ -96,7 +96,18 @@ class Model_VertAdvDiff(object):
         self.b = res.sol(self.z)[0, :]  
         self.bz = res.sol(self.z)[1, :]  
         
-    def timestep(self,w,dt=1.):
+    def convect(self):
+        # do convective adjustment
+        # notice that this parameterization currently only
+        # handles convection from the top down
+        # which is teh only case we really encounter here...
+        dz=self.z[1:]-self.z[:-1];
+        dz=np.append(dz,dz[-1]);dz=np.insert(dz,0,dz[0])
+        dz=0.5*(dz[1:]+dz[0:-1]);
+        ind=self.b>=self.b[-1] 
+        self.b[ind]=np.mean(self.b[ind]*dz[ind])/np.mean(dz[ind])    
+            
+    def timestep(self,w,dt=1.,do_conv=False):
         #Integrate buoyancy profile evolution for one time-step
         if not isinstance(w,np.ndarray):
            w=self.make_array(w,'w')
@@ -109,6 +120,8 @@ class Model_VertAdvDiff(object):
         bz=0.5*(bz_up+bz_down);
         dbdt=-(w[1:-1]-self.dkappa_dz(self.z[1:-1]))*bz+self.kappa(self.z[1:-1])*bzz
         self.b[1:-1]=self.b[1:-1]+dt*dbdt
+        if do_conv:
+            self.convect()
         
     
         
