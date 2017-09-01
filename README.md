@@ -1,15 +1,9 @@
-This repository includes simple scripts for both Matlab or Python
-to solve a  1D equation for the equilibrium  upper overturning cell,
-(documentation to follow)
+This repository is part of a project to develop a modular suite of  simple models
+for the the deep ocean stratification and MOC. The project is very much ongoing,
+and if you want to contribute, please get in touch! 
 
-As always with code, there may well be errors, and it's
-not recommended to use and trust this as a "black box".
-If you find any errors, please get in touch!
+As always with code, there are likely to be errors, and it's not recommended to use
+and trust this as a "black box". If you find any errors, please get in touch!
 
-Thanks to Mike Bueti for contributing the original Python version!
-
-The current script is very simple, and only finds equilibrium solutions
-for the upper cell, with prescribed upwelling in the Southern Ocean.
-I'm hoping to keep extending this to include a time-dependent version 
-and additional components. If you want to contribute, please get in touch! 
-
+Notice that the matlab code is legacy and no longer being developed (although anybody
+is welcome to take on that task).
