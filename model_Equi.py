@@ -17,9 +17,7 @@ Where H is the total depth of the upper cell, which is also solved for
 
 The solution is found by non-dimensionalizing the equations using H and f as length and time scales
 The model is then solved between z^*=z/H=0..1
-Notice that H then appears as a parameter (to be determined) in the equation and boundary conditions
-5 boundary conditions are neede because we are dealing with a 4th order ODE
-but are also solving for the parameter H
+Notice that H then appears as a parameter (to be determined) in the equations. 5 boundary conditions are needed because we are dealing with a 4th order ODE and are also solving for the parameter H
 '''
 
 import numpy as np
