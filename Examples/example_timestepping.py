@@ -8,7 +8,8 @@ with a real time-stepping, which allows us to analyze the transient approach
 -- but this calculation is significantly slower if we are only interested 
 in is the equilibrium solution
 '''
-
+import sys
+sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
 from model_vertadvdiff import Model_VertAdvDiff
 import numpy as np

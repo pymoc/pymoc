@@ -10,7 +10,7 @@ abyssal BL, following Mashayek et al and others.
 
 '''
 import sys
-sys.path.append('../')
+sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
 from model_SO import Model_SO
 from model_vertadvdiff import Model_VertAdvDiff

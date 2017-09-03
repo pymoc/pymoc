@@ -3,7 +3,8 @@ This script shows an example of a "two column" model for the
 overturning circulation in a basin. The first column represents the 
 basin, while the second column represents the northern sinking region
 '''
-
+import sys
+sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
 from model_vertadvdiff import Model_VertAdvDiff
 import numpy as np

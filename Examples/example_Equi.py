@@ -5,6 +5,8 @@ combining two differnt profiles for the prescribed upwelling in the SO
 and two different values for the abyssal stratification    
 '''
 
+import sys
+sys.path.append('../Modules')
 from model_Equi import Model_Equi
 import math
 import numpy as np

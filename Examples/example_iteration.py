@@ -4,6 +4,8 @@ together with the model_veradvdiff to build an iterative solver
 for the overturning circulation  
 '''
 
+import sys
+sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
 from model_vertadvdiff import Model_VertAdvDiff
 import numpy as np
@@ -37,7 +39,7 @@ AMOC.solve()
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
-ax1.plot(AMOC.Psi_N, AMOC.z)
+ax1.plot(AMOC.Psi, AMOC.z)
 #ax2.plot(m.b_N, m.z)
 ax2.plot(b_basin(z), z)
 plt.ylim((-4e3,0))
@@ -51,7 +53,7 @@ basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
 # loop to iteratively find equilibrium solution
 for ii in range(0, 30):    
    # update buoyancy profile
-   w=AMOC.Psi_N*1e6/A_basin
+   w=AMOC.Psi*1e6/A_basin
    basin.solve_equi(w)
  
    # update overturning streamfunction
@@ -60,10 +62,10 @@ for ii in range(0, 30):
    AMOC.solve()
    
    # Plot updated results:
-   ax1.plot(AMOC.Psi_N, AMOC.z, linewidth=0.5)
+   ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5)
    ax2.plot(basin.b, basin.z, linewidth=0.5)
 
 # Plot final results:
-ax1.plot(AMOC.Psi_N, AMOC.z,linewidth=2)
+ax1.plot(AMOC.Psi, AMOC.z,linewidth=2)
 ax2.plot(basin.b, basin.z, linewidth=2)
 
