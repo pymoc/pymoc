@@ -8,7 +8,7 @@ as in Nikurashin and Vallis (2012):
 d_{zz}(\Psi_{N}) = f^{-1} (b_{N} - b_{basin})
 
 This equation is solved subject to the boundary conditions that
-\Psi_N(0) = \Psi_N(-H) = 0 
+\Psi(0) = \Psi(-H) = 0 
 '''
 
 import numpy as np
@@ -22,7 +22,7 @@ class Model_PsiNA(object):
             sol_init=None,    # Initial conditions for ODE solver (input)
             b_basin=None,     # Buoyancy in the basin (input, output)
             b_N=0.,           # Buoyancy in the deep water formation region (input, output)
-            Psi_N= None,      # Streamfunction (output) 
+            Psi= None,      # Streamfunction (output) 
     ):
  
         self.f = f
@@ -69,7 +69,7 @@ class Model_PsiNA(object):
         #Solve the boundary value problem
         res = integrate.solve_bvp(self.ode, self.bc, self.z, self.sol_init)
         # interpolate solution for overturning circulation onto original grid (and change units to SV)
-        self.Psi_N = res.sol(self.z)[0, :] / 1e6  
+        self.Psi = res.sol(self.z)[0, :] / 1e6  
        
     
     def update(self,b_basin=None,b_N=None):

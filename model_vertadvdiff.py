@@ -21,6 +21,7 @@ class Model_VertAdvDiff(object):
             bbot=0.0,       # bottom buoyancy boundary condition (input)  
             bzbot=None,     # bottom strat. as alternative boundary condition (input) 
             b=0.0,          # Buoyancy profile (input, output)
+            d_abyss=0.0     # A length scale used to form abyssal BC (in)
     ):
  
         # initialize grid:
@@ -39,14 +40,15 @@ class Model_VertAdvDiff(object):
     
         self.bs=bs
         self.bbot=bbot    
-        self.bzbot=bzbot    
+        self.bzbot=bzbot  
+        self.d_abyss=d_abyss
     
         self.b=self.make_array(b,'b')     
         
         if self.check_numpy_version():
            self.bz=np.gradient(self.b, z)
         else:
-           self.bz=0.*z   
+           self.bz=0.*z   # notice that this is just for initialization of ode solver
            
     def check_numpy_version(self):
         # check numpy version (version >= 1.13 needed to automatically compute db/dz)    
@@ -84,7 +86,7 @@ class Model_VertAdvDiff(object):
     def bc(self, ya, yb):
         #return the boundary conditions
         if self.bzbot is None:
-            return np.array([ya[0]-self.bbot, yb[0]-self.bs])
+            return np.array([ya[0]-self.d_abyss*ya[1]-self.bbot, yb[0]-self.bs])
         else:
             return np.array([ya[1]-self.bzbot, yb[0]-self.bs])
 
@@ -106,7 +108,7 @@ class Model_VertAdvDiff(object):
         # do convective adjustment
         # notice that this parameterization currently only
         # handles convection from the top down
-        # which is teh only case we really encounter here...
+        # which is thd only case we really encounter here...
         dz=self.z[1:]-self.z[:-1];
         dz=np.append(dz,dz[-1]);dz=np.insert(dz,0,dz[0])
         dz=0.5*(dz[1:]+dz[0:-1]);
@@ -121,13 +123,14 @@ class Model_VertAdvDiff(object):
         # apply boundary conditions:        
         self.b[-1]=self.bs;
         if self.bzbot is None:
-            self.b[0]=self.bbot;
+            self.b[0]=(self.bbot*dz[0]+self.d_abyss*self.b[1])/(dz[0]+self.d_abyss);
         else:
             self.b[0]=self.b[1]-self.bzbot*dz[0]       
         bz=(self.b[1:]-self.b[0:-1])/dz;
         bz_up=bz[1:];bz_down=bz[0:-1];
         bzz=(bz_up-bz_down)/(0.5*(dz[1:]+dz[0:-1]))
-        bz=0.5*(bz_up+bz_down);
+        #upwind advection: 
+        bz=bz_down; bz[w[1:-1]<0]=bz_up[w[1:-1]<0];      
         dbdt=-(w[1:-1]-self.dkappa_dz(self.z[1:-1]))*bz+self.kappa(self.z[1:-1])*bzz
         self.b[1:-1]=self.b[1:-1]+dt*dbdt
         if do_conv:

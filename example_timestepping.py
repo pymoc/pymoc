@@ -20,6 +20,9 @@ bs=0.03; bbot=-0.0004
 
 A_basin=8e13  #area of the basin
 
+dt=60*86400; # timestep
+niter=3000; # total number of time steps
+
 # The next few lines are a an example for a reasonable vertically varying kappa profile:
 # (to use const. kappa, simply define kappa as scalar)
 kappa_back=1e-5
@@ -45,7 +48,7 @@ AMOC.solve()
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
-ax1.plot(AMOC.Psi_N, AMOC.z)
+ax1.plot(AMOC.Psi, AMOC.z)
 #ax2.plot(m.b_N, m.z)
 ax2.plot(b_basin(z), z)
 plt.ylim((-4e3,0))
@@ -57,10 +60,10 @@ ax2.set_xlim((-0.01,0.04))
 basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
 
 # loop to iteratively find equilibrium solution
-for ii in range(0, 6*200):    
+for ii in range(0, niter):    
    # update buoyancy profile
-   w=AMOC.Psi_N*1e6/A_basin
-   basin.timestep(w=w,dt=60*86400)
+   w=AMOC.Psi*1e6/A_basin
+   basin.timestep(w=w,dt=dt)
  
    # update overturning streamfunction
    #(notice that we are only adjusting b some of the way, which leads to better convergence):
@@ -69,11 +72,11 @@ for ii in range(0, 6*200):
    
    if ii%120==0:
       # Plot updated results:
-      ax1.plot(AMOC.Psi_N, AMOC.z, linewidth=0.5)
+      ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5)
       ax2.plot(basin.b, basin.z, linewidth=0.5)
       
 
 # Plot final results:
-ax1.plot(AMOC.Psi_N, AMOC.z,linewidth=2)
+ax1.plot(AMOC.Psi, AMOC.z,linewidth=2)
 ax2.plot(basin.b, basin.z, linewidth=2)
 

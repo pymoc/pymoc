@@ -57,11 +57,11 @@ basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bzbot=bzbot)
 # create adv-diff column model instance for basin
 north= Model_VertAdvDiff(z=z,kappa=kappa,b=0.,bs=bs_north,bzbot=bzbot)
 
-# loop to iteratively find equilibrium solution
+# time integration loop
 for ii in range(0, total_iters):    
    # update buoyancy profile
-   wb=AMOC.Psi_N*1e6/A_basin
-   wN=-AMOC.Psi_N*1e6/A_north
+   wb=AMOC.Psi*1e6/A_basin
+   wN=-AMOC.Psi*1e6/A_north
    basin.timestep(w=wb,dt=dt)
    north.timestep(w=wN,dt=dt,do_conv=True)
    
@@ -72,7 +72,7 @@ for ii in range(0, total_iters):
    
    if ii%plot_iters==0:
       # Plot current state:
-      ax1.plot(AMOC.Psi_N, AMOC.z, linewidth=0.5)
+      ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5)
       ax2.plot(basin.b, basin.z, linewidth=0.5)
       ax2.plot(north.b, north.z, linewidth=0.5)
       
@@ -81,7 +81,7 @@ for ii in range(0, total_iters):
 fig = plt.figure(figsize=(6,10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
-ax1.plot(AMOC.Psi_N, AMOC.z,linewidth=2,color='r')
+ax1.plot(AMOC.Psi, AMOC.z,linewidth=2,color='r')
 ax2.plot(basin.b, basin.z, linewidth=2,color='b')
 ax2.plot(north.b, basin.z, linewidth=2,color='c')
 ax1.plot(0.*AMOC.z, AMOC.z,linewidth=0.5,color='k')
