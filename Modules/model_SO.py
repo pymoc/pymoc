@@ -20,7 +20,8 @@ class Model_SO(object):
             rho=1030,       # Density of sea water (in)
             L =1e7,         # Zonal length of the ACC (in)
             KGM=1e3,        # GM coefficient (in)
-            c = None,        # phase speed for smoothing of GM streamfunction
+            c = None,       # phase speed for F2010 BVP smoother of GM streamfunction
+            bvp_with_Ek=False, # if true, apply boundary condition that Psi_GM=-Psi_EK in F2010 BVP smoother 
             Hsill=None,     # height (in m above ocean floor) of the "sill", where Psi_Ek is tapered
             HEk=None,       # depth of surface Ekman layer
             Htapertop=None, # A quadratic tapering of the GM streamfunction at the surface
@@ -45,7 +46,8 @@ class Model_SO(object):
         self.b=self.make_func(self.z,b,'b')     
         self.bs=self.make_func(self.y,bs,'bs')     
         self.tau=self.make_func(self.y,tau,'tau')     
-        self.f=f; self.rho=rho; self.L=L; self.KGM=KGM; self.c=c;
+        self.f=f; self.rho=rho; self.L=L; self.KGM=KGM
+        self.c=c; self.bvp_with_Ek=bvp_with_Ek
         self.Hsill=Hsill;self.HEk=HEk
         self.Htapertop=Htapertop; self.Htaperbot=Htaperbot
     
@@ -68,8 +70,8 @@ class Model_SO(object):
         def func(y): return self.bs(y)-b
         # should probably add a check here to make sure bs is monotonically increasing...
         if b<self.bs(self.y[0]):
-            # if b is smaller than bs at southern boundary, return southernmost point:
-            return self.y[0]
+           # if b is smaller than bs at southern end, isopycnals don't outcrop and get handled separately
+            return self.y[0]-1e3
         if b>self.bs(self.y[-1]):
             # if b is larger than bs at northern end, return northernmost point:
             return self.y[-1]
@@ -120,17 +122,24 @@ class Model_SO(object):
         else:
            toptaper=1.
         if self.c is not None:
-           temp=self.make_func(self.z,self.KGM*self.z/dy_atz*self.L*toptaper*bottaper,'psiGM')
+           self.make_func(self.z,self.KGM*self.z/dy_atz*self.L*toptaper*bottaper,'psiGM')
            N2=self.calc_N2()
-           def bc(ya, yb): return np.array([ya[0], yb[0]])
+           if self.bvp_with_Ek:
+              def bc(ya, yb):
+                  return np.array([ya[0]+self.Psi_Ek[0]*1e6, yb[0]+self.Psi_Ek[-1]*1e6]) 
+           else:    
+              def bc(ya, yb): return np.array([ya[0], yb[0]])
            def ode(z, y): 
               return np.vstack((y[1], N2(z)/self.c**2.*(y[0] -temp(z))))
            #Solve the boundary value problem
            res = integrate.solve_bvp(ode, bc, self.z, np.zeros((2, np.size(self.z))))
            # return solution interpolated onto original grid        
-           return res.sol(self.z)[0, :]
+           temp= res.sol(self.z)[0, :]
         else:
-           return self.KGM*self.z/dy_atz*self.L*toptaper*bottaper
+           temp= self.KGM*self.z/dy_atz*self.L*toptaper*bottaper
+        # set Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
+        temp[dy_atz>self.y[-1]-self.y[0]]=-self.Psi_Ek[dy_atz>self.y[-1]-self.y[0]]*1e6
+        return temp
                         
     
     def solve(self):
