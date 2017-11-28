@@ -1,5 +1,5 @@
 '''
-This script shows an example of a "two column" model for the 
+This script shows an example of a (time-stepping) "two column" model for the 
 overturning circulation in a basin. The first column represents the 
 basin, while the second column represents the northern sinking region
 '''
@@ -54,17 +54,17 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bzbot=bzbot)
+basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bzbot=bzbot)
 # create adv-diff column model instance for basin
-north= Model_VertAdvDiff(z=z,kappa=kappa,b=0.,bs=bs_north,bzbot=bzbot)
+north= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bzbot=bzbot)
 
 # time integration loop
 for ii in range(0, total_iters):    
    # update buoyancy profile
-   wb=AMOC.Psi*1e6/A_basin
-   wN=-AMOC.Psi*1e6/A_north
-   basin.timestep(w=wb,dt=dt)
-   north.timestep(w=wN,dt=dt,do_conv=True)
+   wAb=AMOC.Psi*1e6
+   wAN=-AMOC.Psi*1e6
+   basin.timestep(wA=wAb,dt=dt)
+   north.timestep(wA=wAN,dt=dt,do_conv=True)
    
    if ii%MOC_up_iters==0:
       # update overturning streamfunction (can be done less frequently)

@@ -5,9 +5,6 @@ The first column represents the basin, while the second column represents
 the northern sinking region. The overtunning circulation is computed at
 the northern end of the basin (at the interface to the northern sinking region)
 and at the southern end of the basin (at the interface to the channel)
-The abyssal boundary condition is formulated based on a scaling for the
-abyssal BL, following Mashayek et al and others.
-
 '''
 import sys
 sys.path.append('../Modules')
@@ -18,7 +15,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # boundary conditions:
-bs=0.03; bs_north=0.0; bbot= -0.01 
+bs=0.03; bs_north=0.0; bbot= -0.003 
 
 # S.O. surface boundary conditions and grid:
 y=np.asarray(np.linspace(0,2.e6, 40))
@@ -31,8 +28,8 @@ A_north=A_basin/50.  #area of northern sinking region
 # time-stepping parameters:
 dt=86400*30                                 # time-step for vert. adv. diff. calc.
 MOC_up_iters=int(np.floor(2.*360*86400/dt))  # multiplier for MOC time-step (MOC is updated every MOC_up_iters time steps)
-plot_iters= int(np.ceil(500*360*86400/dt))  # plotting frequency (in iterations)
-total_iters=int(np.ceil(5000*360*86400/dt))  # total number of timesteps
+plot_iters= int(np.ceil(300*360*86400/dt))  # plotting frequency (in iterations)
+total_iters=int(np.ceil(3000*360*86400/dt))  # total number of timesteps
 
 # The next few lines define a reasonable vertically varying kappa profile:
 # (to use const. kappa, simply define kappa as scalar)
@@ -57,9 +54,9 @@ SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,L=6e6,KGM=1200.)
 SO.solve()
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
+basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
 # create adv-diff column model instance for basin
-north= Model_VertAdvDiff(z=z,kappa=kappa,b=0.,bs=bs_north,bbot=bbot)
+north= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bbot=bbot)
 
 
 # Create figure:
@@ -73,14 +70,10 @@ ax2.set_xlim((-0.02,0.03))
 # loop to iteratively find equilibrium solution
 for ii in range(0, total_iters):    
    # update buoyancy profile
-   wb=(AMOC.Psi-SO.Psi)*1e6/A_basin
-   wN=-AMOC.Psi*1e6/A_north
-   # use abyssal BL scaling for bottom boundary condition
-   # (activated if d_abyss non-zero):
-   basin.d_abyss=-kappa(SO.z[0])*A_basin/SO.Psi[0]/1e6
-   north.d_abyss=basin.d_abyss
-   basin.timestep(w=wb,dt=dt)
-   north.timestep(w=wN,dt=dt,do_conv=True)
+   wAb=(AMOC.Psi-SO.Psi)*1e6
+   wAN=-AMOC.Psi*1e6
+   basin.timestep(wA=wAb,dt=dt)
+   north.timestep(wA=wAN,dt=dt,do_conv=True)
    
    if ii%MOC_up_iters==0:
       # update overturning streamfunction (can be done less frequently)

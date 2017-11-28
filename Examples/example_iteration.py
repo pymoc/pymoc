@@ -1,6 +1,6 @@
 '''
 This script shows an example of how to use the model_PsiNA class
-together with the model_veradvdiff to build an iterative solver
+together with the model_vertadvdiff to build an iterative solver
 for the overturning circulation  
 '''
 
@@ -48,13 +48,15 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
+#basin= Model_VertAdvDiff_int(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
+basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
 
 # loop to iteratively find equilibrium solution
 for ii in range(0, 30):    
    # update buoyancy profile
-   w=AMOC.Psi*1e6/A_basin
-   basin.solve_equi(w)
+   #w=AMOC.Psi*1e6/A_basin
+   wA=AMOC.Psi*1e6
+   basin.solve_equi(wA)
  
    # update overturning streamfunction
    #(notice that we are only adjusting b some of the way, which leads to better convergence):

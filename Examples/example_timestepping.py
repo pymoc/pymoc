@@ -1,12 +1,12 @@
 '''
 This script shows an example of how to use the model_PsiNA class
-together with the model_veradvdiff time-stepping method to integrate
+together with the model_vertadvdiff time-stepping method to integrate
 a simple diffusive thermocline problem forward in time 
 The boundary conditions here are identical to the exmple_iteration,
 and thus is the equilibrium solutions. However, the equilibrium is here approached
 with a real time-stepping, which allows us to analyze the transient approach
 -- but this calculation is significantly slower if we are only interested 
-in is the equilibrium solution
+in the equilibrium solution
 '''
 import sys
 sys.path.append('../Modules')
@@ -33,9 +33,9 @@ kappa = lambda z: (kappa_back + kappa_s*np.exp(z/100)+kappa_4k*np.exp(-z/1000 - 
 
 # create grid
 z=np.asarray(np.linspace(-3500, 0, 70))
+# we could also use an irregular grid that's finer near the surface:
 #z=np.asarray(np.linspace(-(3500.**(3./4.)), 0, 40))
-#z[:-1]=-(-z[:-1])**(4./3.) # this is for an irregular grid that's fier near the surface
-
+#z[:-1]=-(-z[:-1])**(4./3.) 
 
 # create initial guess for buoyancy profile in the basin
 def b_basin(z): return bs*np.exp(z/300.)+bbot
@@ -58,13 +58,13 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
+basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin, b=b_basin,bs=bs,bbot=bbot)
 
 # loop to iteratively find equilibrium solution
 for ii in range(0, niter):    
    # update buoyancy profile
-   w=AMOC.Psi*1e6/A_basin
-   basin.timestep(w=w,dt=dt)
+   wA=AMOC.Psi*1e6
+   basin.timestep(wA=wA,dt=dt)
  
    # update overturning streamfunction
    #(notice that we are only adjusting b some of the way, which leads to better convergence):

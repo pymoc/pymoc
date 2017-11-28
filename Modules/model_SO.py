@@ -149,9 +149,12 @@ class Model_SO(object):
         self.Psi=self.Psi_Ek + self.Psi_GM;        
         
     
-    def update(self,b=None):
-        # update buoyancy profiles     
-        self.b=self.make_func(self.z,b,'b')
-            
+    def update(self,b=None,bs=None):
+        # update buoyancy profiles
+        if b is not None:
+            self.b=self.make_func(self.z,b,'b')
+        if bs is not None:
+            self.bs=self.make_func(self.y,bs,'bs')     
+          
     
         
