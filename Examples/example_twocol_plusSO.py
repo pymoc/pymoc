@@ -41,7 +41,7 @@ def kappa(z):
 # create vertical grid:
 z=np.asarray(np.linspace(-3200, 0, 80))
 
-# create initial guess for buoyancy profile in the basin
+# Initial conditions for buoyancy profile in the basin
 def b_basin(z): return bs*np.exp(z/300.)
 
 # create N.A. overturning model instance
@@ -67,7 +67,7 @@ plt.ylim((-4e3,0))
 ax1.set_xlim((-10,15))
 ax2.set_xlim((-0.02,0.03))
 
-# loop to iteratively find equilibrium solution
+# Main time-stepping loop:
 for ii in range(0, total_iters):    
    # update buoyancy profile
    wAb=(AMOC.Psi-SO.Psi)*1e6

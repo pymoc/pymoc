@@ -36,7 +36,7 @@ def kappa(z):
 z=np.asarray(np.linspace(-(3500.**(3./4.)), 0, 40))
 z[:-1]=-(-z[:-1])**(4./3.) 
 
-# create initial guess for buoyancy profile in the basin
+# Initial conditions for buoyancy profile in the basin:
 def b_basin(z): return bs*np.exp(z/300.)
 
 # create overturning model instance
@@ -58,7 +58,7 @@ basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bzbot=bzbo
 # create adv-diff column model instance for basin
 north= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bzbot=bzbot)
 
-# time integration loop
+# Main time stepping loop
 for ii in range(0, total_iters):    
    # update buoyancy profile
    wAb=AMOC.Psi*1e6
