@@ -6,8 +6,9 @@ the northern sinking region. The overtunning circulation is computed at
 the northern end of the basin (at the interface to the northern sinking region)
 and at the southern end of the basin (at the interface to the channel).
 The parameters chosen here follow more or less the "control" experiment of Nikurashin
-and Vallis (2012, JPO). Most noteworthy we are here usng a constant SO wind
-stress of 0.15 N/m^2 as opposed to a varying profile with peak value 0.2 N/m^2 
+and Vallis (2012, JPO). Most noteworthy, we are here usng a constant SO wind
+stress of 0.12 N/m^2 (around their average vaue over the channel)
+as opposed to a varying profile 
 '''
 import sys
 sys.path.append('../Modules')
@@ -22,7 +23,7 @@ bs=0.03; bs_north=0.004; bbot=0.0
 
 # S.O. surface boundary conditions and grid:
 y=np.asarray(np.linspace(0,2.e6, 40))
-tau=0.15 #*np.sin(np.pi*y/2.e6)
+tau=0.12
 bs_SO=(bs-bbot)*y/y[-1]+bbot
 
 A_basin=6e13  #area of the basin
@@ -32,7 +33,7 @@ A_north=A_basin/50.  #area of northern sinking region
 dt=86400*30                                 # time-step for vert. adv. diff. calc.
 MOC_up_iters=int(np.floor(2.*360*86400/dt))  # multiplier for MOC time-step (MOC is updated every MOC_up_iters time steps)
 plot_iters= int(np.ceil(300*360*86400/dt))  # plotting frequency (in iterations)
-total_iters=int(np.ceil(5000*360*86400/dt))  # total number of timesteps
+total_iters=int(np.ceil(3000*360*86400/dt))  # total number of timesteps
 
 kappa=2e-5
 
@@ -43,12 +44,12 @@ z=np.asarray(np.linspace(-4000, 0, 80))
 def b_basin(z): return bs*np.exp(z/300.)
 
 # create N.A. overturning model instance
-AMOC = Model_PsiNA(z=z,b_basin=b_basin,b_N=0.)
+AMOC = Model_PsiNA(z=z,b_basin=b_basin,b_N=0.,f=1e-4)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 
 # create S.O. overturning model instance
-SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
+SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,f=1e-4,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
 SO.solve()
 
 # create adv-diff column model instance for basin
@@ -70,8 +71,15 @@ for ii in range(0, total_iters):
    # update buoyancy profile
    wAb=(AMOC.Psi-SO.Psi)*1e6
    wAN=-AMOC.Psi*1e6
-   basin.timestep(wA=wAb,dt=dt)
-   north.timestep(wA=wAN,dt=dt,do_conv=True)
+   # without hor. adv:
+   # basin.timestep(wA=wAb,dt=dt)
+   # north.timestep(wA=wAN,dt=dt,do_conv=True)
+   # with hor. adv:
+   vdx=0*AMOC.Psi
+   vdx[1:-1]=-1e6*(AMOC.Psi[0:-2]-AMOC.Psi[2:])/(AMOC.z[0:-2]-AMOC.z[2:])
+   basin.timestep(wA=wAb,dt=dt,vdx_in=-vdx,b_in=north.b)
+   north.timestep(wA=wAN,dt=dt,do_conv=True,vdx_in=vdx,b_in=basin.b)
+   
    
    if ii%MOC_up_iters==0:
       # update overturning streamfunction (can be done less frequently)
@@ -86,6 +94,7 @@ for ii in range(0, total_iters):
       ax1.plot(SO.Psi, SO.z, linewidth=0.5, color='m')
       ax2.plot(basin.b, basin.z, linewidth=0.5,color='b')
       ax2.plot(north.b, north.z, linewidth=0.5,color='c')
+      plt.pause(0.01)
       
 
 # Plot final results:

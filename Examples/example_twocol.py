@@ -85,6 +85,7 @@ for ii in range(0, total_iters):
       ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5)
       ax2.plot(basin.b, basin.z, linewidth=0.5)
       ax2.plot(north.b, north.z, linewidth=0.5)
+      plt.pause(0.01)
       
 
 # Plot final results:

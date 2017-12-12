@@ -64,7 +64,8 @@ for ii in range(0, 30):
    # Plot updated results:
    ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5)
    ax2.plot(basin.b, basin.z, linewidth=0.5)
-
+   plt.pause(0.01)
+      
 # Plot final results:
 ax1.plot(AMOC.Psi, AMOC.z,linewidth=2)
 ax2.plot(basin.b, basin.z, linewidth=2)
