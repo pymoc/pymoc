@@ -1,12 +1,15 @@
 '''
-This script shows an example of a (time-stepping) "two column" model for the 
-overturning circulation in a basin. The first column represents the 
-basin, while the second column represents the northern sinking region
+This script shows an example of a "two-column" model for the 
+diffusive overturning circulation in a basin, integrated via time-stepping.
+The first column represents the basin, while the second column represents the
+northern sinking region. In this example the bottom boundary condition
+is given in terms of the abyssal stratification
 '''
+
 import sys
 sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
-from model_vertadvdiff import Model_VertAdvDiff
+from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -14,7 +17,7 @@ from matplotlib import pyplot as plt
 bs=0.03; bs_north=0.0; bzbot= 2e-7 
 
 A_basin=8e13  #area of the basin
-A_north=A_basin/100.  #area of northern sinking region
+A_north=A_basin/200.  #area of northern sinking region
 
 # time-stepping parameters:
 dt=86400*30                                 # time-step for vert. adv. diff. calc.
@@ -54,17 +57,23 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bzbot=bzbot)
+basin= Model_Column(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bzbot=bzbot)
 # create adv-diff column model instance for basin
-north= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bzbot=bzbot)
+north= Model_Column(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bzbot=bzbot)
 
 # Main time stepping loop
 for ii in range(0, total_iters):    
    # update buoyancy profile
    wAb=AMOC.Psi*1e6
    wAN=-AMOC.Psi*1e6
-   basin.timestep(wA=wAb,dt=dt)
-   north.timestep(wA=wAN,dt=dt,do_conv=True)
+   # without hor. adv.:
+   #basin.timestep(wA=wAb,dt=dt)
+   #north.timestep(wA=wAN,dt=dt,do_conv=True)
+   # with hor. advection:
+   vdx=0*AMOC.Psi
+   vdx[1:-1]=-1e6*(AMOC.Psi[0:-2]-AMOC.Psi[2:])/(AMOC.z[0:-2]-AMOC.z[2:])
+   basin.timestep(wA=wAb,dt=dt,vdx_in=-vdx,b_in=north.b)
+   north.timestep(wA=wAN,dt=dt,do_conv=True,vdx_in=vdx,b_in=basin.b)
    
    if ii%MOC_up_iters==0:
       # update overturning streamfunction (can be done less frequently)

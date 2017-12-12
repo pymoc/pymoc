@@ -122,7 +122,7 @@ class Model_SO(object):
         else:
            toptaper=1.
         if self.c is not None:
-           self.make_func(self.z,self.KGM*self.z/dy_atz*self.L*toptaper*bottaper,'psiGM')
+           temp=self.make_func(self.z,self.KGM*self.z/dy_atz*self.L*toptaper*bottaper,'psiGM')
            N2=self.calc_N2()
            if self.bvp_with_Ek:
               def bc(ya, yb):

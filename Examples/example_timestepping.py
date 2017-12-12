@@ -1,6 +1,6 @@
 '''
 This script shows an example of how to use the model_PsiNA class
-together with the model_vertadvdiff time-stepping method to integrate
+together with the model_column time-stepping method to integrate
 a simple diffusive thermocline problem forward in time 
 The boundary conditions here are identical to the exmple_iteration,
 and thus is the equilibrium solutions. However, the equilibrium is here approached
@@ -11,7 +11,7 @@ in the equilibrium solution
 import sys
 sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
-from model_vertadvdiff import Model_VertAdvDiff
+from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -58,16 +58,15 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin, b=b_basin,bs=bs,bbot=bbot)
+basin= Model_Column(z=z,kappa=kappa,Area=A_basin, b=b_basin,bs=bs,bbot=bbot)
 
-# loop to iteratively find equilibrium solution
+# time-stepping loop to integrate the model
 for ii in range(0, niter):    
    # update buoyancy profile
    wA=AMOC.Psi*1e6
    basin.timestep(wA=wA,dt=dt)
  
    # update overturning streamfunction
-   #(notice that we are only adjusting b some of the way, which leads to better convergence):
    AMOC.update(b_basin=basin.b)
    AMOC.solve()
    

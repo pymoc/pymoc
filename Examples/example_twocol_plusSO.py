@@ -4,42 +4,40 @@ overturning circulation in a basin connected to a channel in the south.
 The first column represents the basin, while the second column represents
 the northern sinking region. The overtunning circulation is computed at
 the northern end of the basin (at the interface to the northern sinking region)
-and at the southern end of the basin (at the interface to the channel)
+and at the southern end of the basin (at the interface to the channel).
+The parameters chosen here follow more or less the "control" experiment of Nikurashin
+and Vallis (2012, JPO). Most noteworthy we are here usng a constant SO wind
+stress of 0.15 N/m^2 as opposed to a varying profile with peak value 0.2 N/m^2 
 '''
 import sys
 sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
 from model_SO import Model_SO
-from model_vertadvdiff import Model_VertAdvDiff
+from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
 
 # boundary conditions:
-bs=0.03; bs_north=0.0; bbot= -0.003 
+bs=0.03; bs_north=0.004; bbot=0.0 
 
 # S.O. surface boundary conditions and grid:
 y=np.asarray(np.linspace(0,2.e6, 40))
-tau=0.1 #*np.sin(np.pi*y/2.e6)
+tau=0.15 #*np.sin(np.pi*y/2.e6)
 bs_SO=(bs-bbot)*y/y[-1]+bbot
 
-A_basin=8e13  #area of the basin
+A_basin=6e13  #area of the basin
 A_north=A_basin/50.  #area of northern sinking region
 
 # time-stepping parameters:
 dt=86400*30                                 # time-step for vert. adv. diff. calc.
 MOC_up_iters=int(np.floor(2.*360*86400/dt))  # multiplier for MOC time-step (MOC is updated every MOC_up_iters time steps)
 plot_iters= int(np.ceil(300*360*86400/dt))  # plotting frequency (in iterations)
-total_iters=int(np.ceil(3000*360*86400/dt))  # total number of timesteps
+total_iters=int(np.ceil(5000*360*86400/dt))  # total number of timesteps
 
-# The next few lines define a reasonable vertically varying kappa profile:
-# (to use const. kappa, simply define kappa as scalar)
-kappa_back=2e-5
-kappa_4k=2e-4
-def kappa(z):
-    return (kappa_back + kappa_4k*np.exp(-z/1000 - 4))  
+kappa=2e-5
 
 # create vertical grid:
-z=np.asarray(np.linspace(-3200, 0, 80))
+z=np.asarray(np.linspace(-4000, 0, 80))
 
 # Initial conditions for buoyancy profile in the basin
 def b_basin(z): return bs*np.exp(z/300.)
@@ -50,13 +48,13 @@ AMOC = Model_PsiNA(z=z,b_basin=b_basin,b_N=0.)
 AMOC.solve()
 
 # create S.O. overturning model instance
-SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,L=6e6,KGM=1200.)
+SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
 SO.solve()
 
 # create adv-diff column model instance for basin
-basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
+basin= Model_Column(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
 # create adv-diff column model instance for basin
-north= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bbot=bbot)
+north= Model_Column(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bbot=bbot)
 
 
 # Create figure:

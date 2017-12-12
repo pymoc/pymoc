@@ -1,13 +1,13 @@
 '''
 This script shows an example of how to use the model_PsiNA class
 together with the model_vertadvdiff to build an iterative solver
-for the overturning circulation  
+for the diffusive overturning circulation in a basin
 '''
 
 import sys
 sys.path.append('../Modules')
 from model_PsiNA import Model_PsiNA
-from model_vertadvdiff import Model_VertAdvDiff
+from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -17,7 +17,7 @@ bs=0.03; bbot=-0.0004
 
 A_basin=8e13  #area of the basin
 
-# The next few lines are a an example for a reasonable vertically varying kappa profile:
+# The next few lines are an example for a reasonable vertically varying kappa profile:
 # (to use const. kappa, simply define kappa as scalar)
 kappa_back=1e-5
 kappa_s=3e-5
@@ -48,13 +48,11 @@ ax2.set_xlim((-0.01,0.04))
 
 
 # create adv-diff column model instance for basin
-#basin= Model_VertAdvDiff_int(z=z,kappa=kappa,b=b_basin,bs=bs,bbot=bbot)
-basin= Model_VertAdvDiff(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
+basin= Model_Column(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bbot)
 
 # loop to iteratively find equilibrium solution
 for ii in range(0, 30):    
    # update buoyancy profile
-   #w=AMOC.Psi*1e6/A_basin
    wA=AMOC.Psi*1e6
    basin.solve_equi(wA)
  
