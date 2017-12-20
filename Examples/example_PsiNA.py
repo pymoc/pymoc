@@ -1,11 +1,11 @@
 '''
-This script shows an example of how to use the model_PsiNA class 
+This script shows an example of how to use the model_thermwind class 
 to solve for the overturning circulation, given the buoyancy profile
 in the basin and in the northern deep water formation region  
 '''
 import sys
 sys.path.append('../Modules')
-from model_PsiNA import Model_PsiNA
+from model_thermwind import Model_Thermwind
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -20,7 +20,7 @@ z=np.asarray(np.linspace(-4000, 0, 100))
 #b_basin=b_basin(z)
 
 # create column model instance:
-m = Model_PsiNA(z=z,b_basin=b_basin)
+m = Model_Thermwind(z=z,b1=b_basin)
 # solve the model:
 m.solve()
     
@@ -33,3 +33,5 @@ ax1.plot(m.Psi, m.z,color='r')
 plt.ylim((-4e3,0))
 ax1.set_xlim((-5,20))
 ax2.set_xlim((-0.01,0.04))
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)

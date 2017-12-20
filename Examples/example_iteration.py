@@ -1,12 +1,12 @@
 '''
-This script shows an example of how to use the model_PsiNA class
+This script shows an example of how to use the model_thermwind class
 together with the model_vertadvdiff to build an iterative solver
 for the diffusive overturning circulation in a basin
 '''
 
 import sys
 sys.path.append('../Modules')
-from model_PsiNA import Model_PsiNA
+from model_thermwind import Model_Thermwind
 from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
@@ -31,7 +31,7 @@ z=np.asarray(np.linspace(-3500, 0, 100))
 def b_basin(z): return bs*np.exp(z/300.)+bbot
 
 # create overturning model instance
-AMOC = Model_PsiNA(z=z,b_basin=b_basin)
+AMOC = Model_Thermwind(z=z,b1=b_basin)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 
@@ -45,6 +45,8 @@ ax2.plot(b_basin(z), z)
 plt.ylim((-4e3,0))
 ax1.set_xlim((-5,20))
 ax2.set_xlim((-0.01,0.04))
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
 
 
 # create adv-diff column model instance for basin
@@ -58,7 +60,7 @@ for ii in range(0, 30):
  
    # update overturning streamfunction
    #(notice that we are only adjusting b some of the way, which leads to better convergence):
-   AMOC.update(b_basin=0.8*AMOC.b_basin(z)+0.2*basin.b)
+   AMOC.update(b1=0.8*AMOC.b1(z)+0.2*basin.b)
    AMOC.solve()
    
    # Plot updated results:
@@ -69,4 +71,6 @@ for ii in range(0, 30):
 # Plot final results:
 ax1.plot(AMOC.Psi, AMOC.z,linewidth=2)
 ax2.plot(basin.b, basin.z, linewidth=2)
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
 

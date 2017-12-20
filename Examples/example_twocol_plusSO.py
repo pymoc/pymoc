@@ -50,7 +50,7 @@ def b_basin(z): return bs*np.exp(z/300.)
 AMOC = Model_Thermwind(z=z,b1=b_basin,b2=0.,f=1e-4)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
-# evaluate overturning to isopycnal space:
+# evaluate overturning in isopycnal space:
 [Psi_iso_b,Psi_iso_n]=AMOC.Psibz()
 
 # create S.O. overturning model instance
@@ -71,6 +71,8 @@ ax2 = ax1.twiny()
 plt.ylim((-4e3,0))
 ax1.set_xlim((-10,15))
 ax2.set_xlim((-0.02,0.03))
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
 
 # Main time-stepping loop:
 for ii in range(0, total_iters):    
@@ -112,6 +114,8 @@ ax2.plot(north.b, basin.z, linewidth=2,color='c')
 ax1.plot(0.*AMOC.z, AMOC.z,linewidth=0.5,color='k')
 ax1.set_xlim((-10,15))
 ax2.set_xlim((-0.02,0.03))
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
 plt.ylim((-4e3,0))
 
 

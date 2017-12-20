@@ -1,5 +1,5 @@
 '''
-This script shows an example of how to use the model_PsiNA class
+This script shows an example of how to use the model_thermwind class
 together with the model_column time-stepping method to integrate
 a simple diffusive thermocline problem forward in time 
 The boundary conditions here are identical to the exmple_iteration,
@@ -10,7 +10,7 @@ in the equilibrium solution
 '''
 import sys
 sys.path.append('../Modules')
-from model_PsiNA import Model_PsiNA
+from model_thermwind import Model_Thermwind
 from model_column import Model_Column
 import numpy as np
 from matplotlib import pyplot as plt
@@ -41,7 +41,7 @@ z=np.asarray(np.linspace(-3500, 0, 70))
 def b_basin(z): return bs*np.exp(z/300.)+bbot
 
 # create overturning model instance
-AMOC = Model_PsiNA(z=z,b_basin=b_basin)
+AMOC = Model_Thermwind(z=z,b1=b_basin)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 
@@ -55,6 +55,8 @@ ax2.plot(b_basin(z), z)
 plt.ylim((-4e3,0))
 ax1.set_xlim((-5,20))
 ax2.set_xlim((-0.01,0.04))
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
 
 
 # create adv-diff column model instance for basin
@@ -67,7 +69,7 @@ for ii in range(0, niter):
    basin.timestep(wA=wA,dt=dt)
  
    # update overturning streamfunction
-   AMOC.update(b_basin=basin.b)
+   AMOC.update(b1=basin.b)
    AMOC.solve()
    
    if ii%120==0:
@@ -80,4 +82,7 @@ for ii in range(0, niter):
 # Plot final results:
 ax1.plot(AMOC.Psi, AMOC.z,linewidth=2)
 ax2.plot(basin.b, basin.z, linewidth=2)
+ax1.set_xlabel('$\Psi$', fontsize=14)
+ax2.set_xlabel('b', fontsize=14)
+
 
