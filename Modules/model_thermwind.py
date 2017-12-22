@@ -20,9 +20,9 @@ class Model_Thermwind(object):
             f=1.2e-4,         # Coriolis parameter (input)
             z=None,           # grid (input)
             sol_init=None,    # Initial conditions for ODE solver (input)
-            b1=None,     # Buoyancy in the basin (input, output)
-            b2=0.,           # Buoyancy in the deep water formation region (input, output)
-            Psi= None,      # Streamfunction (output) 
+            b1=None,          # Buoyancy in the basin (input, output)
+            b2=0.,            # Buoyancy in the deep water formation region (input, output)
+            Psi= None,        # Streamfunction (output) 
     ):
  
         self.f = f
@@ -79,11 +79,14 @@ class Model_Thermwind(object):
                          
     def solve(self):
         #Solve the boundary value problem
+        # Note: The solution to this BVP is a relatively straightforward integral
+        # it would probably be faster to just code it up that way.   
         res = integrate.solve_bvp(self.ode, self.bc, self.z, self.sol_init)
         # interpolate solution for overturning circulation onto original grid (and change units to SV)
         self.Psi = res.sol(self.z)[0, :] / 1e6  
        
     def Psib(self,nb=500):
+        # map overturning into isopycnal space:
         b1=self.make_array(self.b1,'b1')
         b2=self.make_array(self.b2,'b2')
         bmin=min(np.min(b1),np.min(b2))
@@ -110,6 +113,7 @@ class Model_Thermwind(object):
         return np.append([0],np.cumsum(transb))
     
     def Psibz(self):
+        # map isopycnal overturning back into isopycnal-depth space of each column 
         psib=self.Psib()
         # This would do a linear interploation in b: return np.interp(self.b1,self.bgrid,psib)
         # instead we first estimate the depth levels for the bgrid and then do linear interpolation in z
