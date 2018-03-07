@@ -3,9 +3,9 @@ Instances of this class represent 1D representations of buoyancy in a water
 column governed by vertical advection and diffusion. The velocity
 profile is required as an input. The script can either compute the equilibrium
 buoyancy profile for a given vertical velocity profile and boundary conditions
-or compute the tendency and perform a time-step of given length
+or compute the tendency and perform a time-step of given length.
 BCs have to be fixed buoyancy at the top and either fixed b or db/dz at the bottom
-Update: the time-stepping version can now also handle horizontal advection
+The time-stepping version can also handle horizontal advection
 into the column. This is, however, not (yet) implemented for the equilibrium solver
 '''
 
@@ -127,8 +127,9 @@ class Model_Column(object):
         bz_up=bz[1:];bz_down=bz[0:-1];
         bzz=(bz_up-bz_down)/(0.5*(dz[1:]+dz[0:-1]))
         #upwind advection: 
-        bz=bz_down; bz[wA[1:-1]<0]=bz_up[wA[1:-1]<0];      
-        dbdt=(-(wA[1:-1]-self.dAkappa_dz(self.z[1:-1]))*bz/self.Area(self.z[1:-1])
+        weff=wA-self.dAkappa_dz(self.z)
+        bz=bz_down; bz[weff[1:-1]<0]=bz_up[weff[1:-1]<0];      
+        dbdt=(-(weff[1:-1])*bz/self.Area(self.z[1:-1])
               +self.kappa(self.z[1:-1])*bzz)
         self.b[1:-1]=self.b[1:-1]+dt*dbdt
         
@@ -150,7 +151,7 @@ class Model_Column(object):
         # dz=np.append(dz,dz[-1]);dz=np.insert(dz,0,dz[0])
         # dz=0.5*(dz[1:]+dz[0:-1]);
         # self.b[ind]=(np.mean(self.b[ind]*dz[ind]*self.Area(self.z[ind]))
-        #            /np.mean(dz[ind]*self.Area(self.z[ind])) )    
+        #            /np.mean(dz[ind]*self.Area(self.z[ind])) )   
             
     def horadv(self,vdx_in,b_in,dt):
         # upwind horizontal advection:
