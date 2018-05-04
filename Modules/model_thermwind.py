@@ -9,6 +9,7 @@ d_{zz}(\Psi) = f^{-1} (b_{2} - b_{1})
 
 This equation is solved subject to the boundary conditions that
 \Psi(0) = \Psi(-H) = 0 
+(these BCs are different to NV2012)
 
 An upwind isopycnal mapping is used to compute the isopycnal overturning transport
 '''
@@ -117,10 +118,11 @@ class Model_Thermwind(object):
         for i in range(0,len(bgridmid)):
             transb[i]=np.sum(-udydz*mask[i,:])
         return np.append([0],np.cumsum(transb))
+
     
-    def Psibz(self):
+    def Psibz(self,nb=500):
         # map isopycnal overturning back into isopycnal-depth space of each column 
-        psib=self.Psib()
+        psib=self.Psib(nb)
         # This would do a linear interploation in b: return np.interp(self.b1,self.bgrid,psib)
         # instead we first estimate the depth levels for the bgrid and then do linear interpolation in z
         z1_of_bgrid=np.interp(self.bgrid,self.b1(self.z),self.z)

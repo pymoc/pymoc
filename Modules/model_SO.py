@@ -137,8 +137,10 @@ class Model_SO(object):
            temp= res.sol(self.z)[0, :]
         else:
            temp= self.KGM*self.z/dy_atz*self.L*toptaper*bottaper
-        # set Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
-        temp[dy_atz>self.y[-1]-self.y[0]]=-self.Psi_Ek[dy_atz>self.y[-1]-self.y[0]]*1e6
+        # limit Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
+        temp[dy_atz>self.y[-1]-self.y[0]]=np.maximum(
+             temp[dy_atz>self.y[-1]-self.y[0]],
+            -self.Psi_Ek[dy_atz>self.y[-1]-self.y[0]]*1e6)
         return temp
                         
     
