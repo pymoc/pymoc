@@ -29,6 +29,7 @@ class Model_SO(object):
             Psi_Ek=None,    # eulerian overturning streamfunction (array, out) 
             Psi_GM=None,    # GM-type eddy overturning streamfunction (array, out) 
             Psi=None,       # residual overturning streamfunction (array, out)
+            smax=0.01,      # maximum slope for clipping of GM streamfunction
     ):
  
         # initialize grid:
@@ -50,6 +51,7 @@ class Model_SO(object):
         self.c=c; self.bvp_with_Ek=bvp_with_Ek
         self.Hsill=Hsill;self.HEk=HEk
         self.Htapertop=Htapertop; self.Htaperbot=Htaperbot
+        self.smax=smax
     
     def make_func(self,xi,myst,name):
     # turn mysterious object into callable function (if needed)    
@@ -136,7 +138,7 @@ class Model_SO(object):
            # return solution interpolated onto original grid        
            temp= res.sol(self.z)[0, :]
         else:
-           temp= self.KGM*self.z/dy_atz*self.L*toptaper*bottaper
+           temp= self.KGM*np.maximum(self.z/dy_atz,-self.smax)*self.L*toptaper*bottaper
         # limit Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
         temp[dy_atz>self.y[-1]-self.y[0]]=np.maximum(
              temp[dy_atz>self.y[-1]-self.y[0]],
