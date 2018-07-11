@@ -8,5 +8,3 @@ and trust this as a "black box". If you find any errors, please get in touch!
 Notice that the matlab code is legacy and no longer being developed (although anybody
 is welcome to take on that task).
 
-The acronym MOCM can stand for "Modular Ocean Column Model" (with apologies to GFDL), or, if you prefer, "Meridional Overturning Circulation Model", or in fact any combination of these, such as "Modular Overturning Circulation Model" 
-
