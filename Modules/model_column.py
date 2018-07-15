@@ -24,7 +24,8 @@ class Model_Column(object):
             bbot=0.0,       # bottom buoyancy boundary condition (input)  
             bzbot=None,     # bottom strat. as alternative boundary condition (input) 
             b=0.0,          # Buoyancy profile (input, output)
-            Area=None       # Horizontal area (can be function of depth)
+            Area=None,      # Horizontal area (can be function of depth)
+            N2min=1e-7      # Minimum strat. for conv adjustment
     ):
  
         # initialize grid:
@@ -40,7 +41,8 @@ class Model_Column(object):
         self.bbot=bbot 
         self.bzbot=bzbot  
        
-      
+        self.N2min=N2min  
+       
         self.b=self.make_array(b,'b')     
         
         if self.check_numpy_version():
@@ -135,18 +137,19 @@ class Model_Column(object):
         
     
     def convect(self):
-        # do convective adjustment
+        # do convective adjustment to minimum strat N2min
         # notice that this parameterization currently only handles convection
         # from the top down which is the only case we really encounter here...
         # it also assumes a fixed surface buoyancy BC, and hence any
         # surface heat flux that's required to adjust the buoyancy of the
-        # convecting column to the surface buoyancy:
-        ind=self.b>self.b[-1]
-        self.b[ind]=self.b[-1]      
+        # convecting column:
+        ind=self.b>self.b[-1]+self.N2min*self.z
+        self.b[ind]=self.b[-1]+self.N2min*self.z[ind]      
         # Below is an energy conserving version that could be used 
         # for model formulations without fixed surface b. But for fixed surface
         # b, the simpler version above is preferable as it deals better with long time steps
         # (for infinitesimal time-step and fixed surface b, the two are equivalent)
+        # this version does currently also not include adjustment to finite strat.
         # dz=self.z[1:]-self.z[:-1];
         # dz=np.append(dz,dz[-1]);dz=np.insert(dz,0,dz[0])
         # dz=0.5*(dz[1:]+dz[0:-1]);

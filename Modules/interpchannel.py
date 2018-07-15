@@ -1,12 +1,12 @@
 '''
 An class to interpolate the buoyancy field in the SO along lines
-with constant slope
+with constant slope - only to mke fancy looking plots
 '''
 
 import numpy as np
 from scipy.optimize import brenth
 
-class Interpolate(object):
+class Interpolate_channel(object):
     def __init__(
             self,            
             y=None,          # y-grid

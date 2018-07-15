@@ -16,6 +16,7 @@ An upwind isopycnal mapping is used to compute the isopycnal overturning transpo
 
 import numpy as np
 from scipy import integrate
+#from scipy.interpolate import interp1d
 
 class Model_Thermwind(object):
     def __init__(
@@ -123,11 +124,11 @@ class Model_Thermwind(object):
     def Psibz(self,nb=500):
         # map isopycnal overturning back into isopycnal-depth space of each column 
         psib=self.Psib(nb)
-        # This would do a linear interploation in b: return np.interp(self.b1,self.bgrid,psib)
+        # This would do a linear interploation in b: 
+        #return [np.interp(self.b1(self.z),self.bgrid,psib),np.interp(self.b2(self.z),self.bgrid,psib)]
         # instead we first estimate the depth levels for the bgrid and then do linear interpolation in z
         z1_of_bgrid=np.interp(self.bgrid,self.b1(self.z),self.z)
-        #b2eff=0.01*self.b1+0.99*self.b2;
-        z2_of_bgrid=np.interp(self.bgrid,self.b2(self.z),self.z)
+        z2_of_bgrid=np.interp(self.bgrid,self.b2(self.z),self.z)        
         return [np.interp(self.z,z1_of_bgrid,psib),np.interp(self.z,z2_of_bgrid,psib)]
    
     

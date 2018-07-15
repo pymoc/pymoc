@@ -13,7 +13,7 @@ sys.path.append('../Modules')
 from model_thermwind import Model_Thermwind
 from model_SO import Model_SO
 from model_column import Model_Column
-from constslopeint import Interpolate
+from interpchannel import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
@@ -115,7 +115,7 @@ ax1.plot(0.*AMOC.z, AMOC.z,linewidth=0.5,color='k')
 # This is mostly an exercise in interpolation, but useful to visualize solutions
 
 # first interpolate buoyancy in channel along constant-slope isopycnals: 
-bint=Interpolate(y=y,z=z,bs=bs_SO,bn=basin.b)
+bint=Interpolate_channel(y=y,z=z,bs=bs_SO,bn=basin.b)
 bsouth=bint.gridit()
 # buoyancy in the basin is all the same:
 ybasin=np.linspace(200.,12000.,60);
