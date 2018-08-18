@@ -12,7 +12,7 @@ into the column. This is, however, not (yet) implemented for the equilibrium sol
 import numpy as np
 from scipy import integrate
 
-class Model_Column(object):
+class Column(object):
     # This module creates an advective-diffusive column
     # Notice that the column here represents a horizontal integral, rather than
     # an average, thus allowing for the area of to be a function of depth

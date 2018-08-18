@@ -1,11 +1,11 @@
 '''
-This script shows an example of how to use the model_thermwind class 
+This script shows an example of how to use the psi_thermwind model class 
 to solve for the overturning circulation, given the buoyancy profile
 in the basin and in the northern deep water formation region  
 '''
 import sys
 sys.path.append('../Modules')
-from model_thermwind import Model_Thermwind
+from psi_thermwind import Psi_Thermwind
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -20,7 +20,7 @@ z=np.asarray(np.linspace(-4000, 0, 100))
 #b_basin=b_basin(z)
 
 # create column model instance:
-m = Model_Thermwind(z=z,b1=b_basin)
+m = Psi_Thermwind(z=z,b1=b_basin)
 # solve the model:
 m.solve()
     

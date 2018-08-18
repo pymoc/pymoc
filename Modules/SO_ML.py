@@ -8,7 +8,7 @@ overturning streamfunction and buoyancy profile in the basin
 
 import numpy as np
 
-class Model_SO_ML(object):
+class SO_ML(object):
     # This module creates an advective-diffusive column
     # Notice that the column here represents a horizontal integral, rather than
     # an average, thus allowing for the area of to be a function of depth
@@ -18,8 +18,6 @@ class Model_SO_ML(object):
             Ks=0.,             # hor. diffusivity (input)
             h=50.,             # ML depth (input)
             L=4e6,             # zonal width (input)
-#            b_basin=None,      # basin buoyancy profile (input) - notice that this effectively provides the gird for the isopycnal overturning
-#            Psi_b=None,        # overturning at northern end of channel (input)
             surflux=0.,        # prescribed surface buoyancy flux (in m^2/s^3; input)
                                # Notice that the first and last gridpoints are BCs and should have no flux 
             rest_mask=0.,      # mask for surface restoring (1 where restoring is applied 0 elsewhere)
@@ -66,7 +64,21 @@ class Model_SO_ML(object):
       # update surface buoyancy profile via advect. and diff
       
       # First we need to determine Psi at the surface in the ML:
+      # The first line here is a hack to reduce problems with interpolation  
+      # due to finite SO resolution when PsiSO goes to zero at the bottom
+      #due to non-outcropping isopycnals
+      # If Psi_b is zero at non-outcropping isopycnals, it can end up 
+      # very near zero also at the last (non-boundary) gridpoint
+      # at the surface as a result of the interpolation procedure 
+      # - this is unphysical since psi by definition only vanishes on isopycnals 
+      # that don't outcrop (the problem is that this vanishing here is a step
+      # function which messes with the interpolation.) 
+      # For the purpose of the interpolation to the surface we therefore set psi
+      # on non-outcropping isopycnals to the last non-zero value above 
+      ind=np.nonzero(Psi_b)[0][0]; Psi_b[:ind]=Psi_b[ind]
       self.Psi_s=np.interp(self.bs,b_basin,Psi_b)
+      self.Psi_s[0]=0.# This value doesn't actually enter/matter, but zero overturning
+                      # at southern boundary makes more sense for diag purposes
       
       #set boundary conditions:
       self.bs[-1]=b_basin[-1]
@@ -83,7 +95,7 @@ class Model_SO_ML(object):
           self.bs[0]=self.bs[1]
    
       # Compute tendency due to surface b-flux
-      dbdt_flux=self.surflux + self.rest_mask*self.v_pist/self.h*(
+      dbdt_flux=self.surflux/self.h + self.rest_mask*self.v_pist/self.h*(
                                self.b_rest-self.bs);
       # Compute advective tendency via upwind advection
       dy= self.y[1]-self.y[0] # Notice that the current implementation assumes an evenly spaced grid!

@@ -18,7 +18,7 @@ import numpy as np
 from scipy import integrate
 #from scipy.interpolate import interp1d
 
-class Model_Thermwind(object):
+class Psi_Thermwind(object):
     def __init__(
             self,
             f=1.2e-4,         # Coriolis parameter (input)

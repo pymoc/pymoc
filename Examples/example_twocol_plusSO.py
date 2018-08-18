@@ -10,10 +10,10 @@ and Vallis (2012, JPO).
 '''
 import sys
 sys.path.append('../Modules')
-from model_thermwind import Model_Thermwind
-from model_SO import Model_SO
-from model_column import Model_Column
-from interpchannel import Interpolate_channel
+from psi_thermwind import Psi_Thermwind
+from psi_SO import Psi_SO
+from column import Column
+from interp_channel import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
@@ -50,20 +50,20 @@ z=np.asarray(np.linspace(-4000, 0, 80))
 def b_basin(z): return bs*np.exp(z/300.)
 
 # create N.A. overturning model instance
-AMOC = Model_Thermwind(z=z,b1=b_basin,b2=0.,f=1e-4)
+AMOC = Psi_Thermwind(z=z,b1=b_basin,b2=0.,f=1e-4)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 # evaluate overturning in isopycnal space:
 [Psi_iso_b,Psi_iso_n]=AMOC.Psibz()
 
 # create S.O. overturning model instance
-SO=Model_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,f=1e-4,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
+SO=Psi_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,f=1e-4,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
 SO.solve()
 
 # create adv-diff column model instance for basin
-basin= Model_Column(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bmin)
+basin= Column(z=z,kappa=kappa,Area=A_basin,b=b_basin,bs=bs,bbot=bmin)
 # create adv-diff column model instance for basin
-north= Model_Column(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bbot=bmin)
+north= Column(z=z,kappa=kappa,Area=A_north,b=0.,bs=bs_north,bbot=bmin)
 
 # Create figure:
 fig = plt.figure(figsize=(6,10))

@@ -7,7 +7,7 @@ and two different values for the abyssal stratification
 
 import sys
 sys.path.append('../Modules')
-from model_Equi import Model_Equi
+from equi_column import Equi_Column
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -40,7 +40,7 @@ for i in range(0, N):
     # create SO upwelling profile:
     psi_so= lambda z: (psi_so_max * 1e6 * np.sin([-np.pi * max(x, -H_max_so[i]) / H_max_so[i] for x in z] )**2 )
     # create column model instance
-    m = Model_Equi(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
+    m = Equi_Column(B_int=B_int[i], A=A, kappa=kappa, dkappa_dz=dkappa_dz, psi_so=psi_so)
     # solve the model:
     m.solve()
     # output depth of overtruning cell:

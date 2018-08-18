@@ -23,7 +23,7 @@ Notice that H then appears as a parameter (to be determined) in the equations. 5
 import numpy as np
 from scipy import integrate
 
-class Model_Equi(object):
+class Equi_Column(object):
     def __init__(
             self,
             f=1.2e-4,         # Coriolis parameter (input)

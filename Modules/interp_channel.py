@@ -55,12 +55,12 @@ class Interpolate_channel(object):
                # function to help determine slope in vent. region
                return self.bn(z-x*(l-y))-self.bs(y+z/x)            
         # first determine slope at bottom of vent. region here
-        sbot=-brenth(f2, self.z[0],0.)/l 
+        sbot=-brenth(f2, self.z[0],0.)/l
         # than set slope for stuff above and below...           
         if -z>sbot*y:
           s=sbot
         else:
-          s=brenth(f, 1.e-10,1.0)
+          s=brenth(f, 1.e-12,1.0)
         return self.bn(z-s*(l-y))
         #return s
     

@@ -8,7 +8,7 @@ and the surface wind stress [tau(y)]
 import numpy as np
 from scipy import integrate, optimize
 
-class Model_SO(object):
+class Psi_SO(object):
     def __init__(
             self,            
             z=None,         # vertical grid (array, in)
