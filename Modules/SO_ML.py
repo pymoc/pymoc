@@ -75,11 +75,11 @@ class SO_ML(object):
       # function which messes with the interpolation.) 
       # For the purpose of the interpolation to the surface we therefore set psi
       # on non-outcropping isopycnals to the last non-zero value above 
-      ind=np.nonzero(Psi_b)[0][0]; Psi_b[:ind]=Psi_b[ind]
-      self.Psi_s=np.interp(self.bs,b_basin,Psi_b)
+      Psi_mod=Psi_b.copy();ind=np.nonzero(Psi_mod)[0][0]; Psi_mod[:ind]=Psi_mod[ind]
+      self.Psi_s=np.interp(self.bs,b_basin,Psi_mod)
       self.Psi_s[0]=0.# This value doesn't actually enter/matter, but zero overturning
-                      # at southern boundary makes more sense for diag purposes
-      
+                         # at southern boundary makes more sense for diag purposes
+        
       #set boundary conditions:
       self.bs[-1]=b_basin[-1]
       if self.Psi_s[0]>0:
