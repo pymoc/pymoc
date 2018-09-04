@@ -64,32 +64,15 @@ class SO_ML(object):
       # update surface buoyancy profile via advect. and diff
       
       # First we need to determine Psi at the surface in the ML:
-      # The first line here is a hack to reduce problems with interpolation  
-      # due to finite SO resolution when PsiSO goes to zero at the bottom
-      #due to non-outcropping isopycnals
-      # If Psi_b is zero at non-outcropping isopycnals, it can end up 
-      # very near zero also at the last (non-boundary) gridpoint
-      # at the surface as a result of the interpolation procedure 
-      # - this is unphysical since psi by definition only vanishes on isopycnals 
-      # that don't outcrop (the problem is that this vanishing here is a step
-      # function which messes with the interpolation.) 
-      # For the purpose of the interpolation to the surface we therefore set psi
-      # on non-outcropping isopycnals to the last non-zero value above 
-      Psi_mod=Psi_b.copy();ind=np.nonzero(Psi_mod)[0][0]; Psi_mod[:ind]=Psi_mod[ind]
-      self.Psi_s=np.interp(self.bs,b_basin,Psi_mod)
+      self.Psi_s=np.interp(self.bs,b_basin,Psi_b)
       self.Psi_s[0]=0.# This value doesn't actually enter/matter, but zero overturning
-                         # at southern boundary makes more sense for diag purposes
+                      # at southern boundary makes more sense for diag purposes
         
       #set boundary conditions:
       self.bs[-1]=b_basin[-1]
-      if self.Psi_s[0]>0:
-          # set buoyancy at southern boundary buoyancy to mean of upwelling water
-          #bup=int(d_z(psi)b)dz/int(d_z(psi))dz
-          dpsidz=Psi_b[2:]-Psi_b[:-2]
-          bint=b_basin[1:-1];
-          ind=np.logical_and(Psi_b[1:-1]>0., b_basin[1:-1]<self.bs[1]) 
-          bup=np.sum(dpsidz[ind]*bint[ind])/np.sum(dpsidz[ind])
-          self.bs[0]=bup
+      if self.Psi_s[1]>0:
+          # set buoyancy at southern boundary buoyancy densest upwelling water
+          self.bs[0]=b_basin[np.argwhere(Psi_b>0)[0][0]]
       else:
           # no-flux BC
           self.bs[0]=self.bs[1]
