@@ -48,7 +48,10 @@ class Interpolate_twocol(object):
         bsurf=self.make_func(self.y/l*self.bn(0) + (1-self.y/l)*self.bs(0),'bsurf',self.y)
         if z==0 and y==0:
             # slope ill defined at (0,0); evaluate infinitesimally below the surface:
-            z=-1e-10  
+            z=-0.01  
+        if z==self.z[0] and y==l:
+            # slope also potentially ill defined at (l,-H); evaluate infinitesimally above the bottom:
+            z=self.z[0]+0.01  
         def fint(x):
                # function to help determine slope at bottom of vent. region
                return self.bn(0)-self.bs(-x*l)  
@@ -62,7 +65,7 @@ class Interpolate_twocol(object):
         sbot=brenth(fint, 0.,1.) 
         # than set slope for stuff above and below...           
         if z>-sbot*(l-y):
-          s=brenth(fup, 1.e-10,1.0)
+          s=brenth(fup, 1e-10,1.0)
         else:
           s=brenth(fdeep, -1.0,1.0)
         return self.bs(z-s*y)
