@@ -103,6 +103,14 @@ class SO_ML(object):
       # add tendencies from surface flux and advection
       self.bs=self.bs+dt*(dbdt_flux+dbdt_ad)       
       
+      #re-set southern boundary condition in case we need no-flux:
+      if self.Psi_s[1]>0:
+          # set buoyancy at southern boundary to buoyancy of densest upwelling water
+          self.bs[0]=b_basin[np.argwhere(Psi_b>0)[0][0]]
+      else:
+          # no-flux BC
+          self.bs[0]=self.bs[1]
+          
       # Do implicit diffusion:
       s=self.Ks*dt/dy**2;
       U=(np.diag(-s/2.*np.ones(len(self.y)-1), -1)
@@ -116,6 +124,15 @@ class SO_ML(object):
       V[0,0]=1;V[0,1]=0; V[-1,-2]=0;V[-1,-1]=1;
       self.bs=np.dot(np.dot(Uinv,V),self.bs)      
       
+      #re-set southern boundary condition in case we need no-flux::
+      # this final re-set is just to pass back a state with consistent bcs
+      # (preferable e.g. for computation of streamfunction)
+      if self.Psi_s[1]>0:
+          # set buoyancy at southern boundary to buoyancy of densest upwelling water
+          self.bs[0]=b_basin[np.argwhere(Psi_b>0)[0][0]]
+      else:
+          # no-flux BC
+          self.bs[0]=self.bs[1]
       
     
     
