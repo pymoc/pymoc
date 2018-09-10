@@ -46,9 +46,9 @@ class SO_ML(object):
         if isinstance(myst,np.ndarray):
             return myst
         elif callable(myst):
-            return myst(self.z)
+            return myst(self.y)
         elif isinstance(myst,float):
-            return myst+0*self.z
+            return myst+0*self.y
         else:
             raise TypeError(name,'needs to be either function, numpy array, or float') 
     
@@ -103,11 +103,10 @@ class SO_ML(object):
       # add tendencies from surface flux and advection
       self.bs=self.bs+dt*(dbdt_flux+dbdt_ad)       
       
-      #re-set southern boundary condition in case we need no-flux:
-      if self.Psi_s[1]>0:
-          # set buoyancy at southern boundary to buoyancy of densest upwelling water
-          self.bs[0]=b_basin[np.argwhere(Psi_b>0)[0][0]]
-      else:
+      #re-set southern boundary condition
+      #(the above does not modify the boundary gridpoints,
+      # but if we want to simulate no-flux bbc we need to adjust the boundary point accordingly):
+      if self.Psi_s[1]<=0:
           # no-flux BC
           self.bs[0]=self.bs[1]
       
@@ -126,8 +125,8 @@ class SO_ML(object):
       self.bs=np.dot(np.dot(Uinv,V),self.bs)      
       
       
-      #re-set southern boundary condition in case we need no-flux:
-      # this final re-set is just to pass back a state with consistent bcs
+      #re-set southern boundary condition:
+      # this final re-set is just to pass back a state where boundary point is consistent with bcs
       # (preferable e.g. for computation of streamfunction)
       if self.Psi_s[1]>0:
           # set buoyancy at southern boundary to buoyancy of densest upwelling water
