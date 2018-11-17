@@ -97,28 +97,13 @@ class Psi_Thermwind(object):
         bmax=max(np.max(b1),np.max(b2))
         self.bgrid=np.linspace(bmin,bmax,nb)
         udydz=-(self.Psi[1:]-self.Psi[:-1])
-        bgridmid=0.5*(self.bgrid[1:]+self.bgrid[:-1])
-        mask=np.ones((len(bgridmid),len(udydz)))
-        for i in range(0,len(udydz)):
-           if udydz[i]>0:
-              mask[bgridmid>b1[i+1],i]=0 
-              mask[bgridmid<b1[i],i]=0
-              bmid=0.5*(b1[i]+b1[i+1])
-           else: 
-              mask[bgridmid>b2[i+1],i]=0 
-              mask[bgridmid<b2[i],i]=0
-              bmid=0.5*(b2[i]+b2[i+1])
-           sumi=sum(mask[:,i])
-           if sumi>0:
-              mask[:,i]=mask[:,i]/sumi
-           else:
-             # if no buoyancy levels falls between b[i] and b[i+1], find the closest b-level and put transport there:
-             idx = (np.abs(bgridmid-bmid)).argmin()  
-             mask[idx,i]=1.
-        transb=np.zeros(np.shape(bgridmid));
-        for i in range(0,len(bgridmid)):
-            transb[i]=np.sum(-udydz*mask[i,:])
-        return np.append([0],np.cumsum(transb))
+        psib=0.*self.bgrid;
+        bup_bot=b1[:-1].copy();bup_top=b1[1:].copy()
+        bup_bot[udydz<0]=b2[:-1][udydz<0];bup_top[udydz<0]=b2[1:][udydz<0];
+        for i in range(0,len(self.bgrid)):
+           mask=np.clip((bup_top-self.bgrid[i])/(bup_top-bup_bot),0.,1.)
+           psib[i]=np.sum(mask*udydz) 
+        return psib   
 
     
     def Psibz(self,nb=500):
