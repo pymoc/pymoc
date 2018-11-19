@@ -77,6 +77,13 @@ class SO_ML(object):
       # on non-outcropping isopycnals to the last non-zero value above 
       Psi_mod=Psi_b.copy();ind=np.nonzero(Psi_mod)[0][0]; Psi_mod[:ind]=Psi_mod[ind]
       self.Psi_s=np.interp(self.bs,b_basin,Psi_mod)
+      # The following makes sure that the circulation vanishes at latitudes
+      # south of the densest surface buoyancy in case of non-monotonicity
+      # of bs around Antarctica (a lense of lighter water around Antarctica 
+      # cannot connect to the channel and thus should have zero overturning.
+      # Notice, however, that the model is not generally designed to properly
+      # handle non-monotonic bs, so any such solution should treated with care)
+      self.Psi_s[:np.argmin(self.bs)]=0.;  
       self.Psi_s[0]=0.# This value doesn't actually enter/matter, but zero overturning
                          # at southern boundary makes more sense for diag purposes
     
