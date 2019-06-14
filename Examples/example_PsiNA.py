@@ -4,7 +4,7 @@ to solve for the overturning circulation, given the buoyancy profile
 in the basin and in the northern deep water formation region  
 '''
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from psi_thermwind import Psi_Thermwind
 import numpy as np
 from matplotlib import pyplot as plt

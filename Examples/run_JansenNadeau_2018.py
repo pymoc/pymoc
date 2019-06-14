@@ -14,7 +14,7 @@ options to set up the different experiments.
 
 
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from psi_thermwind import Psi_Thermwind
 from psi_SO import Psi_SO
 from SO_ML import SO_ML

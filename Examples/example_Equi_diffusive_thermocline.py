@@ -5,7 +5,7 @@ depth and urface and bottom buoyancies.
 '''
 
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from equi_column import Equi_Column
 from matplotlib import pyplot as plt
 

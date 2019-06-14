@@ -6,7 +6,7 @@ and two different values for the abyssal stratification
 '''
 
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from equi_column import Equi_Column
 import math
 import numpy as np

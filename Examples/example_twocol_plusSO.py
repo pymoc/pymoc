@@ -9,7 +9,7 @@ The parameters chosen here follow more or less the "control" experiment of Nikur
 and Vallis (2012, JPO).
 '''
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from psi_thermwind import Psi_Thermwind
 from psi_SO import Psi_SO
 from column import Column

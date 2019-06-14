@@ -5,7 +5,7 @@ for the diffusive overturning circulation in a basin
 '''
 
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from psi_thermwind import Psi_Thermwind
 from column import Column
 import numpy as np

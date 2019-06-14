@@ -9,7 +9,7 @@ with a real time-stepping, which allows us to analyze the transient approach
 in the equilibrium solution
 '''
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from psi_thermwind import Psi_Thermwind
 from column import Column
 import numpy as np

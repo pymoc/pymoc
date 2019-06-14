@@ -10,7 +10,7 @@ the mean depth of the respective isopycnal in the column.
 '''
 
 import sys
-sys.path.append('../Modules')
+sys.path.append('../src')
 from model_thermwind import Model_Thermwind
 from model_column import Model_Column
 import numpy as np
