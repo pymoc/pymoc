@@ -47,6 +47,9 @@ jobs:
       - run:
           name: run tests
           command: py.test -v
+      -run:
+          name: upload codecov report
+          command: codecov
 
       - store_artifacts:
           path: test-reports
