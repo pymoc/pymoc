@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ADD . /pymoc
+# ADD . /pymoc
 WORKDIR /pymoc
 
 RUN apt-get update -y && \
