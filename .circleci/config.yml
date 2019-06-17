@@ -47,7 +47,7 @@ jobs:
       - run:
           name: run tests
           command: py.test -v
-      -run:
+      - run:
           name: upload codecov report
           command: codecov
 
