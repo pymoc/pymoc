@@ -5,6 +5,7 @@ import pytest
 src_path = os.path.realpath(os.path.dirname(__file__))
 src_path = '/'.join(src_path.split('/')[0:-2]) + '/src/modules'
 sys.path.append(src_path)
+print(src_path)
 from column import Column
 
 @pytest.fixture(scope="module", params=[
