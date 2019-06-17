@@ -46,7 +46,7 @@ jobs:
       # https://nose.readthedocs.io
       - run:
           name: run tests
-          command: py.test -v
+          command: py.test -v --cov-report=xml
       - run:
           name: upload codecov report
           command: codecov
