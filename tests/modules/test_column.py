@@ -2,6 +2,7 @@ import sys
 import os
 import numpy as np
 import pytest
+from collections.abc import Iterable
 from pymoc.column import Column
 # src_path = os.path.realpath(os.path.dirname(__file__))
 # src_path = '/'.join(src_path.split('/')[0:-2]) + '/src/modules'
@@ -11,7 +12,12 @@ from pymoc.column import Column
 
 @pytest.fixture(scope="module", params=[
   { 'A': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },
-  {'A': None, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 }]
+  {'A': None, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },
+  { 'A': 6e13, 'z': None, 'kappa': 2e-5 },
+  { 'A': 6e13, 'z': 50, 'kappa': 2e-5 },
+  { 'A': 6e13, 'z': np.array([]), 'kappa': 2e-5 },
+  { 'A': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': None },
+]
 )
 def column_config(request):
   return request.param
@@ -19,22 +25,26 @@ def column_config(request):
 
 class TestColumn(object):
   def test_column_init(self, column_config):
+    init_col = lambda: Column(z=column_config['z'], kappa=column_config['kappa'], Area=column_config['A'])
     if not column_config['A']:
       with pytest.raises(TypeError) as areainfo:
-        print('bar')
-        column = Column(
-          z=column_config['z'],
-          kappa=column_config['kappa'],
-          Area=column_config['A']
-        )
+        init_col()
       assert(str(areainfo.value) == "('Area', 'needs to be either function, numpy array, or float')")
       return
 
-    column = Column(
-      z=column_config['z'],
-      kappa=column_config['kappa'],
-      Area=column_config['A']
-    )
+    if not column_config['kappa']:
+      with pytest.raises(TypeError) as kappainfo:
+        init_col()
+      assert(str(kappainfo.value) == "('kappa', 'needs to be either function, numpy array, or float')")
+      return
+
+    if not isinstance(column_config['z'], np.ndarray) or not len(column_config['z']):
+      with pytest.raises(TypeError) as zinfo:
+        init_col()
+      assert(str(zinfo.value) == "z needs to be numpy array providing grid levels")
+      return
+
+    column = init_col()
 
     assert hasattr(column, 'z')
     assert hasattr(column, 'kappa')

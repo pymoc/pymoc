@@ -29,7 +29,7 @@ class Column(object):
     ):
  
         # initialize grid:
-        if isinstance(z,np.ndarray):
+        if isinstance(z,np.ndarray) and len(z) > 0:
             self.z = z
         else:
             raise TypeError('z needs to be numpy array providing grid levels') 
