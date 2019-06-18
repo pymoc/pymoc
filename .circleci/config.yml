@@ -49,7 +49,7 @@ jobs:
           command: python src/setup.py install
       - run:
           name: run tests
-          command: py.test -v --cov-report=xml --cov=column
+          command: py.test -v --cov-report=xml --cov=pymoc
       - run:
           name: upload codecov report
           command: codecov
