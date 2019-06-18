@@ -1,2 +1,2 @@
 [run]
-ignore = test/*
+omit = test/*
