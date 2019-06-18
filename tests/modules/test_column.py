@@ -2,11 +2,12 @@ import sys
 import os
 import numpy as np
 import pytest
-src_path = os.path.realpath(os.path.dirname(__file__))
-src_path = '/'.join(src_path.split('/')[0:-2]) + '/src/modules'
-sys.path.append(src_path)
-print(src_path)
-from column import Column
+from pymoc.column import Column
+# src_path = os.path.realpath(os.path.dirname(__file__))
+# src_path = '/'.join(src_path.split('/')[0:-2]) + '/src/modules'
+# sys.path.append(src_path)
+# print(src_path)
+# from column import Column
 
 @pytest.fixture(scope="module", params=[
   { 'A': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },

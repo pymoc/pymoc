@@ -45,6 +45,9 @@ jobs:
       # https://pytest.org
       # https://nose.readthedocs.io
       - run:
+          name: install pymoc
+          command: python src/setup.py install
+      - run:
           name: run tests
           command: py.test -v --cov-report=xml --cov=column
       - run:
