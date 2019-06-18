@@ -15,7 +15,7 @@ jobs:
           command: python src/setup.py install
       - run:
           name: run tests
-          command: py.test -v --cov=./
+          command: py.test -v --cov=pymoc --cov-report=xml
       - run:
           name: upload codecov report
           command: codecov
