@@ -1,14 +1,11 @@
 import sys
 import os
+import inspect
+import pprint as pp
 import numpy as np
 import pytest
 from collections.abc import Iterable
 from pymoc.column import Column
-# src_path = os.path.realpath(os.path.dirname(__file__))
-# src_path = '/'.join(src_path.split('/')[0:-2]) + '/src/modules'
-# sys.path.append(src_path)
-# print(src_path)
-# from column import Column
 
 @pytest.fixture(scope="module", params=[
   { 'A': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },
@@ -54,4 +51,8 @@ class TestColumn(object):
     assert hasattr(column, 'bbot')
     assert hasattr(column, 'bzbot')
     assert hasattr(column, 'N2min')
+
+    column_signature = inspect.signature(Column)
+    for k in ['bs', 'bbot', 'bzbot', 'N2min']:
+      assert getattr(column, k)  == (column_config[k] if k in column_config and column_config[k] else column_signature.parameters[k].default)
   
