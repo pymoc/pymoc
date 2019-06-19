@@ -14,34 +14,34 @@ from pymoc.column import Column
   { 'Area': 6e13, 'z': 50, 'kappa': 2e-5 },
   { 'Area': 6e13, 'z': np.array([]), 'kappa': 2e-5 },
   { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': None },
-]
-)
+  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 },
+  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'b': np.arange(0.0, 8.0, 0.1) },
+])
+
 def column_config(request):
   return request.param
-  # return Column(z=request.param['z'], kappa=Grequest.param['kappa'], Area=request.param['A'])
 
 class TestColumn(object):
   def test_column_init(self, column_config):
-    init_col = lambda: Column(z=column_config['z'], kappa=column_config['kappa'], Area=column_config['Area'])
     if not column_config['Area']:
       with pytest.raises(TypeError) as areainfo:
-        init_col()
+        Column(**column_config)
       assert(str(areainfo.value) == "('Area', 'needs to be either function, numpy array, or float')")
       return
 
     if not column_config['kappa']:
       with pytest.raises(TypeError) as kappainfo:
-        init_col()
+        Column(**column_config)
       assert(str(kappainfo.value) == "('kappa', 'needs to be either function, numpy array, or float')")
       return
 
     if not isinstance(column_config['z'], np.ndarray) or not len(column_config['z']):
       with pytest.raises(TypeError) as zinfo:
-        init_col()
+        Column(**column_config)
       assert(str(zinfo.value) == "z needs to be numpy array providing grid levels")
       return
 
-    column = init_col()
+    column = Column(**column_config)
 
     # The constructor assigns all expected properties
     assert hasattr(column, 'z')
@@ -63,7 +63,7 @@ class TestColumn(object):
     # The constructor initializes all vector properties
     # Uses explicit property if present, or the default
     assert all(column.z == column_config['z'])
-    assert all(column.b  == column.make_array(column_config['b'] if 'b' in column_config and column_config['b'] else column_signature.parameters['b'].default, 'b'))
+    assert all(column.b  == column.make_array(column_config['b'] if 'b' in column_config and not column_config['b'] is None else column_signature.parameters['b'].default, 'b'))
 
     # The constructor initializes all z-dependent callable properties
     # Uses explicit property if present, or the default
