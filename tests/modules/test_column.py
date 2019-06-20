@@ -80,5 +80,12 @@ class TestColumn(object):
     myst = np.arange(0.0, 8.0, 0.1)
     for z in column.z:
       assert column.make_func(myst, 'myst')(z) == np.interp(z, column.z, myst)
+    myst = 6.0
+    for z in column.z:
+      assert column.make_func(myst, 'myst')(z) == myst
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      column.make_func(myst, 'myst')
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
 
   
