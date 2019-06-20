@@ -72,4 +72,13 @@ class TestColumn(object):
       ft = column.make_func(column_config[k], k)
       for z in column.z:
         assert f(z) == ft(z)
+
+  def test_make_func(self):
+    column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 }) 
+    myst = lambda: 42
+    assert column.make_func(myst, 'myst')() == myst()
+    myst = np.arange(0.0, 8.0, 0.1)
+    for z in column.z:
+      assert column.make_func(myst, 'myst')(z) == np.interp(z, column.z, myst)
+
   
