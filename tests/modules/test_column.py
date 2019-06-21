@@ -125,4 +125,19 @@ class TestColumn(object):
     col = Column(z=z, Area=Area, kappa=kappa)
     for z in column.z:
       assert col.Akappa(z) == Area(z) * kappa(z)
-  
+
+  def test_bc(self):
+    column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 })
+    ya = [column.b[0], column.bz[0]]
+    yb = [column.b[-1], column.bz[-1]]
+    bc = column.bc(ya, yb) 
+    assert np.round(bc[0], decimals=2)  == -0.01
+    assert np.round(bc[1], decimals=2)  == -0.02
+
+    column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'b': 0.03, 'N2min': 2e-7 })
+    ya = [column.b[0], column.bz[0]]
+    yb = [column.b[-1], column.bz[-1]]
+    bc = column.bc(ya, yb) 
+    assert np.round(bc[0], decimals=2)  == 0.01
+    assert np.round(bc[1], decimals=2)  == -0.02
+      

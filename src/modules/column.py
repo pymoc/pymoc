@@ -106,8 +106,9 @@ class Column(object):
     def solve_equi(self,wA):
         #Solve for equilibrium solution given vert. vel profile and BCs
         self.wA=self.make_func(wA,'w')
-        sol_init = np.zeros((2, np.size(self.z)));
-        sol_init[0,:] = self.b;sol_init[1,:] = self.bz;
+        sol_init = np.zeros((2, np.size(self.z)))
+        sol_init[0,:] = self.b
+        sol_init[1,:] = self.bz
         res = integrate.solve_bvp(self.ode, self.bc, self.z, sol_init)
         # interpolate solution for b and db/dz onto original grid
         self.b = res.sol(self.z)[0, :]  
