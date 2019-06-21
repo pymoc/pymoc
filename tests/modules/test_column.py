@@ -114,6 +114,15 @@ class TestColumn(object):
     for z in column.z:
       assert col.Akappa(z) == Area(z) * kappa(z)
 
-  def test_dAkappa_dz(self):
-    assert 1
+  def test_dAkappa_dz(self, column):
+    # Constant area and kappa
+    for z in column.z:
+      assert column.dAkappa_dz(z) == np.gradient(column.Area(0) * column.kappa(0), z)
+    # variable area and kappa
+    z = column.z
+    Area = lambda l: float(column.Area(0)) / float(l + 1)
+    kappa = lambda l: float(column.kappa(0)) * float(l + 1)
+    col = Column(z=z, Area=Area, kappa=kappa)
+    for z in column.z:
+      assert col.Akappa(z) == Area(z) * kappa(z)
   
