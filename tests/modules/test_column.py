@@ -101,4 +101,19 @@ class TestColumn(object):
     with pytest.raises(TypeError) as mystinfo:
       column.make_array(myst, 'myst')
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+
+  def test_Akappa(self, column):
+    # Constant area and kappa
+    for z in column.z:
+      assert column.Akappa(z) == column.Area(0) * column.kappa(0)
+    # variable area and kappa
+    z = column.z
+    Area = lambda l: float(column.Area(0)) / float(l + 1)
+    kappa = lambda l: float(column.kappa(0)) * float(l + 1)
+    col = Column(z=z, Area=Area, kappa=kappa)
+    for z in column.z:
+      assert col.Akappa(z) == Area(z) * kappa(z)
+
+  def test_dAkappa_dz(self):
+    assert 1
   
