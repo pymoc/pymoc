@@ -17,9 +17,12 @@ from pymoc.column import Column
   { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 },
   { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'b': np.arange(0.0, 8.0, 0.1) },
 ])
-
 def column_config(request):
   return request.param
+
+@pytest.fixture(scope="module")
+def column(request):
+  return Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 }) 
 
 class TestColumn(object):
   def test_column_init(self, column_config):
@@ -73,8 +76,7 @@ class TestColumn(object):
       for z in column.z:
         assert f(z) == ft(z)
 
-  def test_make_func(self):
-    column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 }) 
+  def test_make_func(self, column):
     myst = lambda: 42
     assert column.make_func(myst, 'myst')() == myst()
     myst = np.arange(0.0, 8.0, 0.1)
@@ -87,5 +89,16 @@ class TestColumn(object):
     with pytest.raises(TypeError) as mystinfo:
       column.make_func(myst, 'myst')
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
-
+  
+  def test_make_array(self, column):
+    myst = np.arange(0.0, 8.0, 0.1)
+    assert all(column.make_array(myst, 'myst') == myst)
+    myst = lambda n: 42 + n
+    assert all(column.make_array(myst, 'myst') == myst(column.z))
+    myst = 5.0
+    assert all(column.make_array(myst, 'myst') == 5.0 * np.ones((len(column.z))))
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      column.make_array(myst, 'myst')
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
   
