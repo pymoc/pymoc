@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=svg)](https://circleci.com/gh/pymoc/PyMOC/tree/master) [![codecov](https://codecov.io/gh/pymoc/pymoc/branch/master/graph/badge.svg)](https://codecov.io/gh/pymoc/pymoc)
-[![ReadTheDocs](https://readthedocs.org/projects/py-moc/badge/?style=flat)](https://py-mod.readthedocs.io)
+[![ReadTheDocs](https://readthedocs.org/projects/py-moc/badge/?style=flat)](https://py-moc.readthedocs.io)
 
 This repository is part of a project to develop a modular suite of  simple models
 for the the deep ocean stratification and MOC. The project is very much ongoing,
