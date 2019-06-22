@@ -22,7 +22,7 @@ def column_config(request):
 
 @pytest.fixture(scope="module")
 def column(request):
-  return Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 }) 
+  return Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 }) 
 
 class TestColumn(object):
   def test_column_init(self, column_config):
@@ -141,3 +141,6 @@ class TestColumn(object):
     assert np.round(bc[0], decimals=2)  == 0.01
     assert np.round(bc[1], decimals=2)  == -0.02
       
+  def test_ode(self, column):
+    column.wA = np.sin
+    print((column.ode(column.z, [column.b, column.bz]) == np.vstack((column.bz, (np.sin(column.z) - column.dAkappa_dz(column.z)) / column.Akappa(column.z) * column.bz))).all())
