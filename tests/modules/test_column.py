@@ -3,6 +3,7 @@ import os
 import inspect
 import pprint as pp
 import numpy as np
+from scipy import integrate
 import pytest
 from collections.abc import Iterable
 from pymoc.column import Column
@@ -144,3 +145,12 @@ class TestColumn(object):
   def test_ode(self, column):
     column.wA = np.sin
     print((column.ode(column.z, [column.b, column.bz]) == np.vstack((column.bz, (np.sin(column.z) - column.dAkappa_dz(column.z)) / column.Akappa(column.z) * column.bz))).all())
+
+  def test_solve_equi(self):
+    column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 })
+    column.wA = np.sin
+    sol = integrate.solve_bvp(column.ode, column.bc, column.z, [column.b, column.bz])
+    sol_values = sol.sol(column.z)
+    column.solve_equi(column.wA)
+    assert all(np.around(column.b, decimals=2) == np.around(np.asarray(np.linspace(-39.95, 0.05, 80)), decimals=2))
+    assert all(np.around(column.bz, decimals=2) == np.around(sol_values[1,:], decimals=2))
