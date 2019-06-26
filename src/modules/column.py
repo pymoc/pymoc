@@ -71,41 +71,41 @@ class Column(object):
         else:
             raise TypeError(name,'needs to be either function, numpy array, or float') 
     
-    def make_array(self,myst,name):
-    # turn mysterious object into array(if needed)    
-        if isinstance(myst,np.ndarray):
-            return myst
-        elif callable(myst):
-            return myst(self.z)
-        elif isinstance(myst,float):
-            return myst+0*self.z
-        else:
-            raise TypeError(name,'needs to be either function, numpy array, or float') 
+    def make_array(self, myst, name):
+      # turn mysterious object into array(if needed)    
+      if isinstance(myst, np.ndarray):
+        return myst
+      elif callable(myst):
+        return myst(self.z)
+      elif isinstance(myst, float):
+        return myst + 0 * self.z
+      else:
+        raise TypeError(name, 'needs to be either function, numpy array, or float') 
     
-    def Akappa(self,z):
-        return self.Area(z)*self.kappa(z)
+    def Akappa(self, z):
+      return self.Area(z)*self.kappa(z)
     
-    def dAkappa_dz(self,z):
-        if not self.check_numpy_version():
-            raise ImportError('You need NumPy version 1.13.0 or later. Please upgrade your NumPy libary.')
-        return np.gradient(self.Akappa(z), z)
+    def dAkappa_dz(self, z):
+      if not self.check_numpy_version():
+        raise ImportError('You need NumPy version 1.13.0 or later. Please upgrade your NumPy libary.')
+      return np.gradient(self.Akappa(z), z)
     
     
     def bc(self, ya, yb):
-        #return the boundary conditions
-        if self.bzbot is None:
-            return np.array([ya[0]-self.bbot, yb[0]-self.bs])
-        else:
-            return np.array([ya[1]-self.bzbot, yb[0]-self.bs])
+      #return the boundary conditions
+      if self.bzbot is None:
+        return np.array([ya[0] - self.bbot, yb[0] - self.bs])
+      else:
+        return np.array([ya[1] - self.bzbot, yb[0] - self.bs])
         
     
     def ode(self, z, y):
         #return the equation to be solved 
-        return np.vstack((y[1], (self.wA(z)-self.dAkappa_dz(z))/self.Akappa(z)*y[1]))
+        return np.vstack((y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1]))
                          
     def solve_equi(self,wA):
         #Solve for equilibrium solution given vert. vel profile and BCs
-        self.wA=self.make_func(wA,'w')
+        self.wA = self.make_func(wA,'w')
         sol_init = np.zeros((2, np.size(self.z)))
         sol_init[0,:] = self.b
         sol_init[1,:] = self.bz
@@ -116,25 +116,29 @@ class Column(object):
         
     
     def vertadvdiff(self,wA,dt):
-        #upwind vert. adv. and diffusion
-        if not isinstance(wA,np.ndarray):
-           wA=self.make_array(wA,'wA')
-        dz=self.z[1:]-self.z[0:-1];
-        # apply boundary conditions:        
-        self.b[-1]=self.bs;
-        if self.bzbot is None:
-            self.b[0]=self.bbot;
-        else:
-            self.b[0]=self.b[1]-self.bzbot*dz[0]       
-        bz=(self.b[1:]-self.b[0:-1])/dz;
-        bz_up=bz[1:];bz_down=bz[0:-1];
-        bzz=(bz_up-bz_down)/(0.5*(dz[1:]+dz[0:-1]))
-        #upwind advection: 
-        weff=wA-self.dAkappa_dz(self.z)
-        bz=bz_down; bz[weff[1:-1]<0]=bz_up[weff[1:-1]<0];      
-        dbdt=(-(weff[1:-1])*bz/self.Area(self.z[1:-1])
-              +self.kappa(self.z[1:-1])*bzz)
-        self.b[1:-1]=self.b[1:-1]+dt*dbdt
+      #upwind vert. adv. and diffusion
+      wA = self.make_array(wA,'wA')
+      dz = self.z[1:] - self.z[:-1]
+
+      # apply boundary conditions:        
+      self.b[-1] = self.bs
+      self.b[0] = self.bbot if self.bzbot is None else self.b[1] - self.bzbot*dz[0]
+
+      bz = (self.b[1:] - self.b[:-1]) / dz
+      bz_up = bz[1:]
+      bz_down = bz[:-1]
+      bzz = (bz_up - bz_down) / (0.5*(dz[1:] + dz[:-1]))
+
+      #upwind advection: 
+      weff = wA - self.dAkappa_dz(self.z)
+      bz = bz_down
+      bz[weff[1:-1] < 0] = bz_up[weff[1:-1] < 0]      
+
+      db_dt = (
+        -weff[1:-1] * bz / self.Area(self.z[1:-1])
+        + self.kappa(self.z[1:-1]) * bzz
+      )
+      self.b[1:-1] = self.b[1:-1]+dt*db_dt
         
     
     def convect(self):

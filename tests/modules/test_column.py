@@ -144,7 +144,7 @@ class TestColumn(object):
       
   def test_ode(self, column):
     column.wA = np.sin
-    print((column.ode(column.z, [column.b, column.bz]) == np.vstack((column.bz, (np.sin(column.z) - column.dAkappa_dz(column.z)) / column.Akappa(column.z) * column.bz))).all())
+    assert (column.ode(column.z, [column.b, column.bz]) == np.vstack((column.bz, (np.sin(column.z) - column.dAkappa_dz(column.z)) / column.Akappa(column.z) * column.bz))).all()
 
   def test_solve_equi(self):
     column = Column(**{ 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 })
@@ -154,3 +154,28 @@ class TestColumn(object):
     column.solve_equi(column.wA)
     assert all(np.around(column.b, decimals=2) == np.around(np.asarray(np.linspace(-39.95, 0.05, 80)), decimals=2))
     assert all(np.around(column.bz, decimals=2) == np.around(sol_values[1,:], decimals=2))
+
+  def test_vertadvdiff(self):
+    z = np.asarray(np.linspace(-4000, 0, 80))
+    # For constant kappa, bottom stratification provided, negative weff
+    column = Column(**{ 'Area': 6e13, 'z': z, 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 })
+    wA = np.sin(z)
+    b = column.b.copy()
+    dt = 0.1
+    dz = 50.63291139 * np.ones(len(b) - 1)
+    b[-1] = 0.05
+    b[0] = b[1] - 0.01 * 50.63291139
+    bz = (b[1:] - b[:-1]) / dz
+    bz_up = bz[1:]
+    bz_down = bz[:-1]
+    bzz = (bz_up - bz_down) / (0.5*(dz[1:] + dz[:-1]))
+    weff = wA - column.dAkappa_dz(column.z)
+    bz = bz_down
+    bz[weff[1:-1] < 0] = bz_up[weff[1:-1] < 0]      
+    db_dt = (
+      -weff[1:-1] * bz / 6e13
+      + 2e-5 * bzz
+    )
+    b[1:-1] = b[1:-1]+dt*db_dt
+    column.vertadvdiff(wA, dt)
+    assert all(np.around(column.b, decimals=4) == np.around(b, decimals=4))
