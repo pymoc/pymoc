@@ -16,7 +16,7 @@ from pymoc.column import Column
   { 'Area': 6e13, 'z': np.array([]), 'kappa': 2e-5 },
   { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': None },
   { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 },
-  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'b': np.arange(0.0, 8.0, 0.1) },
+  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'b': np.linspace(0.03, -0.001, 80) },
 ])
 def column_config(request):
   return request.param
@@ -156,26 +156,24 @@ class TestColumn(object):
     assert all(np.around(column.bz, decimals=2) == np.around(sol_values[1,:], decimals=2))
 
   def test_vertadvdiff(self):
+    dt=60*86400
+
+    Area = 6e13
     z = np.asarray(np.linspace(-4000, 0, 80))
-    # For constant kappa, bottom stratification provided, negative weff
-    column = Column(**{ 'Area': 6e13, 'z': z, 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 })
-    wA = np.sin(z)
-    b = column.b.copy()
-    dt = 0.1
-    dz = 50.63291139 * np.ones(len(b) - 1)
-    b[-1] = 0.05
-    b[0] = b[1] - 0.01 * 50.63291139
-    bz = (b[1:] - b[:-1]) / dz
-    bz_up = bz[1:]
-    bz_down = bz[:-1]
-    bzz = (bz_up - bz_down) / (0.5*(dz[1:] + dz[:-1]))
-    weff = wA - column.dAkappa_dz(column.z)
-    bz = bz_down
-    bz[weff[1:-1] < 0] = bz_up[weff[1:-1] < 0]      
-    db_dt = (
-      -weff[1:-1] * bz / 6e13
-      + 2e-5 * bzz
-    )
-    b[1:-1] = b[1:-1]+dt*db_dt
+    kappa = 2e-5
+    b = np.linspace(0.03, -0.002, 80)
+    bs = 0.03
+    bbot = -0.002
+    wA = Area * np.sin(z)
+    db_dz = 0.0004 / 50.0
+    d2b_dz2 = 0
+    dkappa_dz = 0
+    dArea_dz = 0
+    db_dt1 = (db_dz/Area) * (-wA + Area*dkappa_dz + kappa*dArea_dz) + kappa*d2b_dz2
+
+    column = Column(z=z, Area=Area, kappa=kappa, b=b.copy(), bbot=bbot, bs=bs)
     column.vertadvdiff(wA, dt)
-    assert all(np.around(column.b, decimals=4) == np.around(b, decimals=4))
+
+    assert all(np.around(column.b[2:-2], decimals=3) == np.around(b[2:-2] - dt*db_dt1[2:-2], decimals=3))
+
+
