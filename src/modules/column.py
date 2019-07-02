@@ -148,8 +148,8 @@ class Column(object):
         # it also assumes a fixed surface buoyancy BC, and hence any
         # surface heat flux that's required to adjust the buoyancy of the
         # convecting column:
-        ind=self.b>self.b[-1]+self.N2min*self.z
-        self.b[ind]=self.b[-1]+self.N2min*self.z[ind]
+        ind = self.b > self.b[-1] + self.N2min*self.z
+        self.b[ind] = self.b[-1] + self.N2min*self.z[ind]
         # Below is an energy conserving version that could be used 
         # for model formulations without fixed surface b. But for fixed surface
         # b, the simpler version above is preferable as it deals better with long time steps

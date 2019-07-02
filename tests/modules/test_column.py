@@ -175,5 +175,16 @@ class TestColumn(object):
     column.vertadvdiff(wA, dt)
 
     assert all(np.around(column.b[2:-2], decimals=3) == np.around(b[2:-2] - dt*db_dt1[2:-2], decimals=3))
+  
+  def test_convect(self):
+    N2min = 1.5e-7
+    z = np.asarray([-4000.0, -1000.0, -100.0, 0.0])
+    b = np.asarray([-0.03, 0.01, -0.0025, -0.002])
+
+    column = Column(z=z, b=b.copy(), N2min=N2min, kappa=2e-5, Area=6e13)
+    b[1] = b[-1] + N2min * z[1]
+    
+    column.convect()
+    assert(all(column.b == b))
 
 
