@@ -167,9 +167,11 @@ class Column(object):
         # into the column (units m^2/s, sign positive for velocity into the column)
         vdx_in = self.make_array(vdx_in,'vdx_in')  
         b_in = self.make_array(b_in,'b_in')  
-        self.b[vdx_in > 0.] = (self.b[vdx_in > 0.] +
-                       dt*vdx_in[vdx_in > 0.]*(b_in[vdx_in > 0.] - self.b[vdx_in > 0.])
-                       / self.Area(self.z[vdx_in > 0.]) )
+
+        adv_idx = vdx_in > 0.0
+        db = b_in - self.b
+
+        self.b[adv_idx] = self.b[adv_idx] + dt*vdx_in[adv_idx]*db[adv_idx] / self.Area(self.z[adv_idx])
         
     
     def timestep(self,wA=0.,dt=1.,do_conv=False,vdx_in=None,b_in=None):
