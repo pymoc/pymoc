@@ -187,4 +187,16 @@ class TestColumn(object):
     column.convect()
     assert(all(column.b == b))
 
+  def test_horadv(self):
+    z = np.asarray([-4000.0, -1000.0, -100.0, 0.0])
+    b = np.asarray([-0.03, 0.01, -0.0025, -0.002])
+    column = Column(z=z, b=b.copy(), kappa=2e-5, Area=6e13)
 
+    vdx_in = np.asarray([2e8, 2.5e8, 0.0, 0.0])
+    b_in = np.asarray([-0.02, 0.01, -0.001, 0.001])
+    dt=60*86400
+
+    b[0] = -0.03 + dt * 2e6 / 6e13
+    column.horadv(vdx_in, b_in, dt)
+
+    assert(all(np.around(column.b, decimals=4) == np.around(b, decimals=4)))

@@ -165,11 +165,11 @@ class Column(object):
         # upwind horizontal advection:
         # notice that vdx_in is the total transport per unit height
         # into the column (units m^2/s, sign positive for velocity into the column)
-        vdx_in=self.make_array(vdx_in,'vdx_in')  
-        b_in=self.make_array(b_in,'b_in')  
-        self.b[vdx_in>0.]=(self.b[vdx_in>0.]+
-                       dt*vdx_in[vdx_in>0.]*(b_in[vdx_in>0.]-self.b[vdx_in>0.])
-                       /self.Area(self.z[vdx_in>0.]) )
+        vdx_in = self.make_array(vdx_in,'vdx_in')  
+        b_in = self.make_array(b_in,'b_in')  
+        self.b[vdx_in > 0.] = (self.b[vdx_in > 0.] +
+                       dt*vdx_in[vdx_in > 0.]*(b_in[vdx_in > 0.] - self.b[vdx_in > 0.])
+                       / self.Area(self.z[vdx_in > 0.]) )
         
     
     def timestep(self,wA=0.,dt=1.,do_conv=False,vdx_in=None,b_in=None):
