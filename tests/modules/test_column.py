@@ -8,14 +8,52 @@ from collections.abc import Iterable
 from pymoc.column import Column
 
 @pytest.fixture(scope="module", params=[
-  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },
-  { 'Area': None, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5 },
-  { 'Area': 6e13, 'z': None, 'kappa': 2e-5 },
-  { 'Area': 6e13, 'z': 50, 'kappa': 2e-5 },
-  { 'Area': 6e13, 'z': np.array([]), 'kappa': 2e-5 },
-  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': None },
-  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'bs': 0.05, 'bbot': 0.02, 'bzbot': 0.01, 'b': 0.03, 'N2min': 2e-7 },
-  { 'Area': 6e13, 'z': np.asarray(np.linspace(-4000, 0, 80)), 'kappa': 2e-5, 'b': np.linspace(0.03, -0.001, 80) },
+  {
+    'Area': 6e13,
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'kappa': 2e-5
+  },
+  {
+    'Area': None,
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'kappa': 2e-5
+  },
+  {
+    'Area': 6e13,
+    'z': None,
+    'kappa': 2e-5
+  },
+  {
+    'Area': 6e13,
+    'z': 50,
+    'kappa': 2e-5
+  },
+  {
+    'Area': 6e13,
+    'z': np.array([]),
+    'kappa': 2e-5
+  },
+  {
+    'Area': 6e13,
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'kappa': None
+  },
+  {
+    'Area': 6e13,
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'kappa': 2e-5,
+    'bs': 0.05,
+    'bbot': 0.02,
+    'bzbot': 0.01,
+    'b': 0.03,
+    'N2min': 2e-7
+  },
+  {
+    'Area': 6e13,
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'kappa': 2e-5,
+    'b': np.linspace(0.03, -0.001, 80)
+  },
 ])
 def column_config(request):
   return request.param
