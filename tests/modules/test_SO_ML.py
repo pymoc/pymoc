@@ -17,6 +17,9 @@ from pymoc.SO_ML import SO_ML
     'bs': 0.02
   },
   {
+    'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+  },
+  {
     'y': None,
   },
   {
