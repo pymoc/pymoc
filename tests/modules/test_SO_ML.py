@@ -25,6 +25,3 @@ class TestSO_ML(object):
     with pytest.raises(TypeError) as info:
       so_ml.solve_equi()
     assert(str(info.value) == "This functionality is not yet implemented")
-
-  def test_timestep(self):
-    
