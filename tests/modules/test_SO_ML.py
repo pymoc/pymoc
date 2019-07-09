@@ -38,6 +38,18 @@ class TestSO_ML(object):
       assert(str(yinfo.value) == "y needs to be numpy array providing (regular) grid")
       return
 
+    so_ml = SO_ML(**so_ml_config)
+    for k in ['y', 'Ks', 'h', 'L', 'surflux', 'rest_mask', 'b_rest', 'v_pist', 'Psi_s', 'bs']:
+      assert hasattr(so_ml, k)
+
+    so_ml_signature = inspect.signature(SO_ML)
+
+    for k in ['Ks', 'h', 'L', 'v_pist', 'Psi_s']:
+      assert getattr(so_ml, k)  == (so_ml_config[k] if k in so_ml_config and so_ml_config[k] else so_ml_signature.parameters[k].default)
+
+    for k in ['surflux', 'rest_mask', 'b_rest', 'bs']:
+      assert all(getattr(so_ml, k)  == so_ml.make_array((so_ml_config[k] if k in so_ml_config and so_ml_config[k] else so_ml_signature.parameters[k].default), k))
+
   def test_make_array(self, so_ml):
     myst = np.arange(0.0, 8.0, 0.1)
     assert all(so_ml.make_array(myst, 'myst') == myst)

@@ -85,14 +85,8 @@ class TestColumn(object):
     column = Column(**column_config)
 
     # The constructor assigns all expected properties
-    assert hasattr(column, 'z')
-    assert hasattr(column, 'kappa')
-    assert hasattr(column, 'Area')
-    assert hasattr(column, 'b')
-    assert hasattr(column, 'bs')
-    assert hasattr(column, 'bbot')
-    assert hasattr(column, 'bzbot')
-    assert hasattr(column, 'N2min')
+    for k in ['z', 'kappa', 'Area', 'b', 'bs', 'bbot', 'bzbot', 'N2min']:
+      assert hasattr(column, k)
 
     column_signature = inspect.signature(Column)
 
