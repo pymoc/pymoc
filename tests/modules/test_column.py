@@ -1,7 +1,6 @@
 import sys
 import os
 import inspect
-import pprint as pp
 import numpy as np
 from scipy import integrate
 import pytest
