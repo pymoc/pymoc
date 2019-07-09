@@ -200,3 +200,43 @@ class TestColumn(object):
     column.horadv(vdx_in, b_in, dt)
 
     assert(all(np.around(column.b, decimals=4) == np.around(b, decimals=4)))
+
+  def test_timestep(self):
+    Area = 6e13
+    z = np.asarray(np.linspace(-4000, 0, 80))
+    b = np.linspace(0.03, -0.002, 80)
+    vdx_in = np.asarray([2e8 for n in z])
+    b_in = np.asarray([-0.02 for n in z])
+    wA = Area * np.sin(z)
+    dt=60*86400
+
+    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1.timestep(wA=wA, dt=dt)
+    column2.vertadvdiff(wA=wA, dt=dt)
+    assert(all(column1.b == column2.b))
+    column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
+    column2.convect()
+    assert(any(column1.b != column2.b))
+    
+    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in)
+    column2.vertadvdiff(wA=wA, dt=dt)
+    column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
+    assert(all(column1.b == column2.b))
+    column2.convect()
+    assert(any(column1.b != column2.b))
+
+    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in, do_conv=True)
+    column2.vertadvdiff(wA=wA, dt=dt)
+    column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
+    column2.convect()
+    assert(all(column1.b == column2.b))
+
+    column = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    with pytest.raises(TypeError) as binfo:
+      column.timestep(wA=wA, dt=dt, vdx_in=vdx_in)
+    assert(str(binfo.value) == "b_in is needed if vdx_in is provided")
