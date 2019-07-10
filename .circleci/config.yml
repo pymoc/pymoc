@@ -23,11 +23,14 @@ jobs:
           name: run tests
           command: py.test -v --cov=pymoc --cov-report=xml
       - run:
-          name: format codeclimate coverage report
-          command: ./cc-test-reporter format-coverage -t coverage.py coverage.xml 
-      - run:
-          name: upload codeclimate coverage report
-          command: ./cc-test-reporter upload-coverage
+          name: codeclimate post-build hooks
+          command:  ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
+#      - run:
+#          name: format codeclimate coverage report
+#          command: ./cc-test-reporter format-coverage -t coverage.py coverage.xml 
+#      - run:
+#          name: upload codeclimate coverage report
+#          command: ./cc-test-reporter upload-coverage
       - run:
           name: upload codecov report
           command: codecov
