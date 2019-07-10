@@ -1,8 +1,10 @@
 import pytest
+import sys
 import inspect
 import numpy as np
 from scipy import integrate
-from pymoc.SO_ML import SO_ML
+sys.path.append('/pymoc/src/modules')
+from SO_ML import SO_ML
 
 @pytest.fixture(scope="module", params=[
   {

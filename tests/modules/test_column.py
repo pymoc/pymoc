@@ -4,8 +4,10 @@ import inspect
 import numpy as np
 from scipy import integrate
 import pytest
+import sys
 from collections.abc import Iterable
-from pymoc.column import Column
+sys.path.append('/pymoc/src/modules')
+from column import Column
 
 @pytest.fixture(scope="module", params=[
   {

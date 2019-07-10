@@ -21,7 +21,7 @@ jobs:
           command: ./cc-test-reporter before-build
       - run:
           name: run tests
-          command: py.test -v --cov=pymoc
+          command: py.test -v --cov=pymoc --cov-report=xml
       - run:
           name: codeclimate post-build hooks
           command:  ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
