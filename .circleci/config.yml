@@ -25,7 +25,7 @@ jobs:
       - run:
           name: format codeclimate coverage report
           command: ./cc-test-reporter format-coverage -t coverage.py -o ./.coverage coverage.xml 
-      -run:
+      - run:
           name: upload codeclimate coverage report
           command: ./cc-test-reporter upload-coverage
       - run:
