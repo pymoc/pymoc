@@ -69,3 +69,34 @@ class TestSO_ML(object):
     with pytest.raises(TypeError) as info:
       so_ml.solve_equi()
     assert(str(info.value) == "This functionality is not yet implemented")
+
+  def test_timestep(self, so_ml_config):
+    dt=60*86400
+    conf = {
+      'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+      'Ks': 100,
+      'h': 50,
+      'L': 4e6,
+      'surflux': 5.9e3,
+      'rest_mask': 0.0,
+      'b_rest': 0.0,
+      'v_pist': 2.0/86400.0,
+      'bs': 0.02
+    }
+    b_basin = np.linspace(0.03, -0.002, 80)
+    Psi_b = np.linspace(4.0e6, 0, 80)
+    so_ml1 = SO_ML(**conf)
+    so_ml2 = SO_ML(**conf)
+
+    with pytest.raises(TypeError) as info:
+      so_ml1.timestep(dt=dt, Psi_b=Psi_b)
+    assert(str(info.value) == 'b_basin needs to be numpy array providing buoyancy levels in basin')
+
+    with pytest.raises(TypeError) as info:
+      so_ml1.timestep(dt=dt, b_basin=b_basin)
+    assert(str(info.value) == 'Psi_b needs to be numpy array providing overturning at buoyancy levels given by b_basin')
+
+    so_ml1.timestep(dt=dt, b_basin=b_basin, Psi_b=Psi_b)
+    so_ml2.advdiff(b_basin=b_basin, Psi_b=Psi_b, dt=dt)
+    assert(all(so_ml1.bs == so_ml2.bs))
+    assert(all(so_ml1.Psi_s == so_ml2.Psi_s))

@@ -159,7 +159,7 @@ class SO_ML(object):
         #Integrate buoyancy profile evolution for one time-step
         if not isinstance(b_basin,np.ndarray):
             raise TypeError('b_basin needs to be numpy array providing buoyancy levels in basin') 
-        
+       
         if not isinstance(Psi_b,np.ndarray):
             raise TypeError('Psi_b needs to be numpy array providing overturning at buoyancy levels given by b_basin') 
    
