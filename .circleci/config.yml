@@ -24,7 +24,7 @@ jobs:
           command: py.test -v --cov=pymoc --cov-report=xml
       - run:
           name: format codeclimate coverage report
-          command: ./cc-test-reporter format-coverage -t coverage.py -o ./.coverage coverage.xml 
+          command: ./cc-test-reporter format-coverage -t coverage.py coverage.xml 
       - run:
           name: upload codeclimate coverage report
           command: ./cc-test-reporter upload-coverage
