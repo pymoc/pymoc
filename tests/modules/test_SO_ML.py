@@ -100,3 +100,21 @@ class TestSO_ML(object):
     so_ml2.advdiff(b_basin=b_basin, Psi_b=Psi_b, dt=dt)
     assert(all(so_ml1.bs == so_ml2.bs))
     assert(all(so_ml1.Psi_s == so_ml2.Psi_s))
+
+  def test_advdiff(self):
+    dt=60*86400
+    conf = {
+      'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+      'Ks': 100,
+      'h': 50,
+      'L': 4e6,
+      'surflux': 5.9e3,
+      'rest_mask': 0.0,
+      'b_rest': 0.0,
+      'v_pist': 2.0/86400.0,
+      'bs': 0.02
+    }
+    b_basin = np.linspace(0.03, -0.002, 80)
+    Psi_b = np.linspace(4.0e6, 0, 80)
+    so_ml = SO_ML(**conf)
+

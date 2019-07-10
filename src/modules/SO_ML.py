@@ -80,9 +80,9 @@ class SO_ML(object):
       # on non-outcropping isopycnals to the last non-zero value above 
       Psi_mod = Psi_b.copy()
       ind = np.nonzero(Psi_mod)[0][0]
-      Psi_mod[:ind]=Psi_mod[ind]
+      Psi_mod[:ind] = Psi_mod[ind]
 
-      self.Psi_s=np.interp(self.bs,b_basin,Psi_mod)
+      self.Psi_s = np.interp(self.bs,b_basin,Psi_mod)
 
       # The following makes sure that the circulation vanishes at latitudes
       # south of the densest surface buoyancy in case of non-monotonicity
@@ -96,7 +96,7 @@ class SO_ML(object):
     
       #set boundary conditions:
       self.bs[-1] = b_basin[-1]
-      if self.Psi_s[1]>0:
+      if self.Psi_s[1] > 0:
           # set buoyancy at southern boundary to buoyancy of densest upwelling water
           self.bs[0] = b_basin[np.argwhere(Psi_b>0)[0][0]]
       else:
@@ -107,12 +107,12 @@ class SO_ML(object):
       dbdt_flux = self.surflux/self.h + self.rest_mask*self.v_pist/self.h*(self.b_rest - self.bs);
 
       # Compute advective tendency via upwind advection
-      dy = self.y[1]-self.y[0] # Notice that the current implementation assumes an evenly spaced grid!
+      dy = self.y[1] - self.y[0] # Notice that the current implementation assumes an evenly spaced grid!
       dbdt_ad = 0.*self.y;
-      indneg = self.Psi_s[1:-1]<0.;
-      indpos = self.Psi_s[1:-1]>0.;
-      dbdt_ad[1:-1][indneg] = -self.Psi_s[1:-1][indneg]*1e6*(self.bs[2:][indneg]-self.bs[1:-1][indneg])/self.h/self.L/dy
-      dbdt_ad[1:-1][indpos] = -self.Psi_s[1:-1][indpos]*1e6*(self.bs[1:-1][indpos]-self.bs[:-2][indpos])/self.h/self.L/dy
+      indneg = self.Psi_s[1:-1] < 0.;
+      indpos = self.Psi_s[1:-1] > 0.;
+      dbdt_ad[1:-1][indneg] = -self.Psi_s[1:-1][indneg] * 1e6 * (self.bs[2:][indneg] - self.bs[1:-1][indneg]) / self.h / self.L / dy
+      dbdt_ad[1:-1][indpos] = -self.Psi_s[1:-1][indpos] * 1e6 * (self.bs[1:-1][indpos] - self.bs[:-2][indpos]) / self.h / self.L / dy
        
       # add tendencies from surface flux and advection
       self.bs = self.bs+dt*(dbdt_flux + dbdt_ad)       
@@ -128,14 +128,14 @@ class SO_ML(object):
       # Do implicit diffusion:
       s = self.Ks*dt/dy**2
 
-      U = (np.diag(-s/2.*np.ones(len(self.y)-1), -1) + np.diag((1+s)*np.ones(len(self.y)), 0) + np.diag(-s/2.*np.ones(len(self.y)-1), 1))
+      U = (np.diag(-s/2.*np.ones(len(self.y) - 1), -1) + np.diag((1 + s)*np.ones(len(self.y)), 0) + np.diag(-s/2.*np.ones(len(self.y) - 1), 1))
       U[0,0] = 1
       U[0,1] = 0
       U[-1,-2] = 0
       U[-1,-1] = 1
       Uinv=np.linalg.inv(U)
 
-      V = (np.diag(s/2.*np.ones(len(self.y)-1), -1) + np.diag((1-s)*np.ones(len(self.y)), 0) + np.diag(s/2.*np.ones(len(self.y)-1), 1))
+      V = (np.diag(s/2.*np.ones(len(self.y) - 1), -1) + np.diag((1 - s)*np.ones(len(self.y)), 0) + np.diag(s/2.*np.ones(len(self.y) - 1), 1))
       V[0,0] = 1
       V[0,1] = 0
       V[-1,-2] = 0

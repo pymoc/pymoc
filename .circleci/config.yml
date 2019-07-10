@@ -14,8 +14,20 @@ jobs:
           name: install pymoc
           command: python src/setup.py install
       - run:
+          name: setup codeclimate reporter
+          command: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporterI
+      - run:
+          name: codeclimate pre-build hooks
+          command: ./cc-test-reporter before-build
+      - run:
           name: run tests
           command: py.test -v --cov=pymoc --cov-report=xml
+      - run:
+          name: format codeclimate coverage report
+          command: ./cc-test-reporter format-coverage -t coverage.py -o ./.coverage coverage.xml 
+      -run:
+          name: upload codeclimate coverage report
+          command: ./cc-test-reporter upload-coverage
       - run:
           name: upload codecov report
           command: codecov
