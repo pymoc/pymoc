@@ -26,10 +26,10 @@ class Psi_SO(object):
             HEk=None,       # depth of surface Ekman layer
             Htapertop=None, # A quadratic tapering of the GM streamfunction at the surface
             Htaperbot=None, # A quadratic tapering of the GM streamfunction at the bottom
+            smax=0.01,      # maximum slope for clipping of GM streamfunction
             Psi_Ek=None,    # eulerian overturning streamfunction (array, out) 
             Psi_GM=None,    # GM-type eddy overturning streamfunction (array, out) 
             Psi=None,       # residual overturning streamfunction (array, out)
-            smax=0.01,      # maximum slope for clipping of GM streamfunction
     ):
  
         # initialize grid:

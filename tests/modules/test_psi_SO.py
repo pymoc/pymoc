@@ -51,14 +51,11 @@ from psi_SO import Psi_SO
   #   'L':
   #   'KGM':
   #   'c':
-  #   'bvp_with_EK':
+  #   'bvp_with_EskK':
   #   'Hsill':
   #   'HEk':
   #   'Htapertop':
   #   'Htaperbot':
-  #   'Psi_Ek':
-  #   'Psi_GM':
-  #   'Psi':
   #   'smax':
   # }
 ])
@@ -78,6 +75,7 @@ class TestPsi_SO(object):
       assert(str(yinfo.value) == "y needs to be numpy array providing horizontal grid (or boundaries) of ACC")
       return
 
+    # Implicit exceptions thrown if these params are missing, should change these to explicit checks
     for k in ['b', 'bs', 'tau']:
       if not k in psi_so_config:
         with pytest.raises(TypeError) as kinfo:
@@ -85,7 +83,9 @@ class TestPsi_SO(object):
         assert(str(kinfo.value) == "('" + k + "', 'needs to be either function, numpy array, or float')")
         return
 
-
     psi_so = Psi_SO(**psi_so_config)
+    for k in ['z', 'y', 'b', 'bs', 'tau', 'f', 'rho', 'L', 'KGM', 'c', 'bvp_with_Ek', 'Hsill', 'HEk', 'Htapertop', 'Htaperbot', 'smax']:
+      assert hasattr(psi_so, k)
+
     psi_so_signature = inspect.signature(Psi_SO)
     assert 1
