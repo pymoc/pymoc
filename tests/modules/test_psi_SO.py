@@ -68,7 +68,7 @@ def psi_so(request):
     'z': np.asarray(np.linspace(-4000, 0, 80)),
     'y': np.asarray(np.linspace(0, 2.0e6, 51)),
     'b': np.linspace(0.03, -0.001, 80),
-    'bs': 0.05,
+    'bs': np.linspace(0.05, 0.10, 51),
     'tau': 0.12
   })
 
@@ -127,3 +127,9 @@ class TestPsi_SO(object):
     with pytest.raises(TypeError) as mystinfo:
       psi_so.make_func(psi_so.z, myst, 'myst')
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+
+    def test_ys(self, psi_so):
+      assert(psi_so.ys(0.02) == psi_so.y[0] - 1e3)
+      assert(psi_so.ys(0.2) == psi_so.y[-1])
+      for i in range(len(psi_so.y)):
+        assert(psi_so.ys(psi_so.bs(psi_so.y[i])) == psi_so.y[i])

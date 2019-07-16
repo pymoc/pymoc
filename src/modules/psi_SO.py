@@ -73,22 +73,24 @@ class Psi_SO(object):
             raise TypeError(name,'needs to be either function, numpy array, or float') 
     
     
-    def ys(self,b):
+    def ys(self, b):
         # inverse of bs(y)
-        def func(y): return self.bs(y)-b
-        if b<np.min(self.bs(self.y)):
-           # if b is smaller minimum bs, isopycnals don't outcrop and get handled separately
-            return self.y[0]-1e3
-        if b>self.bs(self.y[-1]):
-            # if b is larger than bs at northern end, return northernmost point:
-            return self.y[-1]
+        def func(y):
+          return self.bs(y) - b
+
+        if b < np.min(self.bs(self.y)):
+          # if b is smaller minimum bs, isopycnals don't outcrop and get handled separately
+           return self.y[0] - 1e3
+        if b > self.bs(self.y[-1]):
+          # if b is larger than bs at northern end, return northernmost point:
+          return self.y[-1]
         else:
-            # if b in range of bs return ys(b):
-            # Notice that this inversion is well defined only if bs is monotonically
-            # increasing (past minind). Should probably add a check to make sure
-            # this is the case...
-            minind=np.argmin(self.bs(self.y))
-            return optimize.brentq(func,self.y[minind],self.y[-1])
+          # if b in range of bs return ys(b):
+          # Notice that this inversion is well defined only if bs is monotonically
+          # increasing (past minind). Should probably add a check to make sure
+          # this is the case...
+          minind = np.argmin(self.bs(self.y))
+          return optimize.brentq(func, self.y[minind], self.y[-1])
           
     def calc_N2(self):
         dz=self.z[1:]-self.z[:-1];
