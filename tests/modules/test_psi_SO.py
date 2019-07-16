@@ -62,6 +62,16 @@ from psi_SO import Psi_SO
 def psi_so_config(request):
   return request.param
 
+@pytest.fixture(scope="module")
+def psi_so(request):
+  return Psi_SO(**{
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+    'b': np.linspace(0.03, -0.001, 80),
+    'bs': 0.05,
+    'tau': 0.12
+  })
+
 class TestPsi_SO(object):
   def test_psi_so_init(self, psi_so_config):
     if not 'z' in psi_so_config or not isinstance(psi_so_config['z'], np.ndarray) or not len(psi_so_config['z']):
@@ -103,3 +113,17 @@ class TestPsi_SO(object):
       ft = psi_so.make_func(psi_so_config['y'], psi_so_config[k], k)
       for y in psi_so.y:
         assert f(y) == ft(y)
+
+  def test_make_func(self, psi_so):
+    myst = lambda: 42
+    assert psi_so.make_func(psi_so.z, myst, 'myst')() == myst()
+    myst = np.arange(0.0, 8.0, 0.1)
+    for z in psi_so.z:
+      assert psi_so.make_func(psi_so.z, myst, 'myst')(z) == np.interp(z, psi_so.z, myst)
+    myst = 6.0
+    for y in psi_so.y:
+      assert psi_so.make_func(psi_so.y, myst, 'myst')(y) == myst
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      psi_so.make_func(psi_so.z, myst, 'myst')
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
