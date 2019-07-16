@@ -128,8 +128,8 @@ class TestPsi_SO(object):
       psi_so.make_func(psi_so.z, myst, 'myst')
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
 
-    def test_ys(self, psi_so):
-      assert(psi_so.ys(0.02) == psi_so.y[0] - 1e3)
-      assert(psi_so.ys(0.2) == psi_so.y[-1])
-      for i in range(len(psi_so.y)):
-        assert(psi_so.ys(psi_so.bs(psi_so.y[i])) == psi_so.y[i])
+  def test_ys(self, psi_so):
+    assert(np.round(psi_so.ys(0.02), decimals=3) == np.round(psi_so.y[0] - 1e3, decimals=3))
+    assert(np.round(psi_so.ys(0.2), decimals=3) == np.round(psi_so.y[-1], decimals=3))
+    for i in range(len(psi_so.y)):
+      assert(np.round(psi_so.ys(psi_so.bs(psi_so.y[i])), decimals=3) == np.round(psi_so.y[i], decimals=3))
