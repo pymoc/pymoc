@@ -88,4 +88,18 @@ class TestPsi_SO(object):
       assert hasattr(psi_so, k)
 
     psi_so_signature = inspect.signature(Psi_SO)
-    assert 1
+    
+    for k in ['f', 'rho', 'L', 'KGM', 'c', 'bvp_with_Ek', 'Hsill', 'HEk', 'Htapertop', 'Htaperbot', 'smax']:
+      assert getattr(psi_so, k)  == (psi_so_config[k] if k in psi_so_config and psi_so_config[k] else psi_so_signature.parameters[k].default)
+
+    for k in ['b']:
+      f = getattr(psi_so, k)
+      ft = psi_so.make_func(psi_so_config['z'], psi_so_config[k], k)
+      for z in psi_so.z:
+        assert f(z) == ft(z)
+
+    for k in ['bs', 'tau']:
+      f = getattr(psi_so, k)
+      ft = psi_so.make_func(psi_so_config['y'], psi_so_config[k], k)
+      for y in psi_so.y:
+        assert f(y) == ft(y)
