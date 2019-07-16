@@ -93,13 +93,15 @@ class Psi_SO(object):
           return optimize.brentq(func, self.y[minind], self.y[-1])
           
     def calc_N2(self):
-        dz=self.z[1:]-self.z[:-1];
-        N2=np.zeros(np.size(self.z))
-        b=self.b(self.z)
-        N2[1:-1]=(b[2:]-b[:-2])/(dz[1:]+dz[:-1])
-        N2[0]=(b[1]-b[0])/dz[0]
-        N2[-1]=(b[-1]-b[-2])/dz[-1]
-        return self.make_func(self.z,N2,'N2')
+        dz = self.z[1:] - self.z[:-1];
+        N2 = np.zeros(np.size(self.z))
+        b = self.b(self.z)
+
+        N2[1:-1] = (b[2:] - b[:-2])/(dz[1:] + dz[:-1])
+        N2[0] = (b[1] - b[0])/dz[0]
+        N2[-1] = (b[-1] - b[-2])/dz[-1]
+
+        return self.make_func(self.z, N2, 'N2')
     
     def calc_Ekman(self):
         # compute Ekman transport on z grid

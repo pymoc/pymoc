@@ -133,3 +133,8 @@ class TestPsi_SO(object):
     assert(np.round(psi_so.ys(0.2), decimals=3) == np.round(psi_so.y[-1], decimals=3))
     for i in range(len(psi_so.y)):
       assert(np.round(psi_so.ys(psi_so.bs(psi_so.y[i])), decimals=3) == np.round(psi_so.y[i], decimals=3))
+
+  def test_calc_N2(self, psi_so):
+    N2 = (psi_so.b(psi_so.z[1]) - psi_so.b(psi_so.z[0])) / (psi_so.z[1] - psi_so.z[0])
+    for z in psi_so.z:
+      assert(np.round(psi_so.calc_N2()(z), decimals=10) == np.round(N2, decimals=10))
