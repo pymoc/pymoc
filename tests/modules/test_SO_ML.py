@@ -104,8 +104,8 @@ class TestSO_ML(object):
     assert(all(so_ml1.Psi_s == so_ml2.Psi_s))
 
   def test_advdiff(self):
-    # dt=60*86400
-    dt=60
+    dt=60*86400
+    # dt=60
     y = np.asarray(np.linspace(0, 2.0e6, 51))
     z = np.asarray(np.linspace(-4000, 0, 80))
     tau=0.12
