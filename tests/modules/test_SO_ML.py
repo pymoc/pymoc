@@ -104,19 +104,40 @@ class TestSO_ML(object):
     assert(all(so_ml1.Psi_s == so_ml2.Psi_s))
 
   def test_advdiff(self):
-    dt=60*86400
+    # dt=60*86400
+    dt=60
+    y = np.asarray(np.linspace(0, 2.0e6, 51))
+    z = np.asarray(np.linspace(-4000, 0, 80))
+    tau=0.12
+    Ks = 100
+    L = 4e6
+    h = 50
+    surflux = 5.9e3
+    dtheta_dy = 2.0*np.pi/2.0e6
+    b_basin = np.asarray([0.02*(n / 2.0e6)**2 for n in y])
+    bs = np.asarray([b_basin[-1] * np.cos(n*dtheta_dy) for n in y])
     conf = {
-      'y': np.asarray(np.linspace(0, 2.0e6, 51)),
-      'Ks': 100,
-      'h': 50,
-      'L': 4e6,
-      'surflux': 5.9e3,
+      'y': y,
+      'Ks': Ks,
+      'h': h,
+      'L': L,
+      'surflux': surflux,
       'rest_mask': 0.0,
       'b_rest': 0.0,
       'v_pist': 2.0/86400.0,
-      'bs': 0.02
+      'bs': bs
     }
-    b_basin = np.linspace(0.03, -0.002, 80)
-    Psi_b = np.linspace(4.0e6, 0, 80)
+
+    Psi_b = np.asarray(np.linspace(1e4, 2.0e4, 51))
     so_ml = SO_ML(**conf)
+
+    # Explicity calculate the analytical solution fo the above setup
+    dbs_dy = np.asarray([-dtheta_dy * b_basin[-1] * np.sin(n*dtheta_dy) for n in y])
+    d2bs_dy2 = np.asarray([-dtheta_dy**2 * b_basin[-1] * np.cos(n*dtheta_dy) for n in y])
+    db = -((Psi_b/(h*L))*dbs_dy + Ks*d2bs_dy2 + surflux/h) * dt
+
+
+    b = -(so_ml.bs.copy() + db)
+    so_ml.advdiff(b_basin, Psi_b, dt)
+    assert(all([np.abs(b[i] - so_ml.bs[i]) / b[i] < 0.05 for i in range(len(b))]))
 
