@@ -44,14 +44,20 @@ class Psi_SO(object):
             raise TypeError('y needs to be numpy array providing horizontal grid (or boundaries) of ACC') 
         
             
-        self.b=self.make_func(self.z,b,'b')     
-        self.bs=self.make_func(self.y,bs,'bs')     
-        self.tau=self.make_func(self.y,tau,'tau')     
-        self.f=f; self.rho=rho; self.L=L; self.KGM=KGM
-        self.c=c; self.bvp_with_Ek=bvp_with_Ek
-        self.Hsill=Hsill;self.HEk=HEk
-        self.Htapertop=Htapertop; self.Htaperbot=Htaperbot
-        self.smax=smax
+        self.b = self.make_func(self.z,b,'b')     
+        self.bs = self.make_func(self.y,bs,'bs')     
+        self.tau = self.make_func(self.y,tau,'tau')     
+        self.f = f
+        self.rho = rho
+        self.L = L
+        self.KGM = KGM
+        self.c = c
+        self.bvp_with_Ek = bvp_with_Ek
+        self.Hsill = Hsill
+        self.HEk = HEk
+        self.Htapertop = Htapertop
+        self.Htaperbot = Htaperbot
+        self.smax = smax
     
     def make_func(self,xi,myst,name):
     # turn mysterious object into callable function (if needed)    
