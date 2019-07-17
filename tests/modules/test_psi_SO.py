@@ -138,3 +138,9 @@ class TestPsi_SO(object):
     N2 = (psi_so.b(psi_so.z[1]) - psi_so.b(psi_so.z[0])) / (psi_so.z[1] - psi_so.z[0])
     for z in psi_so.z:
       assert(np.round(psi_so.calc_N2()(z), decimals=10) == np.round(N2, decimals=10))
+
+  def test_Ekman(self, psi_so):
+    ekman = (psi_so.L * 0.12) / (psi_so.f * psi_so.rho)
+    ekman = [ekman for _ in range(len(psi_so.z))]
+    ekman[-1] = 0
+    assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
