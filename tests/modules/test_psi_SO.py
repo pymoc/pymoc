@@ -65,9 +65,9 @@ def psi_so_config(request):
 @pytest.fixture(scope="module")
 def psi_so(request):
   return Psi_SO(**{
-    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'z': np.asarray(np.linspace(-4000, 0, 81)),
     'y': np.asarray(np.linspace(0, 2.0e6, 51)),
-    'b': np.linspace(0.03, -0.001, 80),
+    'b': np.linspace(0.03, -0.001, 81),
     'bs': np.linspace(0.05, 0.10, 51),
     'tau': 0.12
   })
@@ -117,7 +117,7 @@ class TestPsi_SO(object):
   def test_make_func(self, psi_so):
     myst = lambda: 42
     assert psi_so.make_func(psi_so.z, myst, 'myst')() == myst()
-    myst = np.arange(0.0, 8.0, 0.1)
+    myst = np.arange(0.0, 8.1, 0.1)
     for z in psi_so.z:
       assert psi_so.make_func(psi_so.z, myst, 'myst')(z) == np.interp(z, psi_so.z, myst)
     myst = 6.0
@@ -152,9 +152,26 @@ class TestPsi_SO(object):
     y = np.asarray(np.linspace(0, 2e6, 51))
     z = np.asarray(np.linspace(-4000, 0, 21))
     tau = np.asarray(np.linspace(0.2, 0.12, 51))
-    psi_so = Psi_SO(y=y, z=z, b=b, bs=bs, tau=tau)
+    psi = Psi_SO(y=y, z=z, b=b, bs=bs, tau=tau)
     tau_ave = np.zeros((len(z)))
     tau_ave[0:11] = tau[-1]
     tau_ave[11:-1] = [np.mean(tau[-i*5 - 1:]) for i in range(1, 10)]
-    ekman = psi_so.L*tau_ave/(psi_so.f*psi_so.rho)
-    assert(all(np.around(psi_so.calc_Ekman(), decimals=3) == np.around(ekman, decimals=3)))
+    ekman = psi.L*tau_ave/(psi.f*psi.rho)
+    assert(all(np.around(psi.calc_Ekman(), decimals=3) == np.around(ekman, decimals=3)))
+
+    # With sill tapering
+    psi_so.Hsill = 1000.0
+    ekman = (psi_so.L * 0.12) / (psi_so.f * psi_so.rho)
+    ekman = [ekman for _ in range(len(psi_so.z))]
+    ekman[:20] = [ekman[-1] * (1 - (-3000 - z)**2/1.0e6) for z in psi_so.z[:20]]
+    ekman[-1] = 0
+    assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
+    psi_so.Hsill = None
+
+    # With constrained ekman layer
+    psi_so.HEk = 200
+    ekman = (psi_so.L * 0.12) / (psi_so.f * psi_so.rho)
+    ekman = [ekman for _ in range(len(psi_so.z))]
+    ekman[77:] = [ekman[0] * (1 - (z + 200.0)**2/4.0e4) for z in psi_so.z[77:]]
+    assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
+    psi_so.HEk = None
