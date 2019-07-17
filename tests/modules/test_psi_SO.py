@@ -140,7 +140,21 @@ class TestPsi_SO(object):
       assert(np.round(psi_so.calc_N2()(z), decimals=10) == np.round(N2, decimals=10))
 
   def test_Ekman(self, psi_so):
+    # Constant wind stress
     ekman = (psi_so.L * 0.12) / (psi_so.f * psi_so.rho)
     ekman = [ekman for _ in range(len(psi_so.z))]
     ekman[-1] = 0
     assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
+
+    # Variable wind stress
+    b = np.asarray(np.linspace(0.03, 0.01, 21))
+    bs = np.asarray(np.linspace(0.01, 0.02, 51))
+    y = np.asarray(np.linspace(0, 2e6, 51))
+    z = np.asarray(np.linspace(-4000, 0, 21))
+    tau = np.asarray(np.linspace(0.2, 0.12, 51))
+    psi_so = Psi_SO(y=y, z=z, b=b, bs=bs, tau=tau)
+    tau_ave = np.zeros((len(z)))
+    tau_ave[0:11] = tau[-1]
+    tau_ave[11:-1] = [np.mean(tau[-i*5 - 1:]) for i in range(1, 10)]
+    ekman = psi_so.L*tau_ave/(psi_so.f*psi_so.rho)
+    assert(all(np.around(psi_so.calc_Ekman(), decimals=3) == np.around(ekman, decimals=3)))

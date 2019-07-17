@@ -107,15 +107,15 @@ class Psi_SO(object):
         # compute Ekman transport on z grid
         # based on average wind stress between outcrop and northern end of channel 
         tau_ave = 0*self.z
-        for ii in range(0,np.size(self.z)):
+        for ii in range(0, np.size(self.z)):
            y0 = self.ys(self.b(self.z[ii])) # outcrop latitude
-           tau_ave[ii] =  np.mean(self.tau(np.linspace(y0,self.y[-1], 100)))
+           tau_ave[ii] =  np.mean(self.tau(np.linspace(y0, self.y[-1], 100)))
         if self.Hsill is not None:
-           silltaper = 1.-np.maximum(self.z[0]+self.Hsill-self.z,0.)**2./self.Hsill**2.
+           silltaper = 1. - np.maximum(self.z[0] + self.Hsill - self.z, 0.)**2./self.Hsill**2.
         else:
            silltaper = 1.
         if self.HEk is not None: 
-           Ektaper = 1-np.maximum(self.z+self.HEk,0)**2./self.HEk**2.
+           Ektaper = 1 - np.maximum(self.z + self.HEk, 0)**2./self.HEk**2.
         else:
            Ektaper = np.ones(np.size(self.z))
            Ektaper[-1] = 0.
