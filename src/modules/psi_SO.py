@@ -121,45 +121,43 @@ class Psi_SO(object):
            Ektaper[-1] = 0.
         return tau_ave/self.f/self.rho*self.L*silltaper*Ektaper   
     
-    
     def calc_GM(self):
         # compute GM ransport on z grid
         # based on average isopycnal slope
         dy_atz = 0*self.z
-        eps=0.1 # minimum dy (in meters) (to avoid div. by 0)
-        for ii in range(0,np.size(self.z)):
-           dy_atz[ii]=max(self.y[-1]-self.ys(self.b(self.z[ii])),eps)
+        eps = 0.1 # minimum dy (in meters) (to avoid div. by 0)
+        for ii in range(0, np.size(self.z)):
+           dy_atz[ii] = max(self.y[-1] - self.ys(self.b(self.z[ii])), eps)
         if self.Htaperbot is not None:
-           bottaper=1.-np.maximum(self.z[0]+self.Htaperbot-self.z,0.)**2./self.Htaperbot**2.
+           bottaper = 1. - np.maximum(self.z[0] + self.Htaperbot - self.z, 0.)**2./self.Htaperbot**2.
         else:
-           bottaper=1.
+           bottaper = 1.
         if self.Htapertop is not None:
-           toptaper=1-np.maximum(self.z+self.Htapertop,0)**2./self.Htapertop**2.
+           toptaper = 1 - np.maximum(self.z + self.Htapertop, 0)**2./self.Htapertop**2.
         else:
-           toptaper=1.
+           toptaper = 1.
         if self.c is not None:
-           temp=self.make_func(self.z,self.KGM*self.z/dy_atz*self.L*toptaper*bottaper,'psiGM')
-           N2=self.calc_N2()
+           temp = self.make_func(self.z, self.KGM*self.z/dy_atz*self.L*toptaper*bottaper, 'psiGM')
+           N2 = self.calc_N2()
            if self.bvp_with_Ek:
               def bc(ya, yb):
-                  return np.array([ya[0]+self.Psi_Ek[0]*1e6, yb[0]+self.Psi_Ek[-1]*1e6]) 
+                  return np.array([ya[0] + self.Psi_Ek[0]*1e6, yb[0] + self.Psi_Ek[-1]*1e6]) 
            else:    
               def bc(ya, yb): return np.array([ya[0], yb[0]])
            def ode(z, y): 
-              return np.vstack((y[1], N2(z)/self.c**2.*(y[0] -temp(z))))
+              return np.vstack((y[1], N2(z)/self.c**2.*(y[0] - temp(z))))
            #Solve the boundary value problem
            res = integrate.solve_bvp(ode, bc, self.z, np.zeros((2, np.size(self.z))))
            # return solution interpolated onto original grid        
-           temp= res.sol(self.z)[0, :]
+           temp = res.sol(self.z)[0, :]
         else:
-           temp= self.KGM*np.maximum(self.z/dy_atz,-self.smax)*self.L*toptaper*bottaper
+           temp = self.KGM*np.maximum(self.z/dy_atz, -self.smax)*self.L*toptaper*bottaper
         # limit Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
-        temp[dy_atz>self.y[-1]-self.y[0]]=np.maximum(
-             temp[dy_atz>self.y[-1]-self.y[0]],
-            -self.Psi_Ek[dy_atz>self.y[-1]-self.y[0]]*1e6)
+        temp[dy_atz > self.y[-1] - self.y[0]] = np.maximum(
+             temp[dy_atz > self.y[-1] - self.y[0]],
+            -self.Psi_Ek[dy_atz > self.y[-1] - self.y[0]]*1e6)
         return temp
                         
-    
     def solve(self):
         #Solve for overturning circ.
         self.Psi_Ek=self.calc_Ekman()/1e6;

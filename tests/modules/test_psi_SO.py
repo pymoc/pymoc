@@ -175,3 +175,10 @@ class TestPsi_SO(object):
     ekman[77:] = [ekman[0] * (1 - (z + 200.0)**2/4.0e4) for z in psi_so.z[77:]]
     assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
     psi_so.HEk = None
+
+  def test_calc_GM(self, psi_so):
+    # Test constant isopycnal sloping
+    dy_atz = 2001000.0
+    GM = [psi_so.L*psi_so.KGM*z/dy_atz for z in psi_so.z]
+    psi_so.Psi_Ek = psi_so.calc_Ekman()
+    assert(all(np.around(dz_dy, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
