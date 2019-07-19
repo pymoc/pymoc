@@ -181,4 +181,4 @@ class TestPsi_SO(object):
     dy_atz = 2001000.0
     GM = [psi_so.L*psi_so.KGM*z/dy_atz for z in psi_so.z]
     psi_so.Psi_Ek = psi_so.calc_Ekman()
-    assert(all(np.around(dz_dy, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
