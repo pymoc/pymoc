@@ -186,13 +186,22 @@ class TestPsi_SO(object):
     # Test that isopycnals behave well when they don't outcrop
     dy_atz = 0.1
     psi_so.b = psi_so.make_func(psi_so.z, np.linspace(0.3, 0.2, 81), 'b')
+    GM = [-psi_so.L*psi_so.KGM*psi_so.smax for z in psi_so.z]
+    GM[-1] = 0
+    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+
+    # Test maximum isopycnal slope limit
+    dy_atz = 2001000.0
+    psi_so.smax = -0.01
+    psi_so.b = psi_so.make_func(psi_so.z, np.linspace(0.03, -0.001, 81), 'b')
+    GM = [psi_so.L*psi_so.KGM*0.01 for _ in psi_so.z]
+    psi_so.Psi_Ek = psi_so.calc_Ekman()
+    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+
     # eps = 0.1 # minimum dy (in meters) (to avoid div. by 0)
     # for ii in range(0, np.size(psi_so.z)):
     #   dy_atz[ii] = max(psi_so.y[-1] - psi_so.ys(psi_so.b(psi_so.z[ii])), eps)
     # print(dy_atz)
-    GM = [-psi_so.L*psi_so.KGM*psi_so.smax for z in psi_so.z]
-    GM[-1] = 0
-    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
     # GM[dy_atz > psi_so.y[-1] - psi_so.y[0]]jk = np.maximum(
     #       GM[dy_atz > psi_so.y[-1] - psi_so.y[0]],
     #     -psi_so.Psi_Ek[dy_atz > psi_so.y[-1] - psi_so.y[0]]*1e6)
