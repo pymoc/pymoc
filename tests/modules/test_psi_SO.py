@@ -176,7 +176,7 @@ class TestPsi_SO(object):
     assert(all(np.around(ekman, decimals=3) == np.around(psi_so.calc_Ekman(), decimals=3)))
     psi_so.HEk = None
 
-  def test_calc_GM(self, psi_so):
+  def test_calc_GM_no_bvp(self, psi_so):
     # Test constant isopycnal sloping
     dy_atz = 2001000.0
     GM = [psi_so.L*psi_so.KGM*z/dy_atz for z in psi_so.z]
@@ -198,6 +198,26 @@ class TestPsi_SO(object):
     psi_so.Psi_Ek = psi_so.calc_Ekman()
     assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
 
+    # Test quadratic bottom tapering of streamfunction
+    psi_so.smax = 0.01
+    psi_so.Htaperbot = 800.0
+    dy_atz = 2001000.0
+    GM = [psi_so.L*psi_so.KGM*z/dy_atz for z in psi_so.z]
+    GM[0:17] = [(1.0 - (-3200.0 - psi_so.z[i])**2/6.4e5)*GM[i] for i in range(0,17)] 
+    psi_so.Psi_Ek = psi_so.calc_Ekman()
+    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+    psi_so.Htaperbot = None
+
+    # Test quadratic top tapering of streamfunction
+    psi_so.smax = 0.01
+    psi_so.Htapertop = 500.0
+    dy_atz = 2001000.0
+    GM = [psi_so.L*psi_so.KGM*z/dy_atz for z in psi_so.z]
+    GM[-11:] = [(1.0 - (500.0 + psi_so.z[i])**2/2.5e5)*GM[i] for i in range(70,81)] 
+    psi_so.Psi_Ek = psi_so.calc_Ekman()
+    assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+    psi_so.Htapertop = None
+
     # Test ekman streamfunction limiting for non-outcropping isopycnals
     psi_so = Psi_SO(**{
       'z': np.asarray(np.linspace(-4000, 0, 81)),
@@ -212,6 +232,8 @@ class TestPsi_SO(object):
     psi_ek = np.asarray([gm + np.abs(gm/2.0) for gm in GM])
     psi_so.Psi_Ek = psi_ek
     assert(all(np.around(-psi_ek*1e6, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
+
+
     # eps = 0.1 # minimum dy (in meters) (to avoid div. by 0)
     # for ii in range(0, np.size(psi_so.z)):
     #   dy_atz[ii] = max(psi_so.y[-1] - psi_so.ys(psi_so.b(psi_so.z[ii])), eps)
