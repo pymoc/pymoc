@@ -183,7 +183,7 @@ class TestPsi_SO(object):
     psi_so.Psi_Ek = psi_so.calc_Ekman()
     assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
 
-    # Test that isopycnals behave well when they don't outcrop
+    # Test minimum dy limit
     dy_atz = 0.1
     psi_so.b = psi_so.make_func(psi_so.z, np.linspace(0.3, 0.2, 81), 'b')
     GM = [-psi_so.L*psi_so.KGM*psi_so.smax for z in psi_so.z]
@@ -198,6 +198,20 @@ class TestPsi_SO(object):
     psi_so.Psi_Ek = psi_so.calc_Ekman()
     assert(all(np.around(GM, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
 
+    # Test ekman streamfunction limiting for non-outcropping isopycnals
+    psi_so = Psi_SO(**{
+      'z': np.asarray(np.linspace(-4000, 0, 81)),
+      'y': np.asarray(np.linspace(0, 2.0e3, 51)),
+      'b': np.linspace(0.03, -0.001, 81),
+      'bs': np.linspace(0.05, 0.10, 51),
+      'tau': 0.12
+    })
+    dy_atz = 2001000.0
+    GM = [-psi_so.L*psi_so.KGM*0.01 for _ in psi_so.z]
+    GM[-1] = 0
+    psi_ek = np.asarray([gm + np.abs(gm/2.0) for gm in GM])
+    psi_so.Psi_Ek = psi_ek
+    assert(all(np.around(-psi_ek*1e6, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
     # eps = 0.1 # minimum dy (in meters) (to avoid div. by 0)
     # for ii in range(0, np.size(psi_so.z)):
     #   dy_atz[ii] = max(psi_so.y[-1] - psi_so.ys(psi_so.b(psi_so.z[ii])), eps)
