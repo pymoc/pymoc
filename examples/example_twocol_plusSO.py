@@ -10,10 +10,10 @@ and Vallis (2012, JPO).
 '''
 import sys
 sys.path.append('../src')
-from psi_thermwind import Psi_Thermwind
-from psi_SO import Psi_SO
-from column import Column
-from interp_channel import Interpolate_channel
+from pymoc.psi_thermwind import Psi_Thermwind
+from pymoc.psi_SO import Psi_SO
+from pymoc.column import Column
+from pymoc.interp_channel import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
@@ -57,7 +57,11 @@ AMOC.solve()
 [Psi_iso_b,Psi_iso_n]=AMOC.Psibz()
 
 # create S.O. overturning model instance
-SO=Psi_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,f=1e-4,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=True)
+SO=Psi_SO(z=z,y=y,b=b_basin(z),bs=bs_SO,tau=tau,f=1e-4,L=5e6,KGM=1000.,c=0.1, bvp_with_Ek=False)
+SO.Psi_Ek = SO.calc_Ekman()/1e6
+gm = SO.calc_GM()
+plt.plot(gm, SO.z)
+plt.savefig('GM_ex.png')
 SO.solve()
 
 # create adv-diff column model instance for basin

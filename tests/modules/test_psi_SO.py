@@ -4,6 +4,7 @@ import sys
 import numpy as np
 sys.path.append('/pymoc/src/modules')
 from psi_SO import Psi_SO
+from matplotlib import pyplot as plt
 
 @pytest.fixture(scope="module", params=[
   {
@@ -233,16 +234,30 @@ class TestPsi_SO(object):
     psi_so.Psi_Ek = psi_ek
     assert(all(np.around(-psi_ek*1e6, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
 
+  def test_calc_GM_bvp(self, psi_so):
+    c = 1e3
+    h = -4000
+    Ly = 2.0e6
+    Lx = 5e6
+    K = 1.0e3
+    yso = -1.0e3
+    z = np.asarray(np.linspace(h, 0, 80))
+    psi_so = Psi_SO(**{
+    'z': z,
+    'y': np.asarray(np.linspace(0, Ly, 51)),
+    'b': np.linspace(0.03, -0.001, 80),
+    'bs': np.linspace(0.05, 0.04, 51),
+    # 'bs': 0.02,
+    'tau': 0.12,
+    'c': c,
+    'L': Lx,
+    'KGM': K
+    })
 
-    # eps = 0.1 # minimum dy (in meters) (to avoid div. by 0)
-    # for ii in range(0, np.size(psi_so.z)):
-    #   dy_atz[ii] = max(psi_so.y[-1] - psi_so.ys(psi_so.b(psi_so.z[ii])), eps)
-    # print(dy_atz)
-    # GM[dy_atz > psi_so.y[-1] - psi_so.y[0]]jk = np.maximum(
-    #       GM[dy_atz > psi_so.y[-1] - psi_so.y[0]],
-    #     -psi_so.Psi_Ek[dy_atz > psi_so.y[-1] - psi_so.y[0]]*1e6)
-    # GM = np.asarray(GM)
-    # print(GM)
-    # psi_so.Psi_Ek = psi_so.calc_Ekman()
-    # print(psi_so.Psi_Ek)
-    # print(psi_so.calc_GM())
+    psi_so.Psi_Ek = psi_so.calc_Ekman()/1e6
+    GM = psi_so.calc_GM()
+    N2 = psi_so.calc_N2()(z)
+    N = np.sqrt(np.abs(N2))
+    psio = K*Lx*h/((Ly - yso)*(np.exp(-N*h/c) - np.exp(N*h/c)))
+    psi = psio*(np.exp(N*z/c) - np.exp(-N*z/c)) + K*Lx*z/(Ly - yso)
+    assert(all(np.around(GM[1:-1], decimals=1) == np.around(-psi[1:-1], decimals=1)))
