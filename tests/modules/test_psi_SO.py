@@ -234,6 +234,36 @@ class TestPsi_SO(object):
     psi_so.Psi_Ek = psi_ek
     assert(all(np.around(-psi_ek*1e6, decimals=3) == np.around(psi_so.calc_GM(), decimals=3)))
 
+  def test_calc_GM_bvp_with_Ek(self, psi_so):
+    c = 1e3
+    h = -4000
+    Ly = 2.0e6
+    Lx = 5e6
+    K = 1.0e3
+    yso = -1.0e3
+    z = np.asarray(np.linspace(h, 0, 80))
+    psi_so = Psi_SO(**{
+      'z': z,
+      'y': np.asarray(np.linspace(0, Ly, 51)),
+      'b': np.linspace(0.03, -0.001, 80),
+      'bs': np.linspace(0.05, 0.04, 51),
+      'tau': 0.12,
+      'c': c,
+      'L': Lx,
+      'KGM': K,
+      'bvp_with_Ek': True
+    })
+
+    psi_Ek = psi_so.calc_Ekman()
+    psi_so.Psi_Ek = psi_Ek/1e6
+    psi_Ek = psi_Ek[0]
+    GM = psi_so.calc_GM()
+    N2 = psi_so.calc_N2()(z)
+    N = np.sqrt(np.abs(N2))
+    psio = (psi_Ek*np.exp(-N*h/c) + K*Lx*h/(Ly - yso))/(np.exp(-N*h/c) - np.exp(N*h/c))
+    psi = psio*(np.exp(N*z/c) - np.exp(-N*z/c)) + K*Lx*z/(Ly - yso)
+    assert(all([np.abs((GM[i] - psi[i])/GM[i]) < 0.025 for i in range(1, len(GM) - 1)]))
+
   def test_calc_GM_bvp(self, psi_so):
     c = 1e3
     h = -4000
@@ -243,15 +273,14 @@ class TestPsi_SO(object):
     yso = -1.0e3
     z = np.asarray(np.linspace(h, 0, 80))
     psi_so = Psi_SO(**{
-    'z': z,
-    'y': np.asarray(np.linspace(0, Ly, 51)),
-    'b': np.linspace(0.03, -0.001, 80),
-    'bs': np.linspace(0.05, 0.04, 51),
-    # 'bs': 0.02,
-    'tau': 0.12,
-    'c': c,
-    'L': Lx,
-    'KGM': K
+      'z': z,
+      'y': np.asarray(np.linspace(0, Ly, 51)),
+      'b': np.linspace(0.03, -0.001, 80),
+      'bs': np.linspace(0.05, 0.04, 51),
+      'tau': 0.12,
+      'c': c,
+      'L': Lx,
+      'KGM': K
     })
 
     psi_so.Psi_Ek = psi_so.calc_Ekman()/1e6
