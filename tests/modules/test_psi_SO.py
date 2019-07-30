@@ -40,25 +40,7 @@ from matplotlib import pyplot as plt
     'b': np.linspace(0.03, -0.001, 80),
     'bs': 0.05,
     'tau': 0.12
-  },
-  # {
-  #   'z': np.asarray(np.linspace(-4000, 0, 80)),
-  #   'y':
-  #   'b':
-  #   'bs':
-  #   'tau':
-  #   'f':
-  #   'rho':
-  #   'L':
-  #   'KGM':
-  #   'c':
-  #   'bvp_with_EskK':
-  #   'Hsill':
-  #   'HEk':
-  #   'Htapertop':
-  #   'Htaperbot':
-  #   'smax':
-  # }
+  }
 ])
 def psi_so_config(request):
   return request.param
