@@ -290,3 +290,55 @@ class TestPsi_SO(object):
     psio = K*Lx*h/((Ly - yso)*(np.exp(-N*h/c) - np.exp(N*h/c)))
     psi = psio*(np.exp(N*z/c) - np.exp(-N*z/c)) + K*Lx*z/(Ly - yso)
     assert(all(np.around(GM[1:-1], decimals=1) == np.around(-psi[1:-1], decimals=1)))
+
+  def test_solve(self):
+    c = 1e3
+    h = -4000
+    Ly = 2.0e6
+    Lx = 5e6
+    K = 1.0e3
+    yso = -1.0e3
+    z = np.asarray(np.linspace(h, 0, 80))
+    psi_so_1 = Psi_SO(**{
+      'z': z,
+      'y': np.asarray(np.linspace(0, Ly, 51)),
+      'b': np.linspace(0.03, -0.001, 80),
+      'bs': np.linspace(0.05, 0.04, 51),
+      'tau': 0.12,
+      'c': c,
+      'L': Lx,
+      'KGM': K,
+      'bvp_with_Ek': True
+    })
+    psi_so_2 = Psi_SO(**{
+      'z': z,
+      'y': np.asarray(np.linspace(0, Ly, 51)),
+      'b': np.linspace(0.03, -0.001, 80),
+      'bs': np.linspace(0.05, 0.04, 51),
+      'tau': 0.12,
+      'c': c,
+      'L': Lx,
+      'KGM': K,
+      'bvp_with_Ek': True
+    })
+
+    Psi_Ek = psi_so_1.calc_Ekman()/1e6;
+    psi_so_1.Psi_Ek = Psi_Ek
+    Psi_GM = psi_so_1.calc_GM()/1e6;
+    Psi = Psi_Ek + Psi_GM;
+    Psi[0] = Psi[1]         
+    psi_so_2.solve() 
+    assert(all(psi_so_2.Psi == Psi))
+
+  def test_update(self, psi_so):
+    b = 10.0
+    bs = 50.0
+    z = psi_so.z
+    y = psi_so.y
+    psi_so.update(b, bs)
+
+    b_func = psi_so.make_func(z, b, 'b')
+    bs_func = psi_so.make_func(y, bs, 'bs')
+
+    assert(all(psi_so.b(z) == b_func(z)))
+    assert(all(psi_so.bs(y) == bs_func(y)))
