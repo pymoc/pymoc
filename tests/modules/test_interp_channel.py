@@ -28,6 +28,15 @@ from interp_channel import Interpolate_channel
 def interp_channel_config(request):
   return request.param
 
+@pytest.fixture(scope="module")
+def interp_channel(request):
+  return Interpolate_channel(**{
+    'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+    'z': np.asarray(np.linspace(-4.0e3, 0, 81)),
+    'bn': np.linspace(0.03, -0.001, 81),
+    'bs': np.linspace(0.05, 0.04, 51)
+  })
+
 class TestInterpolate_channel(object):
   def test_interp_channel_init(self, interp_channel_config):
     if not 'y' in interp_channel_config or not isinstance(interp_channel_config['y'], np.ndarray) or not len(interp_channel_config['y']):
@@ -62,3 +71,17 @@ class TestInterpolate_channel(object):
     bn = interp_channel.make_func(interp_channel_config['bn'], 'bn', interp_channel.z)
     for z in interp_channel.z:
       assert(interp_channel.bn(z) == bn(z))
+
+  def test_make_func(self, interp_channel):
+    myst = lambda: 42
+    assert interp_channel.make_func(myst, 'myst', interp_channel.z)() == myst()
+    myst = np.arange(0.0, 8.1, 0.1)
+    for z in interp_channel.z:
+      assert interp_channel.make_func(myst, 'myst', interp_channel.z)(z) == np.interp(z, interp_channel.z, myst)
+    myst = 6.0
+    for y in interp_channel.y:
+      assert interp_channel.make_func(myst, 'myst', interp_channel.y)(y) == myst
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      interp_channel.make_func(myst, 'myst', interp_channel.z)
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
