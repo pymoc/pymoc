@@ -90,12 +90,12 @@ class TestInterpolate_channel(object):
       interp_channel.make_func(myst, 'myst', interp_channel.z)
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
 
-  def test_call(self, interp_channel):
-    l=interp_channel.y[-1]
-    d=interp_channel.z[0]
-    ny=len(interp_channel.y)
-    nz=len(interp_channel.z)
-    barray=np.zeros((ny,nz))
+  def test_call_and_gridit(self, interp_channel):
+    l = interp_channel.y[-1]
+    d = interp_channel.z[0]
+    ny = len(interp_channel.y)
+    nz = len(interp_channel.z)
+    barray = interp_channel.gridit()
     sy = -0.01 / l
     sz = 0.02 / d
     for iy in range(0,ny):
@@ -104,5 +104,4 @@ class TestInterpolate_channel(object):
           y = interp_channel.y[iy]
           b = np.amin([0.03, sz * z + sy * y + 0.02])
           assert np.abs((b - interp_channel(y, z))/b) < 0.01
-          
-
+          assert np.abs((barray[iy, iz] - interp_channel(y, z))/b) < 0.01
