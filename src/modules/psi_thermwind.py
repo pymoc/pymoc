@@ -41,10 +41,10 @@ class Psi_Thermwind(object):
         self.b2=self.make_func(b2,'b2',self.z)
                  
         # Set initial conditions for BVP solver
-        if sol_init:
-            self.sol_init = sol_init
-        else:
+        if sol_init is None:
             self.sol_init = np.zeros((2, nz))    
+        else:
+            self.sol_init = sol_init
     # end of init
      
     

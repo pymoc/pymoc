@@ -35,7 +35,7 @@ def interp_twocol_config(request):
 @pytest.fixture(scope="module")
 def interp_twocol(request):
   return Interpolate_twocol(**{
-    'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+    'y': np.asarray(np.linspace(0, 2.0e6, 81)),
     'z': np.asarray(np.linspace(-4.0e3, 0, 81)),
     'bn': np.linspace(0.03, 0.01, 81),
     'bs': np.linspace(0.02, 0.01, 81)
@@ -95,7 +95,9 @@ class TestInterpolate_twocol(object):
   #   d = interp_twocol.z[0]
   #   ny = len(interp_twocol.y)
   #   nz = len(interp_twocol.z)
-  #   barray = interp_twocol.gridit()
+  #   # barray = interp_twocol.gridit()
+  #   barray=np.zeros((ny,nz))
+  #   btarray=np.zeros((ny,nz))
   #   sy = -0.01 / l
   #   sz = 0.02 / d
   #   for iy in range(0,ny):
@@ -103,5 +105,14 @@ class TestInterpolate_twocol(object):
   #         z = interp_twocol.z[iz]
   #         y = interp_twocol.y[iy]
   #         b = np.amin([0.03, sz * z + sy * y + 0.02])
-  #         assert np.abs((b - interp_twocol(y, z))/b) < 0.01
-  #         assert np.abs((barray[iy, iz] - interp_twocol(y, z))/b) < 0.01
+  #         barray[iy, iz] = b
+  #         btarray[iy, iz] = interp_twocol(z,y)
+  #         # assert np.abs((b - interp_twocol(y, z))/b) < 0.01
+  #         # assert np.abs((barray[iy, iz] - interp_twocol(y, z))/b) < 0.01
+  #   plt.pcolormesh(y, z, barray)
+  #   plt.colorbar()
+  #   plt.savefig('btest.png')
+
+  #   plt.pcolormesh(y, z, btarray)
+  #   plt.colorbar()
+  #   plt.savefig('test.png')
