@@ -28,7 +28,7 @@ def psi_config(request):
 def psi(request):
   return Psi_Thermwind(**{
     'z': np.asarray(np.linspace(-4000, 0, 80)),
-    'b1': np.linspace(0.03, -0.001, 80),
+    'b1': np.linspace(0.03, -0.01, 80),
     'b2': np.linspace(0.02, 0.0, 80),
     'sol_init': np.ones((2, 80))
   })
@@ -84,3 +84,26 @@ class TestPsi_Thermwind(object):
     with pytest.raises(TypeError) as mystinfo:
       psi.make_array(myst, 'myst')
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+
+  def test_bc(self, psi):
+    testing.assert_array_equal(psi.bc([1, 2], [3, 4]), np.array([1, 3]))
+
+  def test_ode(self, psi):
+    ode = psi.ode(-1e3, [0, 1])
+    b1 = 0.0
+    b2 = 0.005
+    f = 1.2e-4
+    assert ode[0] == 1
+    testing.assert_approx_equal(ode[1][0], 1.0/f*(b2 - b1))
+
+  def test_solv(self, psi):
+    return
+
+  def test_Psib(self, psi):
+    return
+
+  def test_Psibz(self, psi):
+    return
+  
+  def test_update(self, psi):
+    return
