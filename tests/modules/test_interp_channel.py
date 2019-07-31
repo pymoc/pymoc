@@ -3,12 +3,16 @@ import sys
 import numpy as np
 sys.path.append('/pymoc/src/modules')
 from interp_channel import Interpolate_channel
+from matplotlib import pyplot as plt
 
 @pytest.fixture(scope="module", params=[
   {
   },
   {
     'z': np.asarray(np.linspace(-4000, 0, 81)),
+  },
+  {
+    'y': np.asarray(np.linspace(0, 2.0e6, 51)),
   },
   {
     'z': np.asarray(np.linspace(-4000, 0, 81)),
@@ -21,8 +25,8 @@ from interp_channel import Interpolate_channel
   {
     'y': np.asarray(np.linspace(0, 2.0e6, 51)),
     'z': np.asarray(np.linspace(-4.0e3, 0, 81)),
-    'bn': np.linspace(0.03, -0.001, 81),
-    'bs': np.linspace(0.05, 0.04, 51)
+    'bn': np.linspace(0.03, -0.01, 81),
+    'bs': np.linspace(0.02, 0.01, 51)
   },
 ])
 def interp_channel_config(request):
@@ -33,8 +37,8 @@ def interp_channel(request):
   return Interpolate_channel(**{
     'y': np.asarray(np.linspace(0, 2.0e6, 51)),
     'z': np.asarray(np.linspace(-4.0e3, 0, 81)),
-    'bn': np.linspace(0.03, -0.001, 81),
-    'bs': np.linspace(0.05, 0.04, 51)
+    'bn': np.linspace(0.03, 0.01, 81),
+    'bs': np.linspace(0.02, 0.01, 51)
   })
 
 class TestInterpolate_channel(object):
@@ -85,3 +89,20 @@ class TestInterpolate_channel(object):
     with pytest.raises(TypeError) as mystinfo:
       interp_channel.make_func(myst, 'myst', interp_channel.z)
     assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+
+  def test_call(self, interp_channel):
+    l=interp_channel.y[-1]
+    d=interp_channel.z[0]
+    ny=len(interp_channel.y)
+    nz=len(interp_channel.z)
+    barray=np.zeros((ny,nz))
+    sy = -0.01 / l
+    sz = 0.02 / d
+    for iy in range(0,ny):
+        for iz in range(0,nz):
+          z = interp_channel.z[iz]
+          y = interp_channel.y[iy]
+          b = np.amin([0.03, sz * z + sy * y + 0.02])
+          assert np.abs((b - interp_channel(y, z))/b) < 0.01
+          
+

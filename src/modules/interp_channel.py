@@ -45,9 +45,9 @@ class Interpolate_channel(object):
           
     def __call__(self, y, z):
         l=self.y[-1]
-        if z==0 and y==l:
+        if z == 0.0 and y == l:
             # slope ill defined at (l,0); evaluate infinitesimally below the surface:
-            z=-1e-10  
+            z = -1e-10  
         def f2(x):
                # function to help determine slope at bottom of vent. region
                return self.bn(x)-self.bs(0)            
