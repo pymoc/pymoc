@@ -24,6 +24,15 @@ from psi_thermwind import Psi_Thermwind
 def psi_config(request):
   return request.param
 
+@pytest.fixture(scope="module")
+def psi(request):
+  return Psi_Thermwind(**{
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'b1': np.linspace(0.03, -0.001, 80),
+    'b2': np.linspace(0.02, 0.0, 80),
+    'sol_init': np.ones((2, 80))
+  })
+
 class TestPsi_Thermwind(object):
   def test_psi_thermwind_init(self, psi_config):
     if not 'z' in psi_config or not isinstance(psi_config['z'], np.ndarray) or not len(psi_config['z']):
@@ -49,4 +58,29 @@ class TestPsi_Thermwind(object):
       ft = psi.make_func(psi_config[k], k, psi_config['z'])
       for z in psi.z:
         assert f(z) == ft(z)
-    
+
+  def test_make_func(self, psi):
+    myst = lambda: 42
+    assert psi.make_func(myst, 'myst', psi.z)() == myst()
+    myst = np.arange(0.0, 8.0, 0.1)
+    for z in psi.z:
+      assert psi.make_func(myst, 'myst', psi.z)(z) == np.interp(z, psi.z, myst)
+    myst = 6.0
+    for z in psi.z:
+      assert psi.make_func(myst, 'myst', psi.z)(z) == myst
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      psi.make_func(myst, 'myst', psi.z)
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+
+  def test_make_array(self, psi):
+    myst = np.arange(0.0, 8.0, 0.1)
+    assert all(psi.make_array(myst, 'myst') == myst)
+    myst = lambda n: 42 + n
+    assert all(psi.make_array(myst, 'myst') == myst(psi.z))
+    myst = 5.0
+    assert all(psi.make_array(myst, 'myst') == 5.0 * np.ones((len(psi.z))))
+    myst = 1
+    with pytest.raises(TypeError) as mystinfo:
+      psi.make_array(myst, 'myst')
+    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
