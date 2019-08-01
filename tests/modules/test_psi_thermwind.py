@@ -3,6 +3,7 @@ import sys
 import inspect
 import numpy as np
 from numpy import testing
+from matplotlib import pyplot as plt
 sys.path.append('/pymoc/src/modules')
 from psi_thermwind import Psi_Thermwind
 
@@ -96,8 +97,11 @@ class TestPsi_Thermwind(object):
     assert ode[0] == 1
     testing.assert_approx_equal(ode[1][0], 1.0/f*(b2 - b1))
 
-  def test_solv(self, psi):
-    return
+  def test_solve  (self, psi):
+    psi.solve()
+    d = -4e3
+    p = 1e-2*((2.5/3.0)*psi.z**3 + 5000.0*psi.z**2 - d*((2.5/3.0)*d + 5000.0)*psi.z)
+    assert all([np.abs(p[i] - psi.Psi[i]*1e6)/np.abs(p[i]) < 0.2 for i in range(1, len(psi.z) - 1)])
 
   def test_Psib(self, psi):
     return
