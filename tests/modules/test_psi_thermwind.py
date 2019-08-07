@@ -101,10 +101,51 @@ class TestPsi_Thermwind(object):
     psi.solve()
     d = -4e3
     p = 1e-2*((2.5/3.0)*psi.z**3 + 5000.0*psi.z**2 - d*((2.5/3.0)*d + 5000.0)*psi.z)
-    assert all([np.abs(p[i] - psi.Psi[i]*1e6)/np.abs(p[i]) < 0.2 for i in range(1, len(psi.z) - 1)])
+    assert all([np.abs(p[i] - psi.Psi[i]*1e6)/np.abs(p[i]) < 0.25 for i in range(1, len(psi.z) - 1)])
 
-  def test_Psib(self, psi):
-    return
+  def test_Psib(self ):
+    psi = Psi_Thermwind(**{
+      'z': np.asarray(np.linspace(-4000, 0, 81)),
+      'b1': np.linspace(0.03, -0.01, 81),
+      'b2': np.linspace(0.02, 0.0, 81),
+      'sol_init': np.ones((2, 81))
+    })
+
+    # zop = (-1.0e-2 + np.sqrt(1.0e-4 - (1.0/6.0)*1.0e-7))/(5.0e-6)
+    # zom = (-1.0e-2 - np.sqrt(1.0e-4 - (1.0/6.0)*1.0e-7))/(5.0e-6)
+    d = -4e3
+    # dpsi_dz = 1e-2*(2.5*psi.z**2 + 10000.0*psi.z - d*((2.5/3.0)*d + 5000.0))
+    # d = -4e3
+    psi.solve()
+    # p = 1e-2*((2.5/3.0)*psi.z**3 + 5000.0*psi.z**2 - d*((2.5/3.0)*d + 5000.0)*psi.z)/psi.f
+    dp_dz = np.gradient(psi.Psi, psi.z[1] - psi.z[0])
+    [zom, zop] = psi.z[np.where(np.abs(dp_dz) == np.min(np.abs(dp_dz)))]
+    izom = np.where(psi.z == zom)[0][0]
+    izop = np.where(psi.z == zop)[0][0]
+    zom = int(izom)
+    zop = int(izop)
+    b_up = np.concatenate((psi.b2(psi.z)[:izom], psi.b1(psi.z)[izom:izop], psi.b2(psi.z)[izop:]))
+
+    bgrid = np.linspace(-0.01, 0.03, 500)
+    psib = np.zeros((500))
+    for i in range(500):
+      b = bgrid[i]
+      for j in range(len(psi.z)):
+        if b < b_up[j]:
+          psib[i] += dp_dz[j]
+        elif b == b_up[j]:
+          psib[i] += dp_dz[j]/2.0
+
+    psib *= 50.0
+    bo = np.where(np.abs(bgrid) == np.min(np.abs(bgrid)))[0][0]
+    bf = np.where(np.abs(bgrid - 0.02) ==np.min(np.abs(bgrid - 0.02)))[0][0]
+
+    f = np.ones(15) / 15
+    psib = np.convolve(psib, f, 'same')
+    psib -= 1.5
+
+    assert np.sqrt((psib[bo:bf] - psi.Psib()[bo:bf])**2).mean() < 0.25
+
 
   def test_Psibz(self, psi):
     return

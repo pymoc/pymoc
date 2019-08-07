@@ -16,6 +16,7 @@ An upwind isopycnal mapping is used to compute the isopycnal overturning transpo
 
 import numpy as np
 from scipy import integrate
+from matplotlib import pyplot as plt
 #from scipy.interpolate import interp1d
 
 class Psi_Thermwind(object):
@@ -91,19 +92,21 @@ class Psi_Thermwind(object):
        
     def Psib(self,nb=500):
         # map overturning into isopycnal space:
-        b1=self.make_array(self.b1,'b1')
-        b2=self.make_array(self.b2,'b2')
-        bmin=min(np.min(b1),np.min(b2))
-        bmax=max(np.max(b1),np.max(b2))
-        self.bgrid=np.linspace(bmin,bmax,nb)
-        udydz=-(self.Psi[1:]-self.Psi[:-1])
-        psib=0.*self.bgrid;
-        bup_bot=b1[:-1].copy();bup_top=b1[1:].copy()
-        bup_bot[udydz<0]=b2[:-1][udydz<0];bup_top[udydz<0]=b2[1:][udydz<0];
+        b1 = self.make_array(self.b1,'b1')
+        b2 = self.make_array(self.b2,'b2')
+        bmin = min(np.min(b1),np.min(b2))
+        bmax = max(np.max(b1),np.max(b2))
+        self.bgrid = np.linspace(bmin,bmax,nb)
+        udydz = -(self.Psi[1:] - self.Psi[:-1])
+        psib = 0.*self.bgrid
+        bup_bot = b1[:-1].copy()
+        bup_top = b1[1:].copy()
+        bup_bot[udydz < 0] = b2[:-1][udydz < 0]
+        bup_top[udydz < 0] = b2[1:][udydz < 0];
         for i in range(0,len(self.bgrid)):
-           mask=np.clip((bup_top-self.bgrid[i])/(bup_top-bup_bot),0.,1.)
-           psib[i]=np.sum(mask*udydz) 
-        return psib   
+            mask = np.clip((bup_top - self.bgrid[i])/(bup_top - bup_bot), 0., 1.)
+            psib[i] = np.sum(mask*udydz) 
+        return psib  
 
     
     def Psibz(self,nb=500):
