@@ -111,9 +111,9 @@ class Psi_Thermwind(object):
     
     def Psibz(self,nb=500):
         # map isopycnal overturning back into isopycnal-depth space of each column 
-        psib=self.Psib(nb)
+        psib = self.Psib(nb)
         # This does a linear interploation in b: 
-        return [np.interp(self.b1(self.z),self.bgrid,psib),np.interp(self.b2(self.z),self.bgrid,psib)]
+        return [np.interp(self.b1(self.z), self.bgrid, psib), np.interp(self.b2(self.z), self.bgrid, psib)]
         # Ths instead first estimates the depth levels for the bgrid and then does linear interpolation in z
         # either has pros and cons depending on the situation...
         #z1_of_bgrid=np.interp(self.bgrid,self.b1(self.z),self.z)
