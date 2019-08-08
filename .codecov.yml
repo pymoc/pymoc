@@ -10,6 +10,7 @@ coverage:
   
   ignore:
     - "tests/**/*.py"
+    - "srv/setup.py"
 
 codecov:
   max_report_age: off
