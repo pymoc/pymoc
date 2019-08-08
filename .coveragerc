@@ -10,3 +10,4 @@ exclude_lines =
 
     # Ignore testing of numpy version
     def check_numpy_version
+    raise ImportError
