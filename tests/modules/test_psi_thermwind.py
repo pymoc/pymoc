@@ -193,4 +193,14 @@ class TestPsi_Thermwind(object):
     assert np.sqrt((psib[bo:bf] - psi.Psibz()[1][bo:bf])**2).mean() < 0.3
 
   def test_update(self, psi):
-    return
+    b1 = 10.0
+    b2 = 50.0
+    z = psi.z
+    psi.update(b1, b2)
+
+    b1_func = psi.make_func(b1, 'b1', z)
+    b2_func = psi.make_func(b2, 'b2', z)
+
+    assert(all(psi.b1(z) == b1_func(z)))
+    assert(all(psi.b2(z) == b2_func(z)))
+    
