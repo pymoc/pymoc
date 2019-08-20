@@ -13,6 +13,20 @@ from equi_column import Equi_Column
     'A': 2.0e14,
     'kappa': 3e-5,
     'H': 500.0
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'B_int': 3e3,
+    'A': 2.0e14,
+    'kappa': np.asarray(np.linspace(3e-5, 1e-5, 80)),
+    'H': 500.0
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'B_int': 3e3,
+    'A': 2.0e14,
+    'kappa': lambda z: -3e-5 * z / 4e3,
+    'H': 500.0
   }
 ])
 def column_config(request):
@@ -43,11 +57,13 @@ class TestEqui_Column(object):
 
     assert callable(column.kappa)
     assert callable(column.dkappa_dz)
-    if 'kappa' in column_config and column_config['kappa']:
+    if 'kappa' in column_config and not column_config['kappa'] is None:
       if callable(column_config['kappa']):
-        print('foo')
+        for z in column_config['z']:
+          assert column.kappa(z, 1.0) == column_config['kappa'](z) / (column.f)
       elif isinstance(column_config['kappa'], np.ndarray):
-        print('bar')
+        for i in range(len(column_config['z'])):
+          assert column.kappa(column_config['z'][i], 1.0) == column_config['kappa'][i] / (column.f)
       else:
         for z in column_config['z']:
           assert column.kappa(z, 200.0) == column_config['kappa'] / (4e4*column.f)
