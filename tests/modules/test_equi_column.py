@@ -19,6 +19,7 @@ from equi_column import Equi_Column
     'B_int': 3e3,
     'A': 2.0e14,
     'kappa': np.asarray(np.linspace(3e-5, 1e-5, 80)),
+    'dkappa_dz': lambda z: -1e-7 * z / 4e3,
     'H': 500.0
   },
   {
@@ -26,6 +27,14 @@ from equi_column import Equi_Column
     'B_int': 3e3,
     'A': 2.0e14,
     'kappa': lambda z: -3e-5 * z / 4e3,
+    'H': 500.0
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'B_int': 3e3,
+    'A': 2.0e14,
+    'kappa': lambda z: -3e-5 * z / 4e3,
+    'dkappa_dz': lambda z: -1e-7 * z / 4e3,
     'H': 500.0
   }
 ])
@@ -61,9 +70,15 @@ class TestEqui_Column(object):
       if callable(column_config['kappa']):
         for z in column_config['z']:
           assert column.kappa(z, 1.0) == column_config['kappa'](z) / (column.f)
+          if 'dkappa_dz' in column_config and callable(column_config['dkappa_dz']):
+            assert column.dkappa_dz(z, 1.0) == column_config['dkappa_dz'](z) / (column.f)
+          # This case may not currently be functional
+          # else:
+          #   testing.assert_approx_equal(column.dkappa_dz(z, 1.0), (column_config['kappa'](column_config['z'][1]) - column_config['kappa'](column_config['z'][0])) / (column.f*(column_config['z'][1] - column_config['z'][0])))
       elif isinstance(column_config['kappa'], np.ndarray):
         for i in range(len(column_config['z'])):
           assert column.kappa(column_config['z'][i], 1.0) == column_config['kappa'][i] / (column.f)
+          testing.assert_approx_equal(column.dkappa_dz(column_config['z'][i], 1.0), (column_config['kappa'][1] - column_config['kappa'][0]) / (column.f*(column_config['z'][1] - column_config['z'][0])))
       else:
         for z in column_config['z']:
           assert column.kappa(z, 200.0) == column_config['kappa'] / (4e4*column.f)
