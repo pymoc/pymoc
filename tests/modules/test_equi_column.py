@@ -44,6 +44,20 @@ from equi_column import Equi_Column
     'psi_so': np.asarray((np.linspace(-4000, 0, 80) + 2000)**2),
     'H': 500.0
   },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'B_int': 3e3,
+    'A': 2.0e14,
+    'psi_so': lambda z: np.asarray((z/2) + 2000)**2,
+    'H': 500.0
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'B_int': 3e3,
+    'A': 2.0e14,
+    'psi_so': 100,
+    'H': 500.0
+  },
 ])
 def column_config(request):
   return request.param
@@ -93,10 +107,14 @@ class TestEqui_Column(object):
 
     if 'psi_so' in column_config and not column_config['psi_so'] is None:
       if callable(column_config['psi_so']):
-        assert column.psi_so(z, 1.0) == column_config['psi_so'](z) / (column.f)
-      else:
+        for z in column_config['z']:
+          assert column.psi_so(z, 1.0) == column_config['psi_so'](z) / (column.f)
+      elif isinstance(column_config['psi_so'], np.ndarray):
         for i in range(len(column_config['z'])):
           assert column.psi_so(column_config['z'][i], 1.0) == column_config['psi_so'][i] / (column.f)
+      else:
+        for z in column_config['z']:
+          assert column.psi_so(z, 100) == 0
     else:
       for z in column_config['z']:
         assert column.psi_so(z, 100) == 0
