@@ -58,6 +58,29 @@ from equi_column import Equi_Column
     'psi_so': 100,
     'H': 500.0
   },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'A': 2.0e14,
+    'kappa': 3e-5,
+    'H': 500.0,
+    'B_int': None,
+    'b_bot': None,
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'A': 2.0e14,
+    'kappa': 3e-5,
+    'H': 500.0,
+    'B_int': None,
+    'b_bot': 4e3,
+  },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'A': 2.0e14,
+    'kappa': 3e-5,
+    'H': 500.0,
+    'b_s': 0.05,
+  },
 ])
 def column_config(request):
   return request.param
@@ -72,6 +95,11 @@ def column(request):
 
 class TestEqui_Column(object):
   def test_Equi_Column_init(self, column_config):
+    if 'B_int' in column_config and not column_config['B_int'] and 'b_bot' in column_config and not column_config['b_bot']:
+      with pytest.raises(Exception) as binfo:
+        Equi_Column(**column_config)
+      assert(str(binfo.value) == "You need to specify either b_bot or B_int for bottom boundary condition")
+      return
     column_signature = inspect.signature(Equi_Column)
 
     column = Equi_Column(**column_config)
@@ -80,6 +108,21 @@ class TestEqui_Column(object):
       assert getattr(column, k)  == (column_config[k] if k in column_config and column_config[k] else column_signature.parameters[k].default)
     for k in ['z']:
       testing.assert_array_equal(getattr(column, k), (column_config[k] if k in column_config and not column_config[k] is None else column_signature.parameters[k].default))
+
+    if not 'B_int' in column_config or not column_config['B_int'] is None:
+      if 'B_int' in column_config:
+        assert column.B_int == column_config['B_int']
+      else:
+        assert column.B_int == column_signature.parameters['B_int'].default
+
+    if 'B_int' in column_config and not column_config['B_int']:
+      assert column.b_bot == -column_config['b_bot'] / column.f**2
+
+    if not 'b_s' in column_config or not column_config['b_s'] is None:
+      if 'b_s' in column_config:
+        assert column.bs == -column_config['b_s'] / column.f**2
+      else:
+        assert column.bs == -column_signature.parameters['b_s'].default / column.f**2
 
     nz = column_config['nz'] if 'nz' in column_config and not column_config['nz'] is None else 100
     for i in range(nz):
