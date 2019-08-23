@@ -81,6 +81,13 @@ from equi_column import Equi_Column
     'H': 500.0,
     'b_s': 0.05,
   },
+  {
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
+    'A': 2.0e14,
+    'kappa': 3e-5,
+    'H': 500.0,
+    'sol_init': np.sin(np.asarray(np.linspace(-4000, 0, 80)))**2,
+  },
 ])
 def column_config(request):
   return request.param
@@ -161,6 +168,17 @@ class TestEqui_Column(object):
     else:
       for z in column_config['z']:
         assert column.psi_so(z, 100) == 0
+
+    if 'sol_init' in column_config and not column_config['sol_init'] is None:
+      assert all(column.sol_init == column_config['sol_init'])
+    else:
+      for i in range(len(column.z)):
+        assert column.sol_init[0,i] == 1
+        assert column.sol_init[2,i] == 0
+        if 'b_bot' in column_config and column_config['b_bot'] is not None:
+          assert column.sol_init[3,i] == -100
+        else:
+          assert column.sol_init[3,i] == -column.bz(1500)
 
 
 

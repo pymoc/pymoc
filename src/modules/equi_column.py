@@ -91,7 +91,7 @@ class Equi_Column(object):
             raise Exception('You need to specify either b_bot or B_int for bottom boundary condition')
 
         # Set initial conditions for ODE solver
-        if sol_init:
+        if sol_init is not None:
             self.sol_init = sol_init
         else:
             sol_init = np.zeros((4, nz))
