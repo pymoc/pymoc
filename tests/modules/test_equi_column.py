@@ -187,8 +187,8 @@ class TestEqui_Column(object):
     for z in column.z:
       assert column.alpha(z, 1200) == 1200**2 / (column.A * column.kappa(z, 1200))
 
-  def test_bz(self):
-    return 
+  def test_bz(self, column):
+    assert column.bz(1200) == column.B_int / (column.f**3 * 1200**2 * column.A * column.kappa(-1, 1200))
 
   def test_bc(self):
     return 
