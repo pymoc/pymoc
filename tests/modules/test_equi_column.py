@@ -199,6 +199,29 @@ class TestEqui_Column(object):
     assert bc[1] == 11
     assert bc[2] == 2
     assert bc[3] == 4 + column.bz(100)
+    assert bc[4] == 13 - column.bs / 100
+
+    column.b_bot = 2e3
+    bc = column.bc(ya, yb, p)
+    assert bc[0] == 1
+    assert bc[1] == 11
+    assert bc[2] == 2
+    assert bc[3] == -17
+    assert bc[4] == 13 - column.bs / 100
+
+    column.H = -1000
+    bc = column.bc(ya, yb)
+    assert bc[0] == 1
+    assert bc[1] == 11
+    assert bc[2] == 5
+    assert bc[3] == 13 + column.bs / 1000
+
+    column.b_bot = None
+    bc = column.bc(ya, yb)
+    assert bc[0] == 1
+    assert bc[1] == 11
+    assert bc[2] == 4 + column.bz(-1000)
+    assert bc[3] == 13 + column.bs / 1000
 
   def test_ode(self):
     return 
