@@ -120,27 +120,29 @@ class Equi_Column(object):
         # return the properly non-dimensionalized stratification at the bottom of the cell
         return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(-1, H))
 
-   # p is required$ if H is none, should throw an esception if both are absent
     def bc(self, ya, yb, p=None):
         #return the boundary conditions for the ODE
-        if self.H is None:
+        if self.H is None and p is not None and len(p) > 0:
           if getattr(self, "b_bot", None) is not None: 
              return np.array([ya[0], yb[0], ya[1], ya[2] - self.b_bot/p[0], yb[2] - self.bs/p[0]])
           else: 
              return np.array([ya[0], yb[0], ya[1], ya[3] + self.bz(p[0]), yb[2] - self.bs/p[0]])
-        else:
+        elif self.H is not None:
           if getattr(self, "b_bot", None) is not None: 
             return np.array([ya[0], yb[0], ya[2] - self.b_bot/self.H, yb[2] - self.bs/self.H])
           else: 
             return np.array([ya[0], yb[0], ya[3] + self.bz(self.H), yb[2] - self.bs/self.H])
+        else:
+           raise TypeError('Must provide a p array if column does not have an H value')
 
-    # p is required$ if H is none, should throw an esception if both are absent
     def ode(self, z, y, p=None):
         #return the ODE to be solved 
-        if self.H is None:
+        if self.H is None and p is not None and len(p) > 0:
            H = p[0]
+        elif self.H is not None:
+           H = self.H
         else:
-           H=self.H
+           raise TypeError('Must provide a p array if column does not have an H value')
         return np.vstack((y[1], y[2], y[3], self.alpha(z, H) * y[3] * (y[0] - self.psi_so(z, H) - self.A * self.dkappa_dz(z, H)/(H**2))))
         
     

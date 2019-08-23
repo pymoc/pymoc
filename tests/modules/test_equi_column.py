@@ -223,6 +223,11 @@ class TestEqui_Column(object):
     assert bc[2] == 4 + column.bz(-1000)
     assert bc[3] == 13 + column.bs / 1000
 
+    column.H = None
+    with pytest.raises(TypeError) as pinfo:
+      column.bc(ya, yb)
+    assert(str(pinfo.value) == "Must provide a p array if column does not have an H value")
+
   def test_ode(self, column):
     y = [0, 1, 2, 3]
     ode = column.ode(-1000, y, p=[10])
@@ -237,6 +242,11 @@ class TestEqui_Column(object):
     assert ode[1] == 2
     assert ode[2] == 3
     assert ode[3] == column.alpha(-1000, 20) * 3 * (- column.psi_so(-1000, 20) - column.A * column.dkappa_dz(-1000, 20)/400)
+
+    column.H = None
+    with pytest.raises(TypeError) as pinfo:
+      column.ode(-1000, y)
+    assert(str(pinfo.value) == "Must provide a p array if column does not have an H value")
 
 
   def test_solve(self):
