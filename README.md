@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield)](https://circleci.com/gh/pymoc/PyMOC/tree/master) [![codecov](https://codecov.io/gh/pymoc/pymoc/branch/master/graph/badge.svg)](https://codecov.io/gh/pymoc/pymoc)
+[![CircleCI](https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield)](https://circleci.com/gh/pymoc/PyMOC/tree/master)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/test_coverage)](https://codeclimate.com/github/pymoc/PyMOC/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability)](https://codeclimate.com/github/pymoc/PyMOC/maintainability)
 [![ReadTheDocs](https://readthedocs.org/projects/py-moc/badge/?style=flat)](https://py-moc.readthedocs.io)
