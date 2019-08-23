@@ -119,7 +119,8 @@ class Equi_Column(object):
     def bz(self, H): 
         # return the properly non-dimensionalized stratification at the bottom of the cell
         return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(-1, H))
-    
+
+   # p is required$ if H is none
     def bc(self, ya, yb, p=None):
         #return the boundary conditions for the ODE
         if self.H is None:

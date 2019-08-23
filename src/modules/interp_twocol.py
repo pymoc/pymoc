@@ -71,7 +71,8 @@ class Interpolate_twocol(object):
         return self.bs(z-s*y)
     
     def gridit(self):
-        ny=len(self.y);nz=len(self.z)
+        ny=len(self.y)
+        nz=len(self.z)
         barray=np.zeros((ny,nz))
         for iy in range(0,ny):
             for iz in range(0,nz):

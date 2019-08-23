@@ -190,8 +190,15 @@ class TestEqui_Column(object):
   def test_bz(self, column):
     assert column.bz(1200) == column.B_int / (column.f**3 * 1200**2 * column.A * column.kappa(-1, 1200))
 
-  def test_bc(self):
-    return 
+  def test_bc(self, column):
+    ya = [1, 2, 3, 4]
+    yb = [11, 12, 13, 14]
+    p = [100]
+    bc = column.bc(ya, yb, p)
+    assert bc[0] == 1
+    assert bc[1] == 11
+    assert bc[2] == 2
+    assert bc[3] == 4 + column.bz(100)
 
   def test_ode(self):
     return 

@@ -99,9 +99,9 @@ class TestInterpolate_channel(object):
     sy = -0.01 / l
     sz = 0.02 / d
     for iy in range(0,ny):
-        for iz in range(0,nz):
-          z = interp_channel.z[iz]
-          y = interp_channel.y[iy]
-          b = np.amin([0.03, sz * z + sy * y + 0.02])
-          assert np.abs((b - interp_channel(y, z))/b) < 0.01
-          assert np.abs((barray[iy, iz] - interp_channel(y, z))/b) < 0.01
+      for iz in range(0,nz):
+        z = interp_channel.z[iz]
+        y = interp_channel.y[iy]
+        b = np.amin([0.03, sz * z + sy * y + 0.02])
+        assert np.abs((b - interp_channel(y, z))/b) < 0.01
+        assert np.abs((barray[iy, iz] - interp_channel(y, z))/b) < 0.01
