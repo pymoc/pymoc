@@ -95,6 +95,7 @@ def column_config(request):
 @pytest.fixture(scope="module")
 def column(request):
   return Equi_Column(**{
+    'z': np.asarray(np.linspace(-4000, 0, 80)),
     'B_int': 3e3,
     'A': 2.0e14,
     'kappa': 3e-5
@@ -182,8 +183,9 @@ class TestEqui_Column(object):
 
 
 
-  def test_alpha(self):
-    return 
+  def test_alpha(self, column):
+    for z in column.z:
+      assert column.alpha(z, 1200) == 1200**2 / (column.A * column.kappa(z, 1200))
 
   def test_bz(self):
     return 
