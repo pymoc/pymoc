@@ -223,8 +223,21 @@ class TestEqui_Column(object):
     assert bc[2] == 4 + column.bz(-1000)
     assert bc[3] == 13 + column.bs / 1000
 
-  def test_ode(self):
-    return 
+  def test_ode(self, column):
+    y = [0, 1, 2, 3]
+    ode = column.ode(-1000, y, p=[10])
+    assert ode[0] == 1
+    assert ode[1] == 2
+    assert ode[2] == 3
+    assert ode[3] == column.alpha(-1000, 10) * 3 * (- column.psi_so(-1000, 10) - column.A * column.dkappa_dz(-1000, 10)/100)
+
+    column.H = 20
+    ode = column.ode(-1000, y)
+    assert ode[0] == 1
+    assert ode[1] == 2
+    assert ode[2] == 3
+    assert ode[3] == column.alpha(-1000, 20) * 3 * (- column.psi_so(-1000, 20) - column.A * column.dkappa_dz(-1000, 20)/400)
+
 
   def test_solve(self):
     return 

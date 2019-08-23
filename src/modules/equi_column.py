@@ -133,7 +133,8 @@ class Equi_Column(object):
             return np.array([ya[0], yb[0], ya[2] - self.b_bot/self.H, yb[2] - self.bs/self.H])
           else: 
             return np.array([ya[0], yb[0], ya[3] + self.bz(self.H), yb[2] - self.bs/self.H])
-         
+
+    # p is required$ if H is none, should throw an esception if both are absent
     def ode(self, z, y, p=None):
         #return the ODE to be solved 
         if self.H is None:
