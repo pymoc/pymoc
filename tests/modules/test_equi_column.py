@@ -270,5 +270,45 @@ class TestEqui_Column(object):
       ((psi - psi_so - A*dkappa_dz)*psi/(A*kappa))[[i for i in range(len(dpsi_dzzzz)) if i not in indices]],
       decimal=4
     )
-    return
 
+    column.H = 250
+    column.solve()
+    psi = column.psi
+    H = column.H
+    kappa = np.asarray([ column.kappa(z, H) for z in column.z ])
+    psi_so = np.asarray([ column.psi_so(z, H) for z in column.z ])
+    z = column.z
+    dkappa_dz = np.gradient(kappa, z)
+    A = column.A
+    dpsi_dzzz= np.gradient(np.gradient(np.gradient(psi, z), z), z)
+    dpsi_dzzzz = np.gradient(dpsi_dzzz, z)
+    indices = np.concatenate((
+      np.where(np.isnan(dpsi_dzzzz))[0],
+      np.where(np.isnan((psi - psi_so - A*dkappa_dz)*psi/(A*kappa)))[0],
+    ), 0)
+    testing.assert_array_almost_equal(
+      dpsi_dzzzz[[i for i in range(len(dpsi_dzzzz)) if i not in indices]],
+      ((psi - psi_so - A*dkappa_dz)*psi/(A*kappa))[[i for i in range(len(dpsi_dzzzz)) if i not in indices]],
+      decimal=4
+    )
+
+    column.z = None
+    column.solve()
+    psi = column.psi
+    H = column.H
+    kappa = np.asarray([ column.kappa(z, H) for z in column.z ])
+    psi_so = np.asarray([ column.psi_so(z, H) for z in column.z ])
+    z = column.z
+    dkappa_dz = np.gradient(kappa, z)
+    A = column.A
+    dpsi_dzzz= np.gradient(np.gradient(np.gradient(psi, z), z), z)
+    dpsi_dzzzz = np.gradient(dpsi_dzzz, z)
+    indices = np.concatenate((
+      np.where(np.isnan(dpsi_dzzzz))[0],
+      np.where(np.isnan((psi - psi_so - A*dkappa_dz)*psi/(A*kappa)))[0],
+    ), 0)
+    testing.assert_array_almost_equal(
+      dpsi_dzzzz[[i for i in range(len(dpsi_dzzzz)) if i not in indices]],
+      ((psi - psi_so - A*dkappa_dz)*psi/(A*kappa))[[i for i in range(len(dpsi_dzzzz)) if i not in indices]],
+      decimal=4
+    )
