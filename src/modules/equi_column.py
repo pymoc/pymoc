@@ -5,7 +5,7 @@ for the MOC.
 The model is written in terms of a boundary value problem
  
 In dimensional units, the ODE is
-d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}(\Psi_{N} - \Psi_{SO} - A d_z(\kappa))d_{zzz})(\Psi_N)
+d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}(\Psi_{N} - \Psi_{SO} - A d_z(\kappa))d_{zzz}(\Psi_N)
 
 This equation is solved subject to the boundary conditions:
 (1) \Psi_N(0) = 0

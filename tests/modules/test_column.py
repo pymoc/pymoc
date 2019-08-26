@@ -273,3 +273,4 @@ class TestColumn(object):
     with pytest.raises(TypeError) as binfo:
       column.timestep(wA=wA, dt=dt, vdx_in=vdx_in)
     assert(str(binfo.value) == "b_in is needed if vdx_in is provided")
+    
