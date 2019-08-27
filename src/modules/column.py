@@ -9,8 +9,11 @@ The time-stepping version can also handle horizontal advection
 into the column. This is, however, not (yet) implemented for the equilibrium solver
 '''
 
+import sys
 import numpy as np
 from scipy import integrate
+sys.path.append('/pymoc/src/utils')
+from make_func import make_func 
 
 class Column(object):
     # This module creates an advective-diffusive column
@@ -58,18 +61,7 @@ class Column(object):
         return True
        
     
-    def make_func(self,myst,name):
-    # turn mysterious object into callable function (if needed)    
-        if callable(myst):
-            return myst
-        elif isinstance(myst,np.ndarray):
-            def funfun(z): return np.interp(z,self.z,myst)
-            return funfun
-        elif isinstance(myst,float):
-            def funfun(z): return myst +0*z
-            return funfun
-        else:
-            raise TypeError(name,'needs to be either function, numpy array, or float') 
+    def make_func(self,myst,name): return make_func(myst, self.z, name)
     
     def make_array(self, myst, name):
       # turn mysterious object into array(if needed)    

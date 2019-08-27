@@ -14,9 +14,12 @@ This equation is solved subject to the boundary conditions that
 An upwind isopycnal mapping is used to compute the isopycnal overturning transport
 '''
 
+import sys
 import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
+sys.path.append('/pymoc/src/utils')
+from make_func import make_func 
 #from scipy.interpolate import interp1d
 
 class Psi_Thermwind(object):
@@ -49,18 +52,7 @@ class Psi_Thermwind(object):
     # end of init
      
     
-    def make_func(self,myst,name,zin):
-    # turn array or float into callable function (if needed)    
-        if callable(myst):
-            return myst
-        elif isinstance(myst,np.ndarray):
-            def funfun(z): return np.interp(z,zin,myst)
-            return funfun
-        elif isinstance(myst,float):
-            def funfun(z): return myst +0*z
-            return funfun
-        else:
-            raise TypeError(name,'needs to be either function, numpy array, or float') 
+    def make_func(self, myst, name, zin): return make_func(myst, zin, name)
        
     def make_array(self,myst,name):
     # turn mysterious object into array(if needed)    

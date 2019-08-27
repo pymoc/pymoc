@@ -2,11 +2,13 @@
 An class to interpolate the buoyancy field in the SO along lines
 with constant slope - only to mke fancy looking plots
 '''
+
 import sys
 import numpy as np
 from scipy.optimize import brenth
 sys.path.append('/pymoc/src/utils')
 from gridit import gridit 
+from make_func import make_func 
 
 class Interpolate_channel(object):
     def __init__(
@@ -31,19 +33,7 @@ class Interpolate_channel(object):
         self.bn=self.make_func(bn,'bn',self.z)
              
         
-    def make_func(self,myst,name,xin):
-    # turn array or float into callable function (if needed)    
-        if callable(myst):
-            return myst
-        elif isinstance(myst,np.ndarray):
-            def funfun(x): return np.interp(x,xin,myst)
-            return funfun
-        elif isinstance(myst,float):
-            def funfun(x): return myst +0*x
-            return funfun
-        else:
-            raise TypeError(name,'needs to be either function, numpy array, or float') 
-           
+    def make_func(self, myst, name, xin): return make_func(myst, xin, name)
           
     def __call__(self, y, z):
         l=self.y[-1]

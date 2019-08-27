@@ -5,8 +5,11 @@ the surface buoyancy in the SO [bs(y)],
 and the surface wind stress [tau(y)]
 '''
 
+import sys
 import numpy as np
 from scipy import integrate, optimize
+sys.path.append('/pymoc/src/utils')
+from make_func import make_func 
 
 class Psi_SO(object):
     def __init__(
@@ -59,19 +62,7 @@ class Psi_SO(object):
         self.Htaperbot = Htaperbot
         self.smax = smax
     
-    def make_func(self,xi,myst,name):
-    # turn mysterious object into callable function (if needed)    
-        if callable(myst):
-            return myst
-        elif isinstance(myst,np.ndarray):
-            def funfun(x): return np.interp(x,xi,myst)
-            return funfun
-        elif isinstance(myst,float):
-            def funfun(x): return myst +0*x
-            return funfun
-        else:
-            raise TypeError(name,'needs to be either function, numpy array, or float') 
-    
+    def make_func(self, xi, myst, name): return make_func(myst, xi, name)
     
     def ys(self, b):
         # inverse of bs(y)
