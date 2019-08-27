@@ -97,10 +97,20 @@ class Psi_SO(object):
 
     return self.make_func(self.z, N2, 'N2')
 
-  def calc_taper(self, H, z):
+  def calc_bottom_taper(self, H, z):
     if H is not None:
       return 1. - np.maximum(z[0] + H - z, 0.)**2. / H**2.
     return 1.
+
+  def calc_top_taper(self, H, z, scalar=True):
+    if H is not None:
+      return  1 - np.maximum(z + H, 0)**2. / H**2.
+    elif scalar:
+      return 1.
+    else:
+      taper = np.ones(np.size(z))
+      taper[-1] = 0.
+      return taper
 
   def calc_Ekman(self):
     # compute Ekman transport on z grid
@@ -110,12 +120,8 @@ class Psi_SO(object):
       y0 = self.ys(self.b(self.z[ii]))    # outcrop latitude
       tau_ave[ii] = np.mean(self.tau(np.linspace(y0, self.y[-1], 100)))
 
-    silltaper = self.calc_taper(self.Hsill, self.z)
-    if self.HEk is not None:
-      Ektaper = 1 - np.maximum(self.z + self.HEk, 0)**2. / self.HEk**2.
-    else:
-      Ektaper = np.ones(np.size(self.z))
-      Ektaper[-1] = 0.
+    silltaper = self.calc_bottom_taper(self.Hsill, self.z)
+    Ektaper = self.calc_top_taper(self.HEk, self.z, scalar=False)
     return tau_ave / self.f / self.rho * self.L * silltaper * Ektaper
 
   def calc_GM(self):
@@ -125,12 +131,8 @@ class Psi_SO(object):
     eps = 0.1    # minimum dy (in meters) (to avoid div. by 0)
     for ii in range(0, np.size(self.z)):
       dy_atz[ii] = max(self.y[-1] - self.ys(self.b(self.z[ii])), eps)
-    bottaper = self.calc_taper(self.Htaperbot, self.z)
-    if self.Htapertop is not None:
-      toptaper = 1 - np.maximum(self.z + self.Htapertop,
-                                0)**2. / self.Htapertop**2.
-    else:
-      toptaper = 1.
+    bottaper = self.calc_bottom_taper(self.Htaperbot, self.z)
+    toptaper = self.calc_top_taper(self.Htapertop, self.z)
     if self.c is not None:
       temp = self.make_func(
           self.z, self.KGM * self.z / dy_atz * self.L * toptaper * bottaper,
