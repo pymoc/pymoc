@@ -106,7 +106,7 @@
 #         yi = interp_twocol.y[nz - iy - 1]
 #         z = interp_twocol.z[iz]
 #         y = interp_twocol.y[iy]
-#         b = interp_twocol.bn(d - zi - s*(l - yi)) 
+#         b = interp_twocol.bn(d - zi - s*(l - yi))
 #         barray[iy, iz] = b
 #         btarray[iy, iz] = interp_twocol(y, z)
 #         # assert np.abs((b - interp_twocol(y, z))/interp_twocol(y,z)) <= 0.5
