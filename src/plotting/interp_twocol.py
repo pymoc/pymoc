@@ -3,8 +3,11 @@ A class to interpolate the buoyancy field in the North along lines
 with constant slope - only to make fancy plots
 '''
 
+import sys
 import numpy as np
 from scipy.optimize import brenth
+sys.path.append('/pymoc/src/utils')
+from gridit import gridit 
 
 class Interpolate_twocol(object):
     def __init__(
@@ -71,12 +74,6 @@ class Interpolate_twocol(object):
         return self.bs(z-s*y)
     
     def gridit(self):
-        ny=len(self.y)
-        nz=len(self.z)
-        barray=np.zeros((ny,nz))
-        for iy in range(0,ny):
-            for iz in range(0,nz):
-               barray[iy,iz]=self(self.y[iy],self.z[iz])
-        return barray
+      return gridit(self.y, self.z, self)
       
     

@@ -2,9 +2,11 @@
 An class to interpolate the buoyancy field in the SO along lines
 with constant slope - only to mke fancy looking plots
 '''
-
+import sys
 import numpy as np
 from scipy.optimize import brenth
+sys.path.append('/pymoc/src/utils')
+from gridit import gridit 
 
 class Interpolate_channel(object):
     def __init__(
@@ -62,14 +64,6 @@ class Interpolate_channel(object):
         else:
           s=brenth(f, 1.e-12,1.0)
         return self.bn(z-s*(l-y))
-    
+
     def gridit(self):
-        ny=len(self.y)
-        nz=len(self.z)
-        barray=np.zeros((ny,nz))
-        for iy in range(0,ny):
-            for iz in range(0,nz):
-               barray[iy,iz]=self(self.y[iy],self.z[iz])
-        return barray
-      
-    
+      return gridit(self.y, self.z, self)
