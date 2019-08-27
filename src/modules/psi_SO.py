@@ -124,6 +124,13 @@ class Psi_SO(object):
     Ektaper = self.calc_top_taper(self.HEk, self.z, scalar=False)
     return tau_ave / self.f / self.rho * self.L * silltaper * Ektaper
 
+  def bc_GM(self, ya, yb):
+    if self.bvp_with_Ek:
+      return np.array(
+          [ya[0] + self.Psi_Ek[0] * 1e6, yb[0] + self.Psi_Ek[-1] * 1e6])
+    else:
+      return np.array([ya[0], yb[0]])
+
   def calc_GM(self):
     # compute GM ransport on z grid
     # based on average isopycnal slope
@@ -138,21 +145,12 @@ class Psi_SO(object):
           self.z, self.KGM * self.z / dy_atz * self.L * toptaper * bottaper,
           'psiGM')
       N2 = self.calc_N2()
-      if self.bvp_with_Ek:
-
-        def bc(ya, yb):
-          return np.array(
-              [ya[0] + self.Psi_Ek[0] * 1e6, yb[0] + self.Psi_Ek[-1] * 1e6])
-      else:
-
-        def bc(ya, yb):
-          return np.array([ya[0], yb[0]])
 
       def ode(z, y):
         return np.vstack((y[1], N2(z) / self.c**2. * (y[0] - temp(z))))
 
       #Solve the boundary value problem
-      res = integrate.solve_bvp(ode, bc, self.z, np.zeros(
+      res = integrate.solve_bvp(ode, self.bc_GM, self.z, np.zeros(
           (2, np.size(self.z))))
       # return solution interpolated onto original grid
       temp = res.sol(self.z)[0, :]
