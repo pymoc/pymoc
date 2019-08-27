@@ -4,3 +4,4 @@ checks:
     enabled: false
 exclude_patterns:
   - "examples/**/*.py"
+  - "tests/**/*.py"
