@@ -97,6 +97,11 @@ class Psi_SO(object):
 
     return self.make_func(self.z, N2, 'N2')
 
+  def calc_taper(self, H, z):
+    if H is not None:
+      return 1. - np.maximum(z[0] + H - z, 0.)**2. / H**2.
+    return 1.
+
   def calc_Ekman(self):
     # compute Ekman transport on z grid
     # based on average wind stress between outcrop and northern end of channel
@@ -104,11 +109,8 @@ class Psi_SO(object):
     for ii in range(0, np.size(self.z)):
       y0 = self.ys(self.b(self.z[ii]))    # outcrop latitude
       tau_ave[ii] = np.mean(self.tau(np.linspace(y0, self.y[-1], 100)))
-    if self.Hsill is not None:
-      silltaper = 1. - np.maximum(self.z[0] + self.Hsill - self.z,
-                                  0.)**2. / self.Hsill**2.
-    else:
-      silltaper = 1.
+
+    silltaper = self.calc_taper(self.Hsill, self.z)
     if self.HEk is not None:
       Ektaper = 1 - np.maximum(self.z + self.HEk, 0)**2. / self.HEk**2.
     else:
@@ -123,11 +125,7 @@ class Psi_SO(object):
     eps = 0.1    # minimum dy (in meters) (to avoid div. by 0)
     for ii in range(0, np.size(self.z)):
       dy_atz[ii] = max(self.y[-1] - self.ys(self.b(self.z[ii])), eps)
-    if self.Htaperbot is not None:
-      bottaper = 1. - np.maximum(self.z[0] + self.Htaperbot - self.z,
-                                 0.)**2. / self.Htaperbot**2.
-    else:
-      bottaper = 1.
+    bottaper = self.calc_taper(self.Htaperbot, self.z)
     if self.Htapertop is not None:
       toptaper = 1 - np.maximum(self.z + self.Htapertop,
                                 0)**2. / self.Htapertop**2.
