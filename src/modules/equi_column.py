@@ -134,25 +134,26 @@ class Equi_Column(object):
 
   def bc(self, ya, yb, p=None):
     #return the boundary conditions for the ODE
+    if self.H is None and (p is None or len(p) == 0):
+      raise TypeError(
+          'Must provide a p array if column does not have an H value')
+
     y1 = 0
     y2 = 0
-    if self.H is None and p is not None and len(p) > 0:
+    if self.H is None:
       y2 = yb[2] - self.bs / p[0]
       if getattr(self, "b_bot", None) is not None:
         y1 = ya[2] - self.b_bot / p[0]
       else:
         y1 = ya[3] + self.bz(p[0])
       return np.array([ya[0], yb[0], ya[1], y1, y2])
-    elif self.H is not None:
+    else:
       y2 = yb[2] - self.bs / self.H
       if getattr(self, "b_bot", None) is not None:
         y1 = ya[2] - self.b_bot / self.H
       else:
         y1 = ya[3] + self.bz(self.H)
       return np.array([ya[0], yb[0], y1, y2])
-    else:
-      raise TypeError(
-          'Must provide a p array if column does not have an H value')
 
 
   def ode(self, z, y, p=None):
