@@ -54,6 +54,14 @@ class SO_ML(object):
     #Solve for equilibrium solution given inputs
     raise TypeError('This functionality is not yet implemented')
 
+  def set_boundary_conditions(self, b_basin, Psi_b):
+    if self.Psi_s[1] > 0:
+      # set buoyancy at southern boundary to buoyancy of densest upwelling water
+      self.bs[0] = b_basin[np.argwhere(Psi_b > 0)[0][0]]
+    else:
+      # no-flux BC
+      self.bs[0] = self.bs[1]
+
   def advdiff(self, b_basin, Psi_b, dt):
     # update surface buoyancy profile via advect. and diff
 
@@ -87,13 +95,7 @@ class SO_ML(object):
     # at southern boundary makes more sense for diag purposes
 
     #set boundary conditions:
-    self.bs[-1] = b_basin[-1]
-    if self.Psi_s[1] > 0:
-      # set buoyancy at southern boundary to buoyancy of densest upwelling water
-      self.bs[0] = b_basin[np.argwhere(Psi_b > 0)[0][0]]
-    else:
-      # no-flux BC
-      self.bs[0] = self.bs[1]
+    self.set_boundary_conditions(b_basin, Psi_b)
 
     # Compute tendency due to surface b-flux
     dbdt_flux = self.surflux / self.h + self.rest_mask * self.v_pist / self.h * (
@@ -145,12 +147,7 @@ class SO_ML(object):
     #re-set southern boundary condition:
     # this final re-set is just to pass back a state where boundary point is consistent with bcs
     # (preferable e.g. for computation of streamfunction)
-    if self.Psi_s[1] > 0:
-      # set buoyancy at southern boundary to buoyancy of densest upwelling water
-      self.bs[0] = b_basin[np.argwhere(Psi_b > 0)[0][0]]
-    else:
-      # no-flux BC
-      self.bs[0] = self.bs[1]
+    self.set_boundary_conditions(b_basin, Psi_b)
 
   def timestep(self, b_basin=None, Psi_b=None, dt=1.):
     #Integrate buoyancy profile evolution for one time-step
