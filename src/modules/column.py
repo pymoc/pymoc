@@ -15,6 +15,7 @@ from scipy import integrate
 sys.path.append('/pymoc/src/utils')
 from make_func import make_func
 from make_array import make_array
+from check_numpy_version import check_numpy_version
 
 
 class Column(object):
@@ -50,17 +51,10 @@ class Column(object):
 
     self.b = self.make_array(b, 'b')
 
-    if self.check_numpy_version():
+    if check_numpy_version():
       self.bz = np.gradient(self.b, z)
     else:
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
-
-  def check_numpy_version(self):
-    # check numpy version (version >= 1.13 needed to automatically compute db/dz)
-    v = [int(i) for i in np.version.version.split('.')]
-    if v[0] <= 1 and v[1] < 13:
-      return False
-    return True
 
   def make_func(self, myst, name):
     return make_func(myst, self.z, name)
@@ -72,7 +66,7 @@ class Column(object):
     return self.Area(z) * self.kappa(z)
 
   def dAkappa_dz(self, z):
-    if not self.check_numpy_version():
+    if not check_numpy_version():
       raise ImportError(
           'You need NumPy version 1.13.0 or later. Please upgrade your NumPy libary.'
       )

@@ -23,8 +23,11 @@ Notice that H then appears as a parameter in the equations.
 5 boundary conditions are needed if we also want to solve for the parameter H
 '''
 
+import sys
 import numpy as np
 from scipy import integrate
+sys.path.append('/pymoc/src/utils')
+from check_numpy_version import check_numpy_version
 
 
 class Equi_Column(object):
@@ -63,7 +66,7 @@ class Equi_Column(object):
       if callable(dkappa_dz):
         self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
       else:
-        if not self.check_numpy_version():
+        if not check_numpy_version():
           raise ImportError(
               'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary or provide functional form of dkappa_dz.'
           )
@@ -72,7 +75,7 @@ class Equi_Column(object):
     elif isinstance(kappa, np.ndarray):
       self.kappa = lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.
                                                                    f)
-      if not self.check_numpy_version():
+      if not check_numpy_version():
         raise ImportError(
             'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
         )
@@ -120,13 +123,6 @@ class Equi_Column(object):
       self.sol_init = sol_init
 
   # end of init
-
-  def check_numpy_version(self):
-    # check numpy version (version >= 1.13 needed to automatically compute db/dz)
-    v = [int(i) for i in np.version.version.split('.')]
-    if v[0] <= 1 and v[1] < 13:
-      return False
-    return True
 
   def alpha(self, z, H):
     #return factor on the RHS of ODE
