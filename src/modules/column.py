@@ -14,6 +14,7 @@ import numpy as np
 from scipy import integrate
 sys.path.append('/pymoc/src/utils')
 from make_func import make_func
+from make_array import make_array
 
 
 class Column(object):
@@ -65,16 +66,7 @@ class Column(object):
     return make_func(myst, self.z, name)
 
   def make_array(self, myst, name):
-    # turn mysterious object into array(if needed)
-    if isinstance(myst, np.ndarray):
-      return myst
-    elif callable(myst):
-      return myst(self.z)
-    elif isinstance(myst, float):
-      return myst + 0 * self.z
-    else:
-      raise TypeError(name,
-                      'needs to be either function, numpy array, or float')
+    return make_array(myst, self.z, name)
 
   def Akappa(self, z):
     return self.Area(z) * self.kappa(z)

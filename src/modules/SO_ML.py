@@ -6,7 +6,10 @@ Northen and southern boundary conditions are determined internally based on the
 overturning streamfunction and buoyancy profile in the basin
 '''
 
+import sys
 import numpy as np
+sys.path.append('/pymoc/src/utils')
+from make_array import make_array
 
 
 class SO_ML(object):
@@ -45,16 +48,7 @@ class SO_ML(object):
     self.bs = self.make_array(bs, 'bs')
 
   def make_array(self, myst, name):
-    # turn mysterious object into array(if needed)
-    if isinstance(myst, np.ndarray):
-      return myst
-    elif callable(myst):
-      return myst(self.y)
-    elif isinstance(myst, float):
-      return myst + 0 * self.y
-    else:
-      raise TypeError(name,
-                      'needs to be either function, numpy array, or float')
+    return make_array(myst, self.y, name)
 
   def solve_equi(self):
     #Solve for equilibrium solution given inputs

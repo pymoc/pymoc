@@ -20,6 +20,7 @@ from scipy import integrate
 from matplotlib import pyplot as plt
 sys.path.append('/pymoc/src/utils')
 from make_func import make_func
+from make_array import make_array
 #from scipy.interpolate import interp1d
 
 
@@ -57,16 +58,7 @@ class Psi_Thermwind(object):
     return make_func(myst, zin, name)
 
   def make_array(self, myst, name):
-    # turn mysterious object into array(if needed)
-    if isinstance(myst, np.ndarray):
-      return myst
-    elif callable(myst):
-      return myst(self.z)
-    elif isinstance(myst, float):
-      return myst + 0 * self.z
-    else:
-      raise TypeError(name,
-                      'needs to be either function, numpy array, or float')
+    return make_array(myst, self.z, name)
 
   def bc(self, ya, yb):
     #return the boundary conditions
