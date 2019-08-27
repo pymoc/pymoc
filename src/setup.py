@@ -6,8 +6,6 @@ setup(
   py_modules=[
     'pymoc.column',
     'pymoc.equi_column',
-    'pymoc.interp_channel',
-    'pymoc.interp_twocol',
     'pymoc.psi_SO',
     'pymoc.psi_thermwind',
     'pymoc.SO_ML'
