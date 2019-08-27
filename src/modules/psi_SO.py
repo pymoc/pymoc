@@ -160,9 +160,8 @@ class Psi_SO(object):
       temp = self.KGM * np.maximum(self.z / dy_atz,
                                    -self.smax) * self.L * toptaper * bottaper
     # limit Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
-    temp[dy_atz > self.y[-1] - self.y[0]] = np.maximum(
-        temp[dy_atz > self.y[-1] - self.y[0]],
-        -self.Psi_Ek[dy_atz > self.y[-1] - self.y[0]] * 1e6)
+    idx = dy_atz > self.y[-1] - self.y[0]
+    temp[idx] = np.maximum(temp[idx], -self.Psi_Ek[idx] * 1e6)
     return temp
 
   def solve(self):

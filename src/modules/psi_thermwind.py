@@ -87,8 +87,9 @@ class Psi_Thermwind(object):
     psib = 0. * self.bgrid
     bup_bot = b1[:-1].copy()
     bup_top = b1[1:].copy()
-    bup_bot[udydz < 0] = b2[:-1][udydz < 0]
-    bup_top[udydz < 0] = b2[1:][udydz < 0]
+    idx = udydz < 0
+    bup_bot[idx] = b2[:-1][idx]
+    bup_top[idx] = b2[1:][idx]
     for i in range(0, len(self.bgrid)):
       mask = np.clip((bup_top - self.bgrid[i]) / (bup_top-bup_bot), 0., 1.)
       psib[i] = np.sum(mask * udydz)

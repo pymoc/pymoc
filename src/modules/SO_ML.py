@@ -125,8 +125,8 @@ class SO_ML(object):
     # Do implicit diffusion:
     s = self.Ks * dt / dy**2
 
-    U = (np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) + np.diag(
-        (1+s) * np.ones(len(self.y)), 0) +
+    U = (np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
+         np.diag((1+s) * np.ones(len(self.y)), 0) +
          np.diag(-s / 2. * np.ones(len(self.y) - 1), 1))
     U[0, 0] = 1
     U[0, 1] = 0
