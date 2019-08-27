@@ -61,6 +61,28 @@ class SO_ML(object):
     else:
       # no-flux BC
       self.bs[0] = self.bs[1]
+  
+  def calc_advective_tendency(self, dy):
+    # Notice that the current implementation assumes an evenly spaced grid!
+    dbdt_ad = 0. * self.y
+    indneg = self.Psi_s[1:-1] < 0.
+    indpos = self.Psi_s[1:-1] > 0.
+    dbdt_ad[1:-1][indneg] = -self.Psi_s[1:-1][indneg] * 1e6 * (
+        self.bs[2:][indneg] - self.bs[1:-1][indneg]) / self.h / self.L / dy
+    dbdt_ad[1:-1][indpos] = -self.Psi_s[1:-1][indpos] * 1e6 * (
+        self.bs[1:-1][indpos] - self.bs[:-2][indpos]) / self.h / self.L / dy
+    return dbdt_ad
+
+  def calc_implicit_diffusion(self, s):
+    U = (np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
+         np.diag((1+s) * np.ones(len(self.y)), 0) +
+         np.diag(-s / 2. * np.ones(len(self.y) - 1), 1))
+    U[0, 0] = 1
+    U[0, 1] = 0
+    U[-1, -2] = 0
+    U[-1, -1] = 1
+    return U
+
 
   def advdiff(self, b_basin, Psi_b, dt):
     # update surface buoyancy profile via advect. and diff
@@ -102,15 +124,8 @@ class SO_ML(object):
         self.b_rest - self.bs)
 
     # Compute advective tendency via upwind advection
-    dy = self.y[1] - self.y[
-        0]    # Notice that the current implementation assumes an evenly spaced grid!
-    dbdt_ad = 0. * self.y
-    indneg = self.Psi_s[1:-1] < 0.
-    indpos = self.Psi_s[1:-1] > 0.
-    dbdt_ad[1:-1][indneg] = -self.Psi_s[1:-1][indneg] * 1e6 * (
-        self.bs[2:][indneg] - self.bs[1:-1][indneg]) / self.h / self.L / dy
-    dbdt_ad[1:-1][indpos] = -self.Psi_s[1:-1][indpos] * 1e6 * (
-        self.bs[1:-1][indpos] - self.bs[:-2][indpos]) / self.h / self.L / dy
+    dy = self.y[1] - self.y[0]    
+    dbdt_ad = self.calc_advective_tendency(dy)
 
     # add tendencies from surface flux and advection
     self.bs = self.bs + dt * (dbdt_flux+dbdt_ad)
@@ -124,24 +139,9 @@ class SO_ML(object):
 
     # Do implicit diffusion:
     s = self.Ks * dt / dy**2
-
-    U = (np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
-         np.diag((1+s) * np.ones(len(self.y)), 0) +
-         np.diag(-s / 2. * np.ones(len(self.y) - 1), 1))
-    U[0, 0] = 1
-    U[0, 1] = 0
-    U[-1, -2] = 0
-    U[-1, -1] = 1
+    U = self.calc_implicit_diffusion(s)
+    V = self.calc_implicit_diffusion(-s)
     Uinv = np.linalg.inv(U)
-
-    V = (np.diag(s / 2. * np.ones(len(self.y) - 1), -1) + np.diag(
-        (1-s) * np.ones(len(self.y)), 0) +
-         np.diag(s / 2. * np.ones(len(self.y) - 1), 1))
-    V[0, 0] = 1
-    V[0, 1] = 0
-    V[-1, -2] = 0
-    V[-1, -1] = 1
-
     self.bs = np.dot(np.dot(Uinv, V), self.bs)
 
     #re-set southern boundary condition:
