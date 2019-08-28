@@ -62,17 +62,19 @@ class Equi_Column(object):
 
     # Initialize Southern Ocean Streamfunction
     self.init_psi_so(psi_so)
+
     # initialize non-dimensional surface buoyancy and bottom buoyancy
     # or abyssal buoyancy flux boundary condition
-    self.bs = -b_s / f**2
-    if b_bot is not None:
-      self.b_bot = -b_bot / f**2
-    elif B_int is not None:
-      self.B_int = B_int
-    else:
+    if b_bot is None and B_int is None:
       raise Exception(
           'You need to specify either b_bot or B_int for bottom boundary condition'
       )
+
+    self.bs = -b_s / f**2
+    if b_bot is not None:
+      self.b_bot = -b_bot / f**2
+    else:
+      self.B_int = B_int
 
     self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz, b_bot)
   # end of init
