@@ -9,6 +9,7 @@ coverage:
   range: 40..80
   
   ignore:
+    - "examples/**/*.py"
     - "tests/**/*.py"
     - "src/setup.py"
     - "src/plotting/*"
