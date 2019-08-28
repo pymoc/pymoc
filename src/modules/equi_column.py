@@ -58,13 +58,14 @@ class Equi_Column(object):
     self.zi = np.asarray(np.linspace(
         -1, 0, nz))    # grid for initial conditions for solver
 
-    self.init_kappa(kappa, dkappa_dz)
+    self.init_kappa(kappa)
+    self.init_dkappa_dz(kappa, dkappa_dz)
     self.init_psi_so(psi_so)
     self.init_b_boundaries(b_s, b_bot, B_int)
     self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz, b_bot)
 
 
-  def init_kappa(self, kappa, dkappa_dz=None):
+  def init_kappa(self, kappa):
     # Initialize vertical diffusivity profile:
     if callable(kappa):
       self.kappa = lambda z, H: kappa(z * H) / (H**2 * self.f)    # non-dimensionalize (incl. norm. of vertical coordinate)
@@ -72,7 +73,8 @@ class Equi_Column(object):
       self.kappa = lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.f)
     else:
       self.kappa = lambda z, H: kappa / (H**2 * self.f)
-    
+
+  def init_dkappa_dz(self, kappa, dkappa_dz=None):
     if callable(kappa) and callable(dkappa_dz):
         self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
