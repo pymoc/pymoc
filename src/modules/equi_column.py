@@ -110,14 +110,12 @@ class Equi_Column(object):
     # Set initial conditions for ODE solver
     if nz is None:
       nz = len(self.z)
+    b_init = -100.0 if getattr(self, 'b_bot', None) is not None else -self.bz(1500.)
 
     sol_init = np.zeros((4, nz))
     sol_init[0, :] = np.ones((nz))
     sol_init[2, :] = 0.0 * np.ones((nz))
-    if getattr(self, "b_bot", None) is not None:
-      sol_init[3, :] = -100.0 * np.ones((nz))
-    else:
-      sol_init[3, :] = -self.bz(1500.) * np.ones((nz))
+    sol_init[3, :] = b_init * np.ones((nz))
     return sol_init
 
   def init_psi_so(self, psi_so=None):
