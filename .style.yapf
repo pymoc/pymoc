@@ -4,4 +4,3 @@ spaces_before_comment = 4
 split_before_logical_operator = true
 indent_width = 2
 arithmetic_precedence_indication = true
-
