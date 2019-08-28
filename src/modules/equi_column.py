@@ -58,6 +58,11 @@ class Equi_Column(object):
     self.zi = np.asarray(np.linspace(
         -1, 0, nz))    # grid for initial conditions for solver
 
+    if not callable(dkappa_dz) and (callable(kappa) or isinstance(kappa, np.ndarray)) and not check_numpy_version():
+      raise ImportError(
+          'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
+      )
+
     self.kappa = self.init_kappa(kappa)
     self.dkappa_dz = self.init_dkappa_dz(kappa, dkappa_dz)
     self.init_psi_so(psi_so)
@@ -75,11 +80,6 @@ class Equi_Column(object):
       return lambda z, H: kappa / (H**2 * self.f)
 
   def init_dkappa_dz(self, kappa, dkappa_dz=None):
-    if not callable(dkappa_dz) and (callable(kappa) or isinstance(kappa, np.ndarray)) and not check_numpy_version():
-      raise ImportError(
-          'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
-      )
-
     if callable(kappa) and callable(dkappa_dz):
         return lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
