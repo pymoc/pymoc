@@ -138,25 +138,24 @@ class Equi_Column(object):
       raise TypeError(
           'Must provide a p array if column does not have an H value')
 
-    y1 = 0
-    y2 = 0
     bbot_set = getattr(self, 'b_bot', None) is not None
+    y = np.array([ya[0], yb[0]])
     if self.H is None and bbot_set:
-      y1 = ya[2] - self.b_bot / p[0]
-      y2 = yb[2] - self.bs / p[0]
-      return np.array([ya[0], yb[0], ya[1], y1, y2])
+      y = np.append(y, ya[1])
+      y = np.append(y, ya[2] - self.b_bot / p[0])
+      y = np.append(y, yb[2] - self.bs / p[0])
     elif self.H is None:
-      y1 = ya[3] + self.bz(p[0])
-      y2 = yb[2] - self.bs / p[0]
-      return np.array([ya[0], yb[0], ya[1], y1, y2])
+      y = np.append(y, ya[1])
+      y = np.append(y, ya[3] + self.bz(p[0]))
+      y = np.append(y, yb[2] - self.bs / p[0])
     elif bbot_set:
-      y1 = ya[2] - self.b_bot / self.H
-      y2 = yb[2] - self.bs / self.H
-      return np.array([ya[0], yb[0], y1, y2])
+      y = np.append(y, ya[2] - self.b_bot / self.H)
+      y = np.append(y, yb[2] - self.bs / self.H)
     else:
-      y1 = ya[3] + self.bz(self.H)
-      y2 = yb[2] - self.bs / self.H
-      return np.array([ya[0], yb[0], y1, y2])
+      y = np.append(y, ya[3] + self.bz(self.H))
+      y = np.append(y, yb[2] - self.bs / self.H)
+
+    return y
 
 
   def ode(self, z, y, p=None):
