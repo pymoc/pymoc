@@ -61,16 +61,7 @@ class Equi_Column(object):
     self.init_kappa(kappa, dkappa_dz)
 
     # Initialize Southern Ocean Streamfunction
-    if callable(psi_so):
-      self.psi_so = lambda z, H: psi_so(z * H) / (
-          self.f * H**3
-      )    # non-dimensionalize (incl. norm. of vertical coordinate)
-    elif isinstance(psi_so, np.ndarray):
-      self.psi_so = lambda z, H: np.interp(z * H, self.z, psi_so) / (self.f * H
-                                                                     **3)
-    else:
-      self.psi_so = lambda z, H: 0
-
+    self.init_psi_so(psi_so)
     # initialize non-dimensional surface buoyancy and bottom buoyancy
     # or abyssal buoyancy flux boundary condition
     self.bs = -b_s / f**2
@@ -130,6 +121,17 @@ class Equi_Column(object):
       else:
         sol_init[3, :] = -self.bz(1500.) * np.ones((nz))
       self.sol_init = sol_init
+
+  def init_psi_so(self, psi_so=None):
+    if callable(psi_so):
+      self.psi_so = lambda z, H: psi_so(z * H) / (
+          self.f * H**3
+      )    # non-dimensionalize (incl. norm. of vertical coordinate)
+    elif isinstance(psi_so, np.ndarray):
+      self.psi_so = lambda z, H: np.interp(z * H, self.z, psi_so) / (self.f * H
+                                                                     **3)
+    else:
+      self.psi_so = lambda z, H: 0
 
   def alpha(self, z, H):
     #return factor on the RHS of ODE
