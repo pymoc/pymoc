@@ -5,3 +5,8 @@ split_before_logical_operator = true
 indent_width = 2
 arithmetic_precedence_indication = true
 coalesce_brackets = true
+dedent_closing_brackets = true
+indent_dictionary_value = true
+join_multiple_lines = true
+split_complex_comprehension = true
+
