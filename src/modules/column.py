@@ -82,7 +82,8 @@ class Column(object):
   def ode(self, z, y):
     #return the equation to be solved
     return np.vstack(
-        (y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1]))
+        (y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1])
+    )
 
   def solve_equi(self, wA):
     #Solve for equilibrium solution given vert. vel profile and BCs
@@ -115,8 +116,10 @@ class Column(object):
     bz = bz_down
     bz[weff[1:-1] < 0] = bz_up[weff[1:-1] < 0]
 
-    db_dt = (-weff[1:-1] * bz / self.Area(self.z[1:-1]) +
-             self.kappa(self.z[1:-1]) * bzz)
+    db_dt = (
+        -weff[1:-1] * bz / self.Area(self.z[1:-1]) +
+        self.kappa(self.z[1:-1]) * bzz
+    )
     self.b[1:-1] = self.b[1:-1] + dt*db_dt
 
   def convect(self):

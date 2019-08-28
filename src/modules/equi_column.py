@@ -55,10 +55,13 @@ class Equi_Column(object):
     self.H = H
     self.H_guess = H_guess
     self.z = z
-    self.zi = np.asarray(np.linspace(
-        -1, 0, nz))    # grid for initial conditions for solver
+    self.zi = np.asarray(
+        np.linspace(-1, 0, nz)
+    )    # grid for initial conditions for solver
 
-    if not callable(dkappa_dz) and (callable(kappa) or isinstance(kappa, np.ndarray)) and not check_numpy_version():
+    if not callable(dkappa_dz) and (
+        callable(kappa) or isinstance(kappa, np.ndarray)
+    ) and not check_numpy_version():
       raise ImportError(
           'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
       )
@@ -67,13 +70,16 @@ class Equi_Column(object):
     self.dkappa_dz = self.init_dkappa_dz(kappa, dkappa_dz)
     self.init_psi_so(psi_so)
     self.init_b_boundaries(b_s, b_bot, B_int)
-    self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz, b_bot)
-
+    self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(
+        sol_init, nz, b_bot
+    )
 
   def init_kappa(self, kappa):
     # Initialize vertical diffusivity profile:
     if callable(kappa):
-      return lambda z, H: kappa(z * H) / (H**2 * self.f)    # non-dimensionalize (incl. norm. of vertical coordinate)
+      return lambda z, H: kappa(z * H) / (
+          H**2 * self.f
+      )    # non-dimensionalize (incl. norm. of vertical coordinate)
     elif isinstance(kappa, np.ndarray):
       return lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.f)
     else:
@@ -81,7 +87,7 @@ class Equi_Column(object):
 
   def init_dkappa_dz(self, kappa, dkappa_dz=None):
     if callable(kappa) and callable(dkappa_dz):
-        return lambda z, H: dkappa_dz(z * H) / (H * self.f)
+      return lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
       return lambda z, H: np.gradient(kappa(z * H), z * H) / (H * self.f)
     elif isinstance(kappa, np.ndarray):
@@ -109,8 +115,8 @@ class Equi_Column(object):
           self.f * H**3
       )    # non-dimensionalize (incl. norm. of vertical coordinate)
     elif isinstance(psi_so, np.ndarray):
-      self.psi_so = lambda z, H: np.interp(z * H, self.z, psi_so) / (self.f * H
-                                                                     **3)
+      self.psi_so = lambda z, H: np.interp(z * H, self.z, psi_so
+                                           ) / (self.f * H**3)
     else:
       self.psi_so = lambda z, H: 0
 
@@ -149,9 +155,10 @@ class Equi_Column(object):
       y = np.append(y, yb[2] - self.bs / d)
 
       return y
-    except TypeError: 
+    except TypeError:
       raise TypeError(
-          'Must provide a p array if column does not have an H value')
+          'Must provide a p array if column does not have an H value'
+      )
 
   def ode(self, z, y, p=None):
     #return the ODE to be solved
@@ -161,26 +168,24 @@ class Equi_Column(object):
       H = self.H
     else:
       raise TypeError(
-          'Must provide a p array if column does not have an H value')
-    return np.vstack(
-        (y[1], y[2], y[3], self.alpha(z, H) * y[3] *
-         (y[0] - self.psi_so(z, H) - self.A * self.dkappa_dz(z, H) / (H**2))))
+          'Must provide a p array if column does not have an H value'
+      )
+    return np.vstack((
+        y[1], y[2], y[3], self.alpha(z, H) * y[3] *
+        (y[0] - self.psi_so(z, H) - self.A * self.dkappa_dz(z, H) / (H**2))
+    ))
 
   def solve(self):
     #Solve the boundary value problem
     if self.H is None:
-      res = integrate.solve_bvp(self.ode,
-                                self.bc,
-                                self.zi,
-                                self.sol_init,
-                                p=[self.H_guess])
+      res = integrate.solve_bvp(
+          self.ode, self.bc, self.zi, self.sol_init, p=[self.H_guess]
+      )
       self.H = res.p[0]
     else:
-      res = integrate.solve_bvp(self.ode,
-                                self.bc,
-                                self.zi,
-                                self.sol_init,
-                                p=None)
+      res = integrate.solve_bvp(
+          self.ode, self.bc, self.zi, self.sol_init, p=None
+      )
 
     # if self.z does not yet exist use mesh from solver:
     if self.z is None:

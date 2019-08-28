@@ -104,7 +104,7 @@ class Psi_SO(object):
 
   def calc_top_taper(self, H, z, scalar=True):
     if H is not None:
-      return  1 - np.maximum(z + H, 0)**2. / H**2.
+      return 1 - np.maximum(z + H, 0)**2. / H**2.
     elif scalar:
       return 1.
     else:
@@ -126,8 +126,9 @@ class Psi_SO(object):
 
   def bc_GM(self, ya, yb):
     if self.bvp_with_Ek:
-      return np.array(
-          [ya[0] + self.Psi_Ek[0] * 1e6, yb[0] + self.Psi_Ek[-1] * 1e6])
+      return np.array([
+          ya[0] + self.Psi_Ek[0] * 1e6, yb[0] + self.Psi_Ek[-1] * 1e6
+      ])
     else:
       return np.array([ya[0], yb[0]])
 
@@ -143,20 +144,23 @@ class Psi_SO(object):
     if self.c is not None:
       temp = self.make_func(
           self.z, self.KGM * self.z / dy_atz * self.L * toptaper * bottaper,
-          'psiGM')
+          'psiGM'
+      )
       N2 = self.calc_N2()
 
       def ode(z, y):
         return np.vstack((y[1], N2(z) / self.c**2. * (y[0] - temp(z))))
 
       #Solve the boundary value problem
-      res = integrate.solve_bvp(ode, self.bc_GM, self.z, np.zeros(
-          (2, np.size(self.z))))
+      res = integrate.solve_bvp(
+          ode, self.bc_GM, self.z, np.zeros((2, np.size(self.z)))
+      )
       # return solution interpolated onto original grid
       temp = res.sol(self.z)[0, :]
     else:
-      temp = self.KGM * np.maximum(self.z / dy_atz,
-                                   -self.smax) * self.L * toptaper * bottaper
+      temp = self.KGM * np.maximum(
+          self.z / dy_atz, -self.smax
+      ) * self.L * toptaper * bottaper
     # limit Psi_GM to -Psi_Ek on isopycnals that don't outcrop:
     idx = dy_atz > self.y[-1] - self.y[0]
     temp[idx] = np.maximum(temp[idx], -self.Psi_Ek[idx] * 1e6)

@@ -40,7 +40,8 @@ class Interpolate_twocol(object):
     l = self.y[-1]
     bsurf = self.make_func(
         self.y / l * self.bn(0) + (1 - self.y / l) * self.bs(0), 'bsurf',
-        self.y)
+        self.y
+    )
     if z == 0 and y == 0:
       # slope ill defined at (0,0); evaluate infinitesimally below the surface:
       z = -0.01

@@ -61,28 +61,31 @@ class SO_ML(object):
     else:
       # no-flux BC
       self.bs[0] = self.bs[1]
-  
+
   def calc_advective_tendency(self, dy):
     # Notice that the current implementation assumes an evenly spaced grid!
     dbdt_ad = 0. * self.y
     indneg = self.Psi_s[1:-1] < 0.
     indpos = self.Psi_s[1:-1] > 0.
     dbdt_ad[1:-1][indneg] = -self.Psi_s[1:-1][indneg] * 1e6 * (
-        self.bs[2:][indneg] - self.bs[1:-1][indneg]) / self.h / self.L / dy
+        self.bs[2:][indneg] - self.bs[1:-1][indneg]
+    ) / self.h / self.L / dy
     dbdt_ad[1:-1][indpos] = -self.Psi_s[1:-1][indpos] * 1e6 * (
-        self.bs[1:-1][indpos] - self.bs[:-2][indpos]) / self.h / self.L / dy
+        self.bs[1:-1][indpos] - self.bs[:-2][indpos]
+    ) / self.h / self.L / dy
     return dbdt_ad
 
   def calc_implicit_diffusion(self, s):
-    U = (np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
-         np.diag((1+s) * np.ones(len(self.y)), 0) +
-         np.diag(-s / 2. * np.ones(len(self.y) - 1), 1))
+    U = (
+        np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
+        np.diag((1+s) * np.ones(len(self.y)), 0) +
+        np.diag(-s / 2. * np.ones(len(self.y) - 1), 1)
+    )
     U[0, 0] = 1
     U[0, 1] = 0
     U[-1, -2] = 0
     U[-1, -1] = 1
     return U
-
 
   def advdiff(self, b_basin, Psi_b, dt):
     # update surface buoyancy profile via advect. and diff
@@ -113,7 +116,8 @@ class SO_ML(object):
     # handle non-monotonic bs, so any such solution should treated with care)
     self.Psi_s[:np.argmin(self.bs)] = 0.
     self.Psi_s[
-        0] = 0.    # This value doesn't actually enter/matter, but zero overturning
+        0
+    ] = 0.    # This value doesn't actually enter/matter, but zero overturning
     # at southern boundary makes more sense for diag purposes
 
     #set boundary conditions:
@@ -121,10 +125,11 @@ class SO_ML(object):
 
     # Compute tendency due to surface b-flux
     dbdt_flux = self.surflux / self.h + self.rest_mask * self.v_pist / self.h * (
-        self.b_rest - self.bs)
+        self.b_rest - self.bs
+    )
 
     # Compute advective tendency via upwind advection
-    dy = self.y[1] - self.y[0]    
+    dy = self.y[1] - self.y[0]
     dbdt_ad = self.calc_advective_tendency(dy)
 
     # add tendencies from surface flux and advection
@@ -153,7 +158,8 @@ class SO_ML(object):
     #Integrate buoyancy profile evolution for one time-step
     if not isinstance(b_basin, np.ndarray):
       raise TypeError(
-          'b_basin needs to be numpy array providing buoyancy levels in basin')
+          'b_basin needs to be numpy array providing buoyancy levels in basin'
+      )
 
     if not isinstance(Psi_b, np.ndarray):
       raise TypeError(
