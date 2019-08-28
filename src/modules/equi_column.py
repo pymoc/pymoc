@@ -74,7 +74,7 @@ class Equi_Column(object):
           'You need to specify either b_bot or B_int for bottom boundary condition'
       )
 
-    self.calc_sol_init(sol_init, nz)
+    self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz)
   # end of init
 
   def init_kappa(self, kappa, dkappa_dz=None):
@@ -110,17 +110,15 @@ class Equi_Column(object):
     # Set initial conditions for ODE solver
     if nz is None:
       nz = len(self.z)
-    if sol_init is not None:
-      self.sol_init = sol_init
+
+    sol_init = np.zeros((4, nz))
+    sol_init[0, :] = np.ones((nz))
+    sol_init[2, :] = 0.0 * np.ones((nz))
+    if getattr(self, "b_bot", None) is not None:
+      sol_init[3, :] = -100.0 * np.ones((nz))
     else:
-      sol_init = np.zeros((4, nz))
-      sol_init[0, :] = np.ones((nz))
-      sol_init[2, :] = 0.0 * np.ones((nz))
-      if getattr(self, "b_bot", None) is not None:
-        sol_init[3, :] = -100.0 * np.ones((nz))
-      else:
-        sol_init[3, :] = -self.bz(1500.) * np.ones((nz))
-      self.sol_init = sol_init
+      sol_init[3, :] = -self.bz(1500.) * np.ones((nz))
+    return sol_init
 
   def init_psi_so(self, psi_so=None):
     if callable(psi_so):
