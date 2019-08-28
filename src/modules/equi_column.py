@@ -133,30 +133,27 @@ class Equi_Column(object):
     return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(-1, H))
 
   def bc(self, ya, yb, p=None):
-    #return the boundary conditions for the ODE
-    if self.H is None and (p is None or len(p) == 0):
+    try:
+      bbot_set = getattr(self, 'b_bot', None) is not None
+      y = np.array([ya[0], yb[0]])
+      if self.H is None:
+        y = np.append(y, ya[1])
+        if bbot_set:
+          y = np.append(y, ya[2] - self.b_bot / p[0])
+        else:
+          y = np.append(y, ya[3] + self.bz(p[0]))
+        y = np.append(y, yb[2] - self.bs / p[0])
+      else:
+        if bbot_set:
+          y = np.append(y, ya[2] - self.b_bot / self.H)
+        else:
+          y = np.append(y, ya[3] + self.bz(self.H))
+        y = np.append(y, yb[2] - self.bs / self.H)
+
+      return y
+    except TypeError: 
       raise TypeError(
           'Must provide a p array if column does not have an H value')
-
-    bbot_set = getattr(self, 'b_bot', None) is not None
-    y = np.array([ya[0], yb[0]])
-    if self.H is None and bbot_set:
-      y = np.append(y, ya[1])
-      y = np.append(y, ya[2] - self.b_bot / p[0])
-      y = np.append(y, yb[2] - self.bs / p[0])
-    elif self.H is None:
-      y = np.append(y, ya[1])
-      y = np.append(y, ya[3] + self.bz(p[0]))
-      y = np.append(y, yb[2] - self.bs / p[0])
-    elif bbot_set:
-      y = np.append(y, ya[2] - self.b_bot / self.H)
-      y = np.append(y, yb[2] - self.bs / self.H)
-    else:
-      y = np.append(y, ya[3] + self.bz(self.H))
-      y = np.append(y, yb[2] - self.bs / self.H)
-
-    return y
-
 
   def ode(self, z, y, p=None):
     #return the ODE to be solved
