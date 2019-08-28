@@ -59,25 +59,10 @@ class Equi_Column(object):
         -1, 0, nz))    # grid for initial conditions for solver
 
     self.init_kappa(kappa, dkappa_dz)
-
-    # Initialize Southern Ocean Streamfunction
     self.init_psi_so(psi_so)
-
-    # initialize non-dimensional surface buoyancy and bottom buoyancy
-    # or abyssal buoyancy flux boundary condition
-    if b_bot is None and B_int is None:
-      raise Exception(
-          'You need to specify either b_bot or B_int for bottom boundary condition'
-      )
-
-    self.bs = -b_s / f**2
-    if b_bot is not None:
-      self.b_bot = -b_bot / f**2
-    else:
-      self.B_int = B_int
-
+    self.init_b_boundaries(b_s, b_bot, B_int)
     self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz, b_bot)
-  # end of init
+
 
   def init_kappa(self, kappa, dkappa_dz=None):
     # Initialize vertical diffusivity profile:
@@ -120,6 +105,7 @@ class Equi_Column(object):
     sol_init[3, :] = b_init * np.ones((nz))
     return sol_init
 
+  # Initialize Southern Ocean Streamfunction
   def init_psi_so(self, psi_so=None):
     if callable(psi_so):
       self.psi_so = lambda z, H: psi_so(z * H) / (
@@ -130,6 +116,19 @@ class Equi_Column(object):
                                                                      **3)
     else:
       self.psi_so = lambda z, H: 0
+
+  # initialize non-dimensional surface buoyancy and bottom buoyancy
+  # or abyssal buoyancy flux boundary condition
+  def init_b_boundaries(self, b_s, b_bot=None, B_int=None):
+    if b_bot is None and B_int is None:
+      raise Exception(
+          'You need to specify either b_bot or B_int for bottom boundary condition'
+      )
+    self.bs = -b_s / self.f**2
+    if b_bot is not None:
+      self.b_bot = -b_bot / self.f**2
+    else:
+      self.B_int = B_int
 
   def alpha(self, z, H):
     #return factor on the RHS of ODE
