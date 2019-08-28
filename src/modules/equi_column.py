@@ -138,17 +138,12 @@ class Equi_Column(object):
       y = np.array([ya[0], yb[0]])
       if self.H is None:
         y = np.append(y, ya[1])
-        if bbot_set:
-          y = np.append(y, ya[2] - self.b_bot / p[0])
-        else:
-          y = np.append(y, ya[3] + self.bz(p[0]))
-        y = np.append(y, yb[2] - self.bs / p[0])
+      d = p[0] if self.H is None else self.H
+      if bbot_set:
+        y = np.append(y, ya[2] - self.b_bot / d)
       else:
-        if bbot_set:
-          y = np.append(y, ya[2] - self.b_bot / self.H)
-        else:
-          y = np.append(y, ya[3] + self.bz(self.H))
-        y = np.append(y, yb[2] - self.bs / self.H)
+        y = np.append(y, ya[3] + self.bz(d))
+      y = np.append(y, yb[2] - self.bs / d)
 
       return y
     except TypeError: 
