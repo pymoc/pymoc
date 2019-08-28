@@ -75,19 +75,16 @@ class Equi_Column(object):
       self.kappa = lambda z, H: kappa / (H**2 * self.f)
 
   def init_dkappa_dz(self, kappa, dkappa_dz=None):
+    if not callable(dkappa_dz) and (callable(kappa) or isinstance(kappa, np.ndarray)) and not check_numpy_version():
+      raise ImportError(
+          'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
+      )
+
     if callable(kappa) and callable(dkappa_dz):
         self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
-      if not check_numpy_version():
-        raise ImportError(
-            'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary or provide functional form of dkappa_dz.'
-        )
       self.dkappa_dz = lambda z, H: np.gradient(kappa(z * H), z * H) / (H * self.f)
     elif isinstance(kappa, np.ndarray):
-      if not check_numpy_version():
-        raise ImportError(
-            'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
-        )
       dkappa_dz = np.gradient(kappa, self.z)
       self.dkappa_dz = lambda z, H: np.interp(z * H, self.z, dkappa_dz) / (H * self.f)
     else:
