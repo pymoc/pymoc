@@ -58,8 +58,8 @@ class Equi_Column(object):
     self.zi = np.asarray(np.linspace(
         -1, 0, nz))    # grid for initial conditions for solver
 
-    self.init_kappa(kappa)
-    self.init_dkappa_dz(kappa, dkappa_dz)
+    self.kappa = self.init_kappa(kappa)
+    self.dkappa_dz = self.init_dkappa_dz(kappa, dkappa_dz)
     self.init_psi_so(psi_so)
     self.init_b_boundaries(b_s, b_bot, B_int)
     self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(sol_init, nz, b_bot)
@@ -68,11 +68,11 @@ class Equi_Column(object):
   def init_kappa(self, kappa):
     # Initialize vertical diffusivity profile:
     if callable(kappa):
-      self.kappa = lambda z, H: kappa(z * H) / (H**2 * self.f)    # non-dimensionalize (incl. norm. of vertical coordinate)
+      return lambda z, H: kappa(z * H) / (H**2 * self.f)    # non-dimensionalize (incl. norm. of vertical coordinate)
     elif isinstance(kappa, np.ndarray):
-      self.kappa = lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.f)
+      return lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.f)
     else:
-      self.kappa = lambda z, H: kappa / (H**2 * self.f)
+      return lambda z, H: kappa / (H**2 * self.f)
 
   def init_dkappa_dz(self, kappa, dkappa_dz=None):
     if not callable(dkappa_dz) and (callable(kappa) or isinstance(kappa, np.ndarray)) and not check_numpy_version():
@@ -81,14 +81,14 @@ class Equi_Column(object):
       )
 
     if callable(kappa) and callable(dkappa_dz):
-        self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
+        return lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
-      self.dkappa_dz = lambda z, H: np.gradient(kappa(z * H), z * H) / (H * self.f)
+      return lambda z, H: np.gradient(kappa(z * H), z * H) / (H * self.f)
     elif isinstance(kappa, np.ndarray):
       dkappa_dz = np.gradient(kappa, self.z)
-      self.dkappa_dz = lambda z, H: np.interp(z * H, self.z, dkappa_dz) / (H * self.f)
+      return lambda z, H: np.interp(z * H, self.z, dkappa_dz) / (H * self.f)
     else:
-      self.dkappa_dz = lambda z, H: 0
+      return lambda z, H: 0
 
   def calc_sol_init(self, sol_init, nz=None, b_bot=None):
     # Set initial conditions for ODE solver
