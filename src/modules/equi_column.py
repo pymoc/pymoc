@@ -141,21 +141,21 @@ class Equi_Column(object):
     y1 = 0
     y2 = 0
     bbot_set = getattr(self, 'b_bot', None) is not None
-    if self.H is None:
+    if self.H is None and bbot_set:
+      y1 = ya[2] - self.b_bot / p[0]
       y2 = yb[2] - self.bs / p[0]
-      if bbot_set:
-        y1 = ya[2] - self.b_bot / p[0]
-      else:
-        y1 = ya[3] + self.bz(p[0])
-
       return np.array([ya[0], yb[0], ya[1], y1, y2])
-    else:
+    elif self.H is None:
+      y1 = ya[3] + self.bz(p[0])
+      y2 = yb[2] - self.bs / p[0]
+      return np.array([ya[0], yb[0], ya[1], y1, y2])
+    elif bbot_set:
+      y1 = ya[2] - self.b_bot / self.H
       y2 = yb[2] - self.bs / self.H
-      if bbot_set:
-        y1 = ya[2] - self.b_bot / self.H
-      else:
-        y1 = ya[3] + self.bz(self.H)
-
+      return np.array([ya[0], yb[0], y1, y2])
+    else:
+      y1 = ya[3] + self.bz(self.H)
+      y2 = yb[2] - self.bs / self.H
       return np.array([ya[0], yb[0], y1, y2])
 
 
