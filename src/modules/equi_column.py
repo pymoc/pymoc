@@ -58,33 +58,7 @@ class Equi_Column(object):
     self.zi = np.asarray(np.linspace(
         -1, 0, nz))    # grid for initial conditions for solver
 
-    # Initialize vertical diffusivity profile:
-    if callable(kappa):
-      self.kappa = lambda z, H: kappa(z * H) / (
-          H**2 * self.f
-      )    # non-dimensionalize (incl. norm. of vertical coordinate)
-      if callable(dkappa_dz):
-        self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
-      else:
-        if not check_numpy_version():
-          raise ImportError(
-              'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary or provide functional form of dkappa_dz.'
-          )
-        self.dkappa_dz = lambda z, H: np.gradient(kappa(z * H), z * H) / (
-            H * self.f)
-    elif isinstance(kappa, np.ndarray):
-      self.kappa = lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.
-                                                                   f)
-      if not check_numpy_version():
-        raise ImportError(
-            'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
-        )
-      dkappa_dz = np.gradient(kappa, z)
-      self.dkappa_dz = lambda z, H: np.interp(z * H, self.z, dkappa_dz) / (
-          H * self.f)
-    else:
-      self.kappa = lambda z, H: kappa / (H**2 * self.f)
-      self.dkappa_dz = lambda z, H: 0
+    self.init_kappa(kappa, dkappa_dz)
 
     # Initialize Southern Ocean Streamfunction
     if callable(psi_so):
@@ -123,6 +97,35 @@ class Equi_Column(object):
       self.sol_init = sol_init
 
   # end of init
+
+  def init_kappa(self, kappa, dkappa_dz=None):
+    # Initialize vertical diffusivity profile:
+    if callable(kappa):
+      self.kappa = lambda z, H: kappa(z * H) / (
+          H**2 * self.f
+      )    # non-dimensionalize (incl. norm. of vertical coordinate)
+      if callable(dkappa_dz):
+        self.dkappa_dz = lambda z, H: dkappa_dz(z * H) / (H * self.f)
+      else:
+        if not check_numpy_version():
+          raise ImportError(
+              'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary or provide functional form of dkappa_dz.'
+          )
+        self.dkappa_dz = lambda z, H: np.gradient(kappa(z * H), z * H) / (
+            H * self.f)
+    elif isinstance(kappa, np.ndarray):
+      self.kappa = lambda z, H: np.interp(z * H, self.z, kappa) / (H**2 * self.
+                                                                   f)
+      if not check_numpy_version():
+        raise ImportError(
+            'You need NumPy version 1.13.0 or later if you want to automatically compute dkappa_dz. Please upgrade your NumPy libary.'
+        )
+      dkappa_dz = np.gradient(kappa, self.z)
+      self.dkappa_dz = lambda z, H: np.interp(z * H, self.z, dkappa_dz) / (
+          H * self.f)
+    else:
+      self.kappa = lambda z, H: kappa / (H**2 * self.f)
+      self.dkappa_dz = lambda z, H: 0
 
   def alpha(self, z, H):
     #return factor on the RHS of ODE
