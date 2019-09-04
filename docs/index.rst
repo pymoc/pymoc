@@ -38,15 +38,4 @@ team is to keep PyMOC well tested, stable, and maintainable to reduce
 pain to the end user. Further details on installation, configuration,
 contribution, and issue reporting is available in the documentation.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. include:: contents.rst 
