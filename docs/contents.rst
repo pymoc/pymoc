@@ -5,7 +5,7 @@
 Contents
 ==================
 
-Installation
+installation
 Model Physics
 Modules
 Examples
