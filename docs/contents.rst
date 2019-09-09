@@ -2,8 +2,8 @@
 Contents
 ==================
 .. toctree::
-  :maxdepth: 2
-  :caption: Contents:
+  :maxdepth: 1
+  
   installation
   Model Physics
   Modules
