@@ -51,7 +51,7 @@ jobs:
           name: Disable jekyll builds
           command: touch docs/_build/html/.nojekyll
       - add_ssh_keys:
-        - fingerprints:
+        fingerprints:
           - "d4:a3:8b:5f:a9:e3:b4:ce:a1:12:d2:70:0d:3b:3b:ce"
       - run:
           name: Install and configure dependencies
