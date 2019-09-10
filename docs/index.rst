@@ -13,7 +13,7 @@ and carbon by the ocean, and as such both mediates and is governed
 by shifts in the climate regime. As such, understanding of the MOC
 is crucial to understanding of climate change.
 
-The model suite consists of several indepent modules representing
+The model suite consists of several independent modules representing
 various ocean regions and dynamics. Specifically, there are modules
 for calculating the advective-diffusive buoyancy balance in zonally
 constrained ocean basins (such as the Atlantic Ocean) in both
