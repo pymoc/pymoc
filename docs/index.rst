@@ -39,12 +39,9 @@ pain to the end user. Further details on installation, configuration,
 contribution, and issue reporting is available in the documentation.
 
 Contents
-==================
+--------
+
 .. toctree::
   :maxdepth: 1
   
   installation
-  Model Physics
-  Modules
-  Examples
-  Development
