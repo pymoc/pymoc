@@ -143,3 +143,4 @@ And proceed with the instructions for installing and running the model outlined 
 .. _PyPa: https://pip.pypa.io/en/stable/installing/
 .. _`Real Python`: https://realpython.com/installing-python/
 .. _Anaconda: https://www.anaconda.com/distribution/
+.. _GitHub: https://www.github.com/pymoc/PyMOC/
