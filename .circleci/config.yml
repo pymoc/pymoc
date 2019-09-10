@@ -71,7 +71,7 @@ workflows:
       - docs-build
       - docs-deploy:
           requires:
-            - test
+            # - test
             - docs-build
           filters:
             branches:
