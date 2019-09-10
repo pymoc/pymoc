@@ -32,12 +32,14 @@ installed via pip in a terminal window. First, make sure you have
 numpy_ and scipy_ installed:
 
 .. code-block:: bash
+
   $ pip install numpy>=1.13 
   $ pip install scipy>=1.3 
 
 Once these dependencies are installed, PyMOC can be installed via
 
 .. code-block:: bash
+
   $ pip install py-moc
 
 If you do not have Python3 or pip configured on your system,
@@ -49,6 +51,7 @@ the Anaconda_ distribution. Once you have installed Anaconda, you
 can follow analagous steps to those required to install via pip
 
 .. code-block:: bash
+
   $ conda install -c anaconda numpy=1.13 
   $ conda install -c anaconda scipy=1.3 
   $ conda install -c anaconda py-moc
@@ -66,11 +69,13 @@ instead directly clone the code repository using git into whatever
 local directory you would like to work with the code in
 
 .. code-block:: bash
+
   $ git clone https://github.com/pymoc/pymoc.git
 
 You can then navigate into the pymoc directory, and install the model
 
 .. code-block:: bash
+
   $ cd pymoc
   $ python src/setup.py install
 
@@ -78,6 +83,7 @@ If you plan on modifying the model code for your own purposes, you should
 install in development mode instead
 
 .. code-block:: bash
+
   $ python src/setup.py develop
 
 Should you receive an error from either of the above installation commands
@@ -131,6 +137,7 @@ and start a local container from the PyMOC image:
 From there, you can start a bash session inside of the container via:
 
 .. code-block:: bash
+
   $ docker exec -it pymoc bash
 
 And proceed with the instructions for installing and running the model outlined in
