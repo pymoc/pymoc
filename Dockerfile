@@ -5,10 +5,10 @@ WORKDIR /pymoc
 
 RUN apt-get update -y && \
     apt-get install -y python3.6-dev python3-pip git curl
-RUN pip3 install numpy=1.13 && \
-    pip3 install scipy=1.3 && \
+RUN pip3 install numpy==1.13 && \
+    pip3 install scipy==1.3 && \
     pip3 install matplotlib && \
-    pip3 install pytest=5.1.1 && \
+    pip3 install pytest==5.1.1 && \
     pip3 install codecov && \
     pip3 install pytest-cov && \
     pip3 install sphinx && \
