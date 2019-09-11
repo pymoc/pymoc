@@ -67,11 +67,11 @@ workflows:
   version: 2
   build:
     jobs:
-      # - test
+      - test
       - docs-build
       - docs-deploy:
           requires:
-            # - test
+            - test
             - docs-build
           filters:
             branches:
