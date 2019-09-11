@@ -5,6 +5,16 @@
 
 PyMOC: Python Meridional Overturning Circulation Model
 ======================================================
+.. image:: https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield
+  :target: https://circleci.com/gh/pymoc/PyMOC/tree/master
+.. image:: https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/test_coverage
+  :target: https://codeclimate.com/github/pymoc/PyMOC/test_coverage
+.. image:: https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability
+  :target: https://codeclimate.com/github/pymoc/PyMOC/maintainability
+.. image:: https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield
+  :target: https://circleci.com/gh/pymoc/PyMOC/tree/master
+.. image:: https://img.shields.io/badge/license-MIT-informational
+  :target: https://github.com/pymoc/PyMOC/blob/master/LICENSE
 
 PyMOC is a simple, modular suite of python ocean column models for
 use in studying the Meridional Overturning Circulation (MOC). The 
