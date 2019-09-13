@@ -5,7 +5,7 @@ Contents
   :maxdepth: 1
   
   installation
-  model physics
-  module api
+  model-physics
+  module-api
   publications
   contributing
