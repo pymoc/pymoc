@@ -4,10 +4,9 @@ Model Physics
 #############
 
 .. toctree::
-  :maxdepth: 1
+  :maxdepth: 2
 
-  residual-mean-advection-diffusion-equation
-  thermal-wind-closure
-  overturning-transport-closure
-  surface-buoyancy-balance
-  equilibrium-advection-diffusion
+  model-physics/vertical-buoyancy-balance
+  model-physics/thermal-wind-closure
+  model-physics/overturning-transport-closure
+  model-physics/surface-buoyancy-balance
