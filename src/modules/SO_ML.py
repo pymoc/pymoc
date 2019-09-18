@@ -9,9 +9,7 @@ overturning streamfunction and buoyancy profile in the basin
 import sys
 import numpy as np
 # sys.path.append('/pymoc/src/utils')
-from make_array import make_array
-
-import pymoc
+from pymoc.modules import make_array
 
 
 class SO_ML(object):
