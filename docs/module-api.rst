@@ -1,9 +1,9 @@
-.. _model-api:
+.. _module-api:
 
-Model API
-#########
+Module API
+##########
 
-.. automodule:: pymoc
+.. automodule:: pymoc.modules
   :members:
 
 .. autoclass:: Column
@@ -19,4 +19,4 @@ Model API
   :members: 
 
 .. autoclass:: SO_ML
-  :members:
+  :members: 
