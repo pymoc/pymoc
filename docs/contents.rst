@@ -6,6 +6,6 @@ Contents
   
   installation
   model-physics
-  module-api
+  model-api
   publications
   development

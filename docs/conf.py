@@ -1,4 +1,8 @@
+import sys
+import os
 from jupyter_sphinx_theme import *
+
+sys.path.insert(0, os.path.abspath('../src/modules/'))
 init_theme()
 # Configuration file for the Sphinx documentation builder.
 #
@@ -31,10 +35,16 @@ author = 'Michael Bueti'
 # extensions = ['recommonmark']
 extensions = [
     'sphinx.ext.mathjax',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    # 'numpydoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+autoclass_content = 'both'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
