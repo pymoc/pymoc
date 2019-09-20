@@ -5,11 +5,9 @@ the surface buoyancy in the SO [bs(y)],
 and the surface wind stress [tau(y)]
 '''
 
-import sys
 import numpy as np
 from scipy import integrate, optimize
-sys.path.append('/pymoc/src/utils')
-from make_func import make_func
+from pymoc.utils import make_func
 
 
 class Psi_SO(object):

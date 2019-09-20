@@ -9,13 +9,9 @@ The time-stepping version can also handle horizontal advection
 into the column. This is, however, not (yet) implemented for the equilibrium solver
 '''
 
-import sys
 import numpy as np
 from scipy import integrate
-sys.path.append('/pymoc/src/utils')
-from make_func import make_func
-from make_array import make_array
-from check_numpy_version import check_numpy_version
+from pymoc.utils import make_func, make_array, check_numpy_version
 
 
 class Column(object):
