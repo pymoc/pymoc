@@ -2,7 +2,7 @@ import sys
 import os
 from jupyter_sphinx_theme import *
 
-sys.path.insert(0, os.path.abspath('../src/modules/'))
+sys.path.insert(0, os.path.abspath('../src/'))
 init_theme()
 # Configuration file for the Sphinx documentation builder.
 #
@@ -44,6 +44,7 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
+autosummary_generate = True
 autoclass_content = 'both'
 
 # List of patterns, relative to source directory, that match files and
@@ -62,3 +63,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+def skip(app, what, name, obj, would_skip, options):
+  if name == "__init__":
+    return False
+  return would_skip
+
+
+def setup(app):
+  app.connect("autodoc-skip-member", skip)

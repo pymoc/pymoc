@@ -35,6 +35,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: install pymoc
+          command: python src/setup.py install
+      - run:
           name: Build docs
           command: cd docs/ && make html
       - persist_to_workspace:

@@ -1,20 +1,24 @@
-'''
-Instances of this class represent 1D representations of buoyancy in a water
-column governed by vertical advection and diffusion. The velocity
-profile is required as an input. The script can either compute the equilibrium
-buoyancy profile for a given vertical velocity profile and boundary conditions
-or compute the tendency and perform a time-step of given length.
-BCs have to be fixed buoyancy at the top and either fixed b or db/dz at the bottom
-The time-stepping version can also handle horizontal advection
-into the column. This is, however, not (yet) implemented for the equilibrium solver
-'''
-
 import numpy as np
 from scipy import integrate
 from pymoc.utils import make_func, make_array, check_numpy_version
 
 
 class Column(object):
+  r"""
+  .. module:: Column
+
+  :synopsis: Vertical Advection-Diffusion Column Model
+
+  Instances of this class represent 1D representations of buoyancy in a water
+  column governed by vertical advection and diffusion. The velocity
+  profile is required as an input. The script can either compute the equilibrium
+  buoyancy profile for a given vertical velocity profile and boundary conditions
+  or compute the tendency and perform a time-step of given length.
+  BCs have to be fixed buoyancy at the top and either fixed b or db/dz at the bottom
+  The time-stepping version can also handle horizontal advection
+  into the column. This is, however, not (yet) implemented for the equilibrium solver
+  """
+
   # This module creates an advective-diffusive column
   # Notice that the column here represents a horizontal integral, rather than
   # an average, thus allowing for the area of to be a function of depth
@@ -29,6 +33,7 @@ class Column(object):
       Area=None,    # Horizontal area (can be function of depth)
       N2min=1e-7    # Minimum strat. for conv adjustment
   ):
+    """Initiialize a column model"""
 
     # initialize grid:
     if isinstance(z, np.ndarray) and len(z) > 0:
