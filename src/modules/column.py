@@ -37,9 +37,9 @@ class Column(object):
     Parameters
     ----------
 
-    z : numpy array; input
-        Vertical depth levels of column grid.
-    kappa : number, function, or numpy array; input
+    z : ndarray; input
+        Vertical depth levels of column grid. Units: m
+    kappa : number, function, or ndarray; input
             Vertical diffusivity profile. Units: m :sup:`2`/s
     bs : number; input
          Surface level buoyancy boundary condition. Units: m/s :sup:`2`
@@ -47,19 +47,19 @@ class Column(object):
            Bottom level buoyancy boundary condition. Units: m/s :sup:`2`
     bzbot : number; optional; input
             Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s :sup:`-2`
-    b : number, function, or numpy array; input, output
+    b : number, function, or ndarray; input, output
         Initial vertical buoyancy profile. Recalculated on model run. Units: m/s
-    Area : number, function, or numpy array; input
-           Horizontal area of basin
+    Area : number, function, or ndarray; input
+           Horizontal area of basin. Units: m :sup:`2`
     N2min : number; optional; input
-            Minimum stratification for convective adjustment
+            Minimum stratification for convective adjustment. Units: s :sup:`-1`
     """
 
     # initialize grid:
     if isinstance(z, np.ndarray) and len(z) > 0:
       self.z = z
     else:
-      raise TypeError('z needs to be numpy array providing grid levels')
+      raise TypeError('z needs to be ndarray providing grid levels')
 
     self.kappa = make_func(kappa, self.z, 'kappa')
     self.Area = make_func(Area, self.z, 'Area')
@@ -78,9 +78,31 @@ class Column(object):
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
 
   def Akappa(self, z):
+    r"""
+    Compute the area integrated diffusivity :math:`A\kappa`
+    at depth(s) z.
+
+    Parameters
+    ----------
+
+    z : number or ndarray; input
+        Vertical depth level(s) at which to retrieve the integrated diffusivity.
+    """
+
     return self.Area(z) * self.kappa(z)
 
   def dAkappa_dz(self, z):
+    r"""
+    Compute the area integrated diffusivity gradient :math:`\partial_z\left(A\kappa\right)`
+    at depth(s) z.
+
+    Parameters
+    ----------
+
+    z : number or ndarray; input
+        Vertical depth level(s) at which to retrieve the integrated diffusivity gradient.
+    """
+
     if not check_numpy_version():
       raise ImportError(
           'You need NumPy version 1.13.0 or later. Please upgrade your NumPy libary.'
@@ -88,6 +110,18 @@ class Column(object):
     return np.gradient(self.Akappa(z), z)
 
   def bc(self, ya, yb):
+    r"""
+    Calculate the residuals oof boundary conditions for the advective-diffusive boundary value problem.
+
+    Parameters
+    ----------
+
+    ya : ndarray; input
+         Bottom boundary condition in current solution iteration. Units: m/s :sup:`2`
+    yb : ndarray; input
+         Surface boundary condition in current solution iteration. Units: m/s :sup:`2`
+    """
+
     #return the boundary conditions
     if self.bzbot is None:
       return np.array([ya[0] - self.bbot, yb[0] - self.bs])
@@ -95,6 +129,20 @@ class Column(object):
       return np.array([ya[1] - self.bzbot, yb[0] - self.bs])
 
   def ode(self, z, y):
+    r"""
+    Generate the ordinary differential equation, to be solved as a boundary value problem:
+
+    :math:`\partial_tb\left(z\right)=-w^\dagger\partial_zb+\partial_z\left(\kappa_{e\!f\!f}\partial_zb\right)`
+
+    Parameters
+    ----------
+
+    z : ndarray; input
+        Vertical depth levels of column grid on which to solve the ode. Units: m
+    y : ndarray; input
+        Initial values for buoyancy values and their derivatives on the model grid for the current solution iteration.
+    """
+
     #return the equation to be solved
     return np.vstack(
         (y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1])
