@@ -59,7 +59,7 @@ class Column(object):
     if isinstance(z, np.ndarray) and len(z) > 0:
       self.z = z
     else:
-      raise TypeError('z needs to be ndarray providing grid levels')
+      raise TypeError('z needs to be numpy array providing grid levels')
 
     self.kappa = make_func(kappa, self.z, 'kappa')
     self.Area = make_func(Area, self.z, 'Area')
