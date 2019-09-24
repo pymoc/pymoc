@@ -78,4 +78,4 @@ workflows:
             - docs-build
           filters:
             branches:
-              only: make-docs
+              only: master
