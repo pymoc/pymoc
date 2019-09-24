@@ -64,12 +64,10 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# def skip(app, what, name, obj, would_skip, options):
+#   if name == "__init__":
+#     return False
+#   return would_skip
 
-def skip(app, what, name, obj, would_skip, options):
-  if name == "__init__":
-    return False
-  return would_skip
-
-
-def setup(app):
-  app.connect("autodoc-skip-member", skip)
+    # def setup(app):
+    #   app.connect("autodoc-skip-member", skip)

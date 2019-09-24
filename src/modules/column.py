@@ -33,7 +33,27 @@ class Column(object):
       Area=None,    # Horizontal area (can be function of depth)
       N2min=1e-7    # Minimum strat. for conv adjustment
   ):
-    """Initiialize a column model"""
+    """
+    Parameters
+    ----------
+
+    z : numpy array; input
+        Vertical depth levels of column grid.
+    kappa : number, function, or numpy array; input
+            Vertical diffusivity profile. Units: m :sup:`2`/s
+    bs : number; input
+         Surface level buoyancy boundary condition. Units: m/s :sup:`2`
+    bbot : number; optional; input
+           Bottom level buoyancy boundary condition. Units: m/s :sup:`2`
+    bzbot : number; optional; input
+            Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s :sup:`-2`
+    b : number, function, or numpy array; input, output
+        Initial vertical buoyancy profile. Recalculated on model run. Units: m/s
+    Area : number, function, or numpy array; input
+           Horizontal area of basin
+    N2min : number; optional; input
+            Minimum stratification for convective adjustment
+    """
 
     # initialize grid:
     if isinstance(z, np.ndarray) and len(z) > 0:
@@ -41,8 +61,8 @@ class Column(object):
     else:
       raise TypeError('z needs to be numpy array providing grid levels')
 
-    self.kappa = self.make_func(kappa, 'kappa')
-    self.Area = self.make_func(Area, 'Area')
+    self.kappa = make_func(kappa, self.z, 'kappa')
+    self.Area = make_func(Area, self.z, 'Area')
 
     self.bs = bs
     self.bbot = bbot
@@ -50,18 +70,12 @@ class Column(object):
 
     self.N2min = N2min
 
-    self.b = self.make_array(b, 'b')
+    self.b = make_array(b, self.z, 'b')
 
     if check_numpy_version():
       self.bz = np.gradient(self.b, z)
     else:
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
-
-  def make_func(self, myst, name):
-    return make_func(myst, self.z, name)
-
-  def make_array(self, myst, name):
-    return make_array(myst, self.z, name)
 
   def Akappa(self, z):
     return self.Area(z) * self.kappa(z)
@@ -88,7 +102,7 @@ class Column(object):
 
   def solve_equi(self, wA):
     #Solve for equilibrium solution given vert. vel profile and BCs
-    self.wA = self.make_func(wA, 'w')
+    self.wA = make_func(wA, self.z, 'w')
     sol_init = np.zeros((2, np.size(self.z)))
     sol_init[0, :] = self.b
     sol_init[1, :] = self.bz
@@ -99,7 +113,7 @@ class Column(object):
 
   def vertadvdiff(self, wA, dt):
     #upwind vert. adv. and diffusion
-    wA = self.make_array(wA, 'wA')
+    wA = make_array(wA, self.z, 'wA')
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
@@ -147,8 +161,8 @@ class Column(object):
     # upwind horizontal advection:
     # notice that vdx_in is the total transport per unit height
     # into the column (units m^2/s, sign positive for velocity into the column)
-    vdx_in = self.make_array(vdx_in, 'vdx_in')
-    b_in = self.make_array(b_in, 'b_in')
+    vdx_in = make_array(vdx_in, self.z, 'vdx_in')
+    b_in = make_array(b_in, self.z, 'b_in')
 
     adv_idx = vdx_in > 0.0
     db = b_in - self.b
