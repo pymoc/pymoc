@@ -14,15 +14,10 @@ This equation is solved subject to the boundary conditions that
 An upwind isopycnal mapping is used to compute the isopycnal overturning transport
 '''
 
-import sys
 import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
-sys.path.append('/pymoc/src/utils')
-from make_func import make_func
-from make_array import make_array
-
-#from scipy.interpolate import interp1d
+from pymoc.utils import make_func, make_array
 
 
 class Psi_Thermwind(object):

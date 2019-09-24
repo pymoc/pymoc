@@ -1,8 +1,20 @@
-[![CircleCI](https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield)](https://circleci.com/gh/pymoc/PyMOC/tree/master)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/test_coverage)](https://codeclimate.com/github/pymoc/PyMOC/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability)](https://codeclimate.com/github/pymoc/PyMOC/maintainability)
-[![Documentation](https://img.shields.io/badge/docs-PyMOC-informational)](https://pymoc.github.io/PyMOC)
-[![License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
+.. pymoc documentation master file, created by
+   sphinx-quickstart on Fri Aug 30 10:54:58 2019.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+PyMOC: Python Meridional Overturning Circulation Model
+======================================================
+.. image:: https://img.shields.io/badge/code-GitHub-informational
+  :target: https://www.github.com/pymoc/PyMOC
+.. image:: https://circleci.com/gh/pymoc/PyMOC/tree/master.svg?style=shield
+  :target: https://circleci.com/gh/pymoc/PyMOC/tree/master
+.. image:: https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/test_coverage
+  :target: https://codeclimate.com/github/pymoc/PyMOC/test_coverage
+.. image:: https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability
+  :target: https://codeclimate.com/github/pymoc/PyMOC/maintainability
+.. image:: https://img.shields.io/badge/license-MIT-informational
+  :target: https://github.com/pymoc/PyMOC/blob/master/LICENSE
 
 PyMOC is a simple, modular suite of python ocean column models for
 use in studying the Meridional Overturning Circulation (MOC). The 
@@ -35,3 +47,6 @@ software libraries pre-installed. Furthermore, a goal of the development
 team is to keep PyMOC well tested, stable, and maintainable to reduce
 pain to the end user. Further details on installation, configuration,
 contribution, and issue reporting is available in the documentation.
+
+.. include:: contents.rst
+

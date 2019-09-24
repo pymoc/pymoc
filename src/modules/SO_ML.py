@@ -6,10 +6,8 @@ Northen and southern boundary conditions are determined internally based on the
 overturning streamfunction and buoyancy profile in the basin
 '''
 
-import sys
 import numpy as np
-sys.path.append('/pymoc/src/utils')
-from make_array import make_array
+from pymoc.utils import make_array
 
 
 class SO_ML(object):

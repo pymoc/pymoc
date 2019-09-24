@@ -23,11 +23,9 @@ Notice that H then appears as a parameter in the equations.
 5 boundary conditions are needed if we also want to solve for the parameter H
 '''
 
-import sys
 import numpy as np
 from scipy import integrate
-sys.path.append('/pymoc/src/utils')
-from check_numpy_version import check_numpy_version
+from pymoc.utils import check_numpy_version
 
 
 class Equi_Column(object):

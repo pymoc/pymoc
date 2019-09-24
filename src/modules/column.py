@@ -1,24 +1,24 @@
-'''
-Instances of this class represent 1D representations of buoyancy in a water
-column governed by vertical advection and diffusion. The velocity
-profile is required as an input. The script can either compute the equilibrium
-buoyancy profile for a given vertical velocity profile and boundary conditions
-or compute the tendency and perform a time-step of given length.
-BCs have to be fixed buoyancy at the top and either fixed b or db/dz at the bottom
-The time-stepping version can also handle horizontal advection
-into the column. This is, however, not (yet) implemented for the equilibrium solver
-'''
-
-import sys
 import numpy as np
 from scipy import integrate
-sys.path.append('/pymoc/src/utils')
-from make_func import make_func
-from make_array import make_array
-from check_numpy_version import check_numpy_version
+from pymoc.utils import make_func, make_array, check_numpy_version
 
 
 class Column(object):
+  r"""
+  .. module:: Column
+
+  :synopsis: Vertical Advection-Diffusion Column Model
+
+  Instances of this class represent 1D representations of buoyancy in a water
+  column governed by vertical advection and diffusion. The velocity
+  profile is required as an input. The script can either compute the equilibrium
+  buoyancy profile for a given vertical velocity profile and boundary conditions
+  or compute the tendency and perform a time-step of given length.
+  BCs have to be fixed buoyancy at the top and either fixed b or db/dz at the bottom
+  The time-stepping version can also handle horizontal advection
+  into the column. This is, however, not (yet) implemented for the equilibrium solver
+  """
+
   # This module creates an advective-diffusive column
   # Notice that the column here represents a horizontal integral, rather than
   # an average, thus allowing for the area of to be a function of depth
@@ -33,6 +33,27 @@ class Column(object):
       Area=None,    # Horizontal area (can be function of depth)
       N2min=1e-7    # Minimum strat. for conv adjustment
   ):
+    """
+    Parameters
+    ----------
+
+    z : ndarray; input
+        Vertical depth levels of column grid. Units: m
+    kappa : number, function, or ndarray; input
+            Vertical diffusivity profile. Units: m :sup:`2`/s
+    bs : number; input
+         Surface level buoyancy boundary condition. Units: m/s :sup:`2`
+    bbot : number; optional; input
+           Bottom level buoyancy boundary condition. Units: m/s :sup:`2`
+    bzbot : number; optional; input
+            Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s :sup:`-2`
+    b : number, function, or ndarray; input, output
+        Initial vertical buoyancy profile. Recalculated on model run. Units: m/s
+    Area : number, function, or ndarray; input
+           Horizontal area of basin. Units: m :sup:`2`
+    N2min : number; optional; input
+            Minimum stratification for convective adjustment. Units: s :sup:`-1`
+    """
 
     # initialize grid:
     if isinstance(z, np.ndarray) and len(z) > 0:
@@ -40,8 +61,8 @@ class Column(object):
     else:
       raise TypeError('z needs to be numpy array providing grid levels')
 
-    self.kappa = self.make_func(kappa, 'kappa')
-    self.Area = self.make_func(Area, 'Area')
+    self.kappa = make_func(kappa, self.z, 'kappa')
+    self.Area = make_func(Area, self.z, 'Area')
 
     self.bs = bs
     self.bbot = bbot
@@ -49,23 +70,39 @@ class Column(object):
 
     self.N2min = N2min
 
-    self.b = self.make_array(b, 'b')
+    self.b = make_array(b, self.z, 'b')
 
     if check_numpy_version():
       self.bz = np.gradient(self.b, z)
     else:
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
 
-  def make_func(self, myst, name):
-    return make_func(myst, self.z, name)
-
-  def make_array(self, myst, name):
-    return make_array(myst, self.z, name)
-
   def Akappa(self, z):
+    r"""
+    Compute the area integrated diffusivity :math:`A\kappa`
+    at depth(s) z.
+
+    Parameters
+    ----------
+
+    z : number or ndarray; input
+        Vertical depth level(s) at which to retrieve the integrated diffusivity.
+    """
+
     return self.Area(z) * self.kappa(z)
 
   def dAkappa_dz(self, z):
+    r"""
+    Compute the area integrated diffusivity gradient :math:`\partial_z\left(A\kappa\right)`
+    at depth(s) z.
+
+    Parameters
+    ----------
+
+    z : number or ndarray; input
+        Vertical depth level(s) at which to retrieve the integrated diffusivity gradient.
+    """
+
     if not check_numpy_version():
       raise ImportError(
           'You need NumPy version 1.13.0 or later. Please upgrade your NumPy libary.'
@@ -73,6 +110,18 @@ class Column(object):
     return np.gradient(self.Akappa(z), z)
 
   def bc(self, ya, yb):
+    r"""
+    Calculate the residuals oof boundary conditions for the advective-diffusive boundary value problem.
+
+    Parameters
+    ----------
+
+    ya : ndarray; input
+         Bottom boundary condition in current solution iteration. Units: m/s :sup:`2`
+    yb : ndarray; input
+         Surface boundary condition in current solution iteration. Units: m/s :sup:`2`
+    """
+
     #return the boundary conditions
     if self.bzbot is None:
       return np.array([ya[0] - self.bbot, yb[0] - self.bs])
@@ -80,6 +129,20 @@ class Column(object):
       return np.array([ya[1] - self.bzbot, yb[0] - self.bs])
 
   def ode(self, z, y):
+    r"""
+    Generate the ordinary differential equation, to be solved as a boundary value problem:
+
+    :math:`\partial_tb\left(z\right)=-w^\dagger\partial_zb+\partial_z\left(\kappa_{e\!f\!f}\partial_zb\right)`
+
+    Parameters
+    ----------
+
+    z : ndarray; input
+        Vertical depth levels of column grid on which to solve the ode. Units: m
+    y : ndarray; input
+        Initial values for buoyancy values and their derivatives on the model grid for the current solution iteration.
+    """
+
     #return the equation to be solved
     return np.vstack(
         (y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1])
@@ -87,7 +150,7 @@ class Column(object):
 
   def solve_equi(self, wA):
     #Solve for equilibrium solution given vert. vel profile and BCs
-    self.wA = self.make_func(wA, 'w')
+    self.wA = make_func(wA, self.z, 'w')
     sol_init = np.zeros((2, np.size(self.z)))
     sol_init[0, :] = self.b
     sol_init[1, :] = self.bz
@@ -98,7 +161,7 @@ class Column(object):
 
   def vertadvdiff(self, wA, dt):
     #upwind vert. adv. and diffusion
-    wA = self.make_array(wA, 'wA')
+    wA = make_array(wA, self.z, 'wA')
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
@@ -146,8 +209,8 @@ class Column(object):
     # upwind horizontal advection:
     # notice that vdx_in is the total transport per unit height
     # into the column (units m^2/s, sign positive for velocity into the column)
-    vdx_in = self.make_array(vdx_in, 'vdx_in')
-    b_in = self.make_array(b_in, 'b_in')
+    vdx_in = make_array(vdx_in, self.z, 'vdx_in')
+    b_in = make_array(b_in, self.z, 'b_in')
 
     adv_idx = vdx_in > 0.0
     db = b_in - self.b

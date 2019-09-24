@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: pymoc/pymoc:latest
     working_directory: /pymoc
@@ -28,4 +28,54 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+  docs-build:
+    docker:
+      - image: pymoc/pymoc:latest
+    working_directory: /pymoc
+    steps:
+      - checkout
+      - run:
+          name: install pymoc
+          command: python src/setup.py install
+      - run:
+          name: Build docs
+          command: cd docs/ && make html
+      - persist_to_workspace:
+          root: docs/_build
+          paths: html
+  docs-deploy:
+    docker:
+      - image: node:8.10.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: docs/_build
+      - run:
+          name: Disable jekyll builds
+          command: touch docs/_build/html/.nojekyll
+      - add_ssh_keys:
+          fingerprints:
+            - "d4:a3:8b:5f:a9:e3:b4:ce:a1:12:d2:70:0d:3b:3b:ce"
+      - run:
+          name: Install and configure dependencies
+          command: |
+            npm install -g --silent gh-pages@2.0.1
+            git config user.email "ci-build@klukas.net"
+            git config user.name "ci-build"
+      - run:
+          name: Deploy docs to gh-pages branch
+          command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/_build/html
 
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test
+      - docs-build
+      - docs-deploy:
+          requires:
+            - test
+            - docs-build
+          filters:
+            branches:
+              only: make-docs
