@@ -40,19 +40,19 @@ class Column(object):
     z : ndarray; input
         Vertical depth levels of column grid. Units: m
     kappa : number, function, or ndarray; input
-            Vertical diffusivity profile. Units: m :sup:`2`/s
+            Vertical diffusivity profile. Units: m\ :sup:`2`/s
     bs : number; input
-         Surface level buoyancy boundary condition. Units: m/s :sup:`2`
+         Surface level buoyancy boundary condition. Units: m/s\ :sup:`2`
     bbot : number; optional; input
-           Bottom level buoyancy boundary condition. Units: m/s :sup:`2`
+           Bottom level buoyancy boundary condition. Units: m/s\ :sup:`2`
     bzbot : number; optional; input
-            Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s :sup:`-2`
+            Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s\ :sup:`-2`
     b : number, function, or ndarray; input, output
         Initial vertical buoyancy profile. Recalculated on model run. Units: m/s
     Area : number, function, or ndarray; input
-           Horizontal area of basin. Units: m :sup:`2`
+           Horizontal area of basin. Units: m\ :sup:`2`
     N2min : number; optional; input
-            Minimum stratification for convective adjustment. Units: s :sup:`-1`
+            Minimum stratification for convective adjustment. Units: s\ :sup:`-1`
     """
 
     # initialize grid:
@@ -111,15 +111,16 @@ class Column(object):
 
   def bc(self, ya, yb):
     r"""
-    Calculate the residuals oof boundary conditions for the advective-diffusive boundary value problem.
+    Calculate the residuals oof boundary conditions for the advective-diffusive
+    boundary value problem.
 
     Parameters
     ----------
 
     ya : ndarray; input
-         Bottom boundary condition in current solution iteration. Units: m/s :sup:`2`
+         Bottom boundary condition. Units: m/s\ :sup:`2`
     yb : ndarray; input
-         Surface boundary condition in current solution iteration. Units: m/s :sup:`2`
+         Surface boundary condition. Units: m/s\ :sup:`2`
     """
 
     #return the boundary conditions
@@ -130,7 +131,8 @@ class Column(object):
 
   def ode(self, z, y):
     r"""
-    Generate the ordinary differential equation, to be solved as a boundary value problem:
+    Generate the ordinary differential equation for the equilibrium buoyancy profile,
+    to be solved as a boundary value problem:
 
     :math:`\partial_tb\left(z\right)=-w^\dagger\partial_zb+\partial_z\left(\kappa_{e\!f\!f}\partial_zb\right)`
 
@@ -140,7 +142,7 @@ class Column(object):
     z : ndarray; input
         Vertical depth levels of column grid on which to solve the ode. Units: m
     y : ndarray; input
-        Initial values for buoyancy values and their derivatives on the model grid for the current solution iteration.
+        Initial values for buoyancy and buoyancy gradient profiles.
     """
 
     #return the equation to be solved
@@ -149,6 +151,17 @@ class Column(object):
     )
 
   def solve_equi(self, wA):
+    r"""
+    Solve for the equilibrium buoyancy profile, given a specified vertical
+    velocity profile, and pre-set surface and bottom boundary conditions.
+
+    Parameters
+    ----------
+
+    wA : ndarray; input
+         Area integrated velocity profile for the equilibrium solution. Units: m\ :sup:`3`/s
+    """
+
     #Solve for equilibrium solution given vert. vel profile and BCs
     self.wA = make_func(wA, self.z, 'w')
     sol_init = np.zeros((2, np.size(self.z)))
@@ -160,6 +173,19 @@ class Column(object):
     self.bz = res.sol(self.z)[1, :]
 
   def vertadvdiff(self, wA, dt):
+    r"""
+    Calculate and apply the upwind forcing from advection and diffusion on the vertical buoyancy
+    profile, for the timestepping solution.
+
+    Parameters
+    ----------
+
+    wA : number or ndarray; input
+         Area integrated velocity profile for the timestepping solution. Units: m\ :sup:`3`/s
+    dt : number; input
+         Numerical timestep over which solution are iterated. Units: s
+    """
+
     #upwind vert. adv. and diffusion
     wA = make_array(wA, self.z, 'wA')
     dz = self.z[1:] - self.z[:-1]
@@ -186,6 +212,11 @@ class Column(object):
     self.b[1:-1] = self.b[1:-1] + dt*db_dt
 
   def convect(self):
+    r"""
+    Carry out downward convective adustment of the vertical buoyancy profile to
+    the minimum stratification, N2min. This adjustment assumes a fixed surface 
+    buoyancy boundary condition.
+    """
     # do convective adjustment to minimum strat N2min
     # notice that this parameterization currently only handles convection
     # from the top down which is the only case we really encounter here...
