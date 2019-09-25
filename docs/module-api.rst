@@ -3,20 +3,12 @@
 Module API
 ##########
 
-.. automodule:: pymoc.modules
-  :members:
+.. currentmodule:: pymoc.modules
+.. autosummary::
+  :toctree: module-api
 
-.. autoclass:: Column
-  :members: 
-
-.. autoclass:: Equi_Column
-  :members: 
-
-.. autoclass:: Psi_SO
-  :members: 
-
-.. autoclass:: Psi_Thermwind
-  :members: 
-
-.. autoclass:: SO_ML
-  :members: 
+  Column
+  Equi_Column
+  Psi_SO
+  Psi_Thermwind
+  SO_ML

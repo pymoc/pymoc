@@ -1,9 +1,12 @@
 import sys
 import os
-from jupyter_sphinx_theme import *
+# from jupyter_sphinx_theme import *
+import sphinx_rtd_theme
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 sys.path.insert(0, os.path.abspath('../src/'))
-init_theme()
+# init_theme()
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full

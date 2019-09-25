@@ -5,9 +5,7 @@ from pymoc.utils import make_func, make_array, check_numpy_version
 
 class Column(object):
   r"""
-  .. module:: Column
-
-  :synopsis: Vertical Advection-Diffusion Column Model
+  Vertical Advection-Diffusion Column Model
 
   Instances of this class represent 1D representations of buoyancy in a water
   column governed by vertical advection and diffusion. The velocity
@@ -83,6 +81,12 @@ class Column(object):
 
     z : number or ndarray; input
         Vertical depth level(s) at which to retrieve the integrated diffusivity.
+    
+    Returns
+    -------
+
+    If z is a number, a number corresponding to the integrated diffusivity :math:`A\kappa` at that depth.
+    If z is an ndarray, an ndarray where each entry corresponds to the integrated diffusivity :math:`A\kappa` at the z value with the same index.
     """
 
     return self.Area(z) * self.kappa(z)
