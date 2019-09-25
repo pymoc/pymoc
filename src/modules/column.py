@@ -18,10 +18,6 @@ class Column(object):
   The time-stepping version can also handle horizontal advection
   into the column. This is, however, not (yet) implemented for the equilibrium solver
   """
-
-  # This module creates an advective-diffusive column
-  # Notice that the column here represents a horizontal integral, rather than
-  # an average, thus allowing for the area of to be a function of depth
   def __init__(
       self,
       z=None,    # grid (input)
@@ -123,7 +119,6 @@ class Column(object):
          Surface boundary condition. Units: m/s\ :sup:`2`
     """
 
-    #return the boundary conditions
     if self.bzbot is None:
       return np.array([ya[0] - self.bbot, yb[0] - self.bs])
     else:
@@ -145,7 +140,6 @@ class Column(object):
         Initial values for buoyancy and buoyancy gradient profiles.
     """
 
-    #return the equation to be solved
     return np.vstack(
         (y[1], (self.wA(z) - self.dAkappa_dz(z)) / self.Akappa(z) * y[1])
     )
@@ -162,7 +156,6 @@ class Column(object):
          Area integrated velocity profile for the equilibrium solution. Units: m\ :sup:`3`/s
     """
 
-    #Solve for equilibrium solution given vert. vel profile and BCs
     self.wA = make_func(wA, self.z, 'w')
     sol_init = np.zeros((2, np.size(self.z)))
     sol_init[0, :] = self.b
@@ -174,8 +167,9 @@ class Column(object):
 
   def vertadvdiff(self, wA, dt):
     r"""
-    Calculate and apply the upwind forcing from advection and diffusion on the vertical buoyancy
-    profile, for the timestepping solution.
+    Calculate and apply the forcing from advection and diffusion on the vertical buoyancy
+    profile, for the timestepping solution. This function implements an upwind advection
+    scheme.
 
     Parameters
     ----------
@@ -186,7 +180,6 @@ class Column(object):
          Numerical timestep over which solution are iterated. Units: s
     """
 
-    #upwind vert. adv. and diffusion
     wA = make_array(wA, self.z, 'wA')
     dz = self.z[1:] - self.z[:-1]
 
@@ -237,9 +230,22 @@ class Column(object):
     #            /np.mean(dz[ind]*self.Area(self.z[ind])) )
 
   def horadv(self, vdx_in, b_in, dt):
-    # upwind horizontal advection:
-    # notice that vdx_in is the total transport per unit height
-    # into the column (units m^2/s, sign positive for velocity into the column)
+    r"""
+    Carry out horizon buoyancy advection into the column model from an adjoining model,
+    for the timestepping solution. This function implements an upwind advection scheme.
+
+    Parameters
+    ----------
+
+    vdx_in : number or ndarray; input
+             Total advective transport per unit height into the column for the timestepping
+             solution. Positive values indicate transport into the column. Units: m\ :sup:`2`/s
+    b_in : number or ndarray; input
+           Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
+    dt : number; input
+         Numerical timestep over which solution are iterated. Units: s
+    """
+
     vdx_in = make_array(vdx_in, self.z, 'vdx_in')
     b_in = make_array(b_in, self.z, 'b_in')
 
@@ -250,8 +256,26 @@ class Column(object):
         adv_idx] / self.Area(self.z[adv_idx])
 
   def timestep(self, wA=0., dt=1., do_conv=False, vdx_in=None, b_in=None):
-    #Integrate buoyancy profile evolution for one time-step
-    # do vertical advection and diffusion:
+    r"""
+    Carry out one timestep integration for the buoyancy profile, accounting
+    for advective, diffusive, and convective effects.
+
+    Parameters
+    ----------
+
+    wA : number or ndarray; input
+         Area integrated velocity profile for the timestepping solution. Units: m\ :sup:`3`/s
+    dt : number; input
+         Numerical timestep over which solution are iterated. Units: s
+    do_conv : logical; input
+              Whether to carry out convective adjustment during model integration.
+    vdx_in : number or ndarray; input
+             Total advective transport per unit height into the column for the timestepping
+             solution. Positive values indicate transport into the column. Units: m\ :sup:`2`/s
+    b_in : number or ndarray; input
+           Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
+    """
+
     self.vertadvdiff(wA=wA, dt=dt)
     if vdx_in is not None:
       # do horizontal advection: (optional)
