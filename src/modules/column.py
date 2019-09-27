@@ -101,6 +101,12 @@ class Column(object):
 
     z : number or ndarray; input
         Vertical depth level(s) at which to retrieve the integrated diffusivity gradient.
+
+    Returns
+    -------
+
+    If z is a number, a number corresponding to the ther vertical gradient in the integrated diffusivity :math:`\partial_zA\kappa` at that depth.
+    If z is an ndarray, an ndarray where each entry corresponds to the vertical gradient in the integrated diffusivity :math:`\partial_zA\kappa` at the z value with the same index.
     """
 
     if not check_numpy_version():
@@ -111,7 +117,7 @@ class Column(object):
 
   def bc(self, ya, yb):
     r"""
-    Calculate the residuals oof boundary conditions for the advective-diffusive
+    Calculate the residuals of boundary conditions for the advective-diffusive
     boundary value problem.
 
     Parameters
@@ -121,6 +127,12 @@ class Column(object):
          Bottom boundary condition. Units: m/s\ :sup:`2`
     yb : ndarray; input
          Surface boundary condition. Units: m/s\ :sup:`2`
+
+    Returns
+    -------
+
+    If the bottom buoyancy stratification is defined as a boundary condition, an array containing the residuals of the imposed and calculated bottom buoyancy stratification and surface buoyancy.
+    If the bottom buoyancy stratification is undefined as a boundary condition, an array containing the residuals of the imposed and calculated bottom buoyancy and surface buoyancy.
     """
 
     if self.bzbot is None:
@@ -142,6 +154,17 @@ class Column(object):
         Vertical depth levels of column grid on which to solve the ode. Units: m
     y : ndarray; input
         Initial values for buoyancy and buoyancy gradient profiles.
+
+    Returns
+    -------
+
+    A vertically oriented array, containing the system of linear equations:
+
+      .. math::
+        \begin{aligned}
+        \partial_zy_1 &= y_2 \\
+        \partial_zy_2 &= wA - \partial_zy_2\cdot\frac{\partial_zA\kappa}{A\kappa}
+        \end{aligned}
     """
 
     return np.vstack(
@@ -211,7 +234,7 @@ class Column(object):
   def convect(self):
     r"""
     Carry out downward convective adustment of the vertical buoyancy profile to
-    the minimum stratification, N2min. This adjustment assumes a fixed surface 
+    the minimum stratification, :math:`N^2_{m\!i\!n}`. This adjustment assumes a fixed surface 
     buoyancy boundary condition.
     """
     # do convective adjustment to minimum strat N2min
