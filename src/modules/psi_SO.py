@@ -46,7 +46,7 @@ class Psi_SO(object):
          or an array or function in y. Units: m/s\ :sup:`2`
     tau : number, function, or ndarray; input
           Surface wind stress. Can be a constant, or an array or function
-          in y. Units: m/s\ :sup:`2`
+          in y. Units: N/m\ :sup:`2`
     f : number; input
         Coriolis parameter. Units s\ :sup:`-1`
     rho : number; input
@@ -85,9 +85,9 @@ class Psi_SO(object):
           'y needs to be numpy array providing horizontal grid (or boundaries) of ACC'
       )
 
-    self.b = self.make_func(self.z, b, 'b')
-    self.bs = self.make_func(self.y, bs, 'bs')
-    self.tau = self.make_func(self.y, tau, 'tau')
+    self.b = make_func(b, self.z, 'b')
+    self.bs = make_func(bs, self.y, 'bs')
+    self.tau = make_func(tau, self.y, 'tau')
     self.f = f
     self.rho = rho
     self.L = L
@@ -100,10 +100,22 @@ class Psi_SO(object):
     self.Htaperbot = Htaperbot
     self.smax = smax
 
-  def make_func(self, xi, myst, name):
-    return make_func(myst, xi, name)
-
   def ys(self, b):
+    r"""
+    Inversion function of :math:`bs\left(y\right).
+
+    Parameters
+    ----------
+
+    b: number; input
+       The surface buoyancy value for whose meridional location is being calculated.
+
+    Returns
+    -------
+
+    The meridional location at which the surface buoyancy bs is equal to the supplied buoyancy value b.
+    """
+
     # inverse of bs(y)
     def func(y):
       return self.bs(y) - b
@@ -131,7 +143,7 @@ class Psi_SO(object):
     N2[0] = (b[1] - b[0]) / dz[0]
     N2[-1] = (b[-1] - b[-2]) / dz[-1]
 
-    return self.make_func(self.z, N2, 'N2')
+    return make_func(N2, self.z, 'N2')
 
   def calc_bottom_taper(self, H, z):
     if H is not None:
@@ -178,8 +190,8 @@ class Psi_SO(object):
     bottaper = self.calc_bottom_taper(self.Htaperbot, self.z)
     toptaper = self.calc_top_taper(self.Htapertop, self.z)
     if self.c is not None:
-      temp = self.make_func(
-          self.z, self.KGM * self.z / dy_atz * self.L * toptaper * bottaper,
+      temp = make_func(
+          self.KGM * self.z / dy_atz * self.L * toptaper * bottaper, self.z,
           'psiGM'
       )
       N2 = self.calc_N2()
@@ -215,6 +227,6 @@ class Psi_SO(object):
   def update(self, b=None, bs=None):
     # update buoyancy profiles
     if b is not None:
-      self.b = self.make_func(self.z, b, 'b')
+      self.b = make_func(b, self.z, 'b')
     if bs is not None:
-      self.bs = self.make_func(self.y, bs, 'bs')
+      self.bs = make_func(bs, self.y, 'bs')
