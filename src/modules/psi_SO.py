@@ -29,9 +29,6 @@ class Psi_SO(object):
       Htapertop=None,    # A quadratic tapering of the GM streamfunction at the surface
       Htaperbot=None,    # A quadratic tapering of the GM streamfunction at the bottom
       smax=0.01,    # maximum slope for clipping of GM streamfunction
-      Psi_Ek=None,    # eulerian overturning streamfunction (array, out) 
-      Psi_GM=None,    # GM-type eddy overturning streamfunction (array, out) 
-      Psi=None,    # residual overturning streamfunction (array, out)
   ):
     r"""
     Parameters
@@ -73,12 +70,6 @@ class Psi_SO(object):
                 Height of the quadratic bottom tapering layer for the GM streamfunction. Units: m
     smax : number; input
            Maximum slope of the GM streamfunction, above which Psi_GM is clipped. Units: m\ :sup:`-1`
-    Psi_Ek : ndarray; output
-             Eulerian (Ekman induced) overturning streamfunction. Units: m\ :sup:`2`/s
-    Psi_GM : ndarray; output
-             Gent & McWilliams type eddy overturning streamfunction. Units: m\ :sup`2`/s
-    Psi : ndarray; output
-          Residual overturning streamfunction. Units: m\ :sup:`2`/s 
     """
 
     # initialize grid:
