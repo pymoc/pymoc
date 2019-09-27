@@ -102,7 +102,7 @@ class Psi_SO(object):
 
   def ys(self, b):
     r"""
-    Inversion function of :math:`bs\left(y\right).
+    Inversion function of :math:`bs\left(y\right)`.
 
     Parameters
     ----------
