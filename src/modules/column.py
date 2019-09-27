@@ -27,7 +27,7 @@ class Column(object):
       Area=None,    # Horizontal area (can be function of depth)
       N2min=1e-7    # Minimum strat. for conv adjustment
   ):
-    """
+    r"""
     Parameters
     ----------
 

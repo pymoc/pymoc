@@ -1,16 +1,16 @@
-'''
-A 1D model of the overturninng transpot in the S.O.,
-given the density profile in the basin [b(z)],
-the surface buoyancy in the SO [bs(y)],
-and the surface wind stress [tau(y)]
-'''
-
 import numpy as np
 from scipy import integrate, optimize
 from pymoc.utils import make_func
 
 
 class Psi_SO(object):
+  r"""
+  Southern Ocean Overturning Trasport Model
+
+  A 1D model of the Southern Ocean overturning transport,
+  calculated based on a density profile in the adjoining basin,
+  and local surface buoyancy and surface wind stress in the SO.
+  """
   def __init__(
       self,
       z=None,    # vertical grid (array, in)
@@ -33,6 +33,52 @@ class Psi_SO(object):
       Psi_GM=None,    # GM-type eddy overturning streamfunction (array, out) 
       Psi=None,    # residual overturning streamfunction (array, out)
   ):
+    r"""
+    Parameters
+    ----------
+
+    z : ndarray; input
+        Vertical depth levels of overturning grid. Units: m
+    y : ndarray; input
+        Meridional overturning grid. Units: m
+    b : number, function, or ndarray; input
+        Vertical buoyancy profile from the adjoining basin, on the north
+        side of the ACC. Units m/s\ :sup:`2`
+    bs : number, function, or ndarray; input
+         Surface level buoyancy boundary condition. Can be a constant,
+         or an array or function in y. Units: m/s\ :sup:`2`
+    tau : number, function, or ndarray; input
+          Surface wind stress. Can be a constant, or an array or function
+          in y. Units: m/s\ :sup:`2`
+    f :
+
+    rho :
+
+    L :
+
+    KGM :
+
+    c :
+
+    bvp_with_Ek :
+    
+    Hsill :
+
+    Hek :
+
+    Htapertop :
+     
+    Htaperbot :
+
+    smax :
+
+    Psi_Ek :
+
+    Psi_GM :
+
+    Psi :
+
+    """
 
     # initialize grid:
     if isinstance(z, np.ndarray):
