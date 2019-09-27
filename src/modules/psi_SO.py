@@ -43,41 +43,42 @@ class Psi_SO(object):
         Meridional overturning grid. Units: m
     b : number, function, or ndarray; input
         Vertical buoyancy profile from the adjoining basin, on the north
-        side of the ACC. Units m/s\ :sup:`2`
+        side of the ACC. Units: m/s\ :sup:`2`
     bs : number, function, or ndarray; input
          Surface level buoyancy boundary condition. Can be a constant,
          or an array or function in y. Units: m/s\ :sup:`2`
     tau : number, function, or ndarray; input
           Surface wind stress. Can be a constant, or an array or function
           in y. Units: m/s\ :sup:`2`
-    f :
-
-    rho :
-
-    L :
-
-    KGM :
-
-    c :
-
-    bvp_with_Ek :
-    
-    Hsill :
-
-    Hek :
-
-    Htapertop :
-     
-    Htaperbot :
-
-    smax :
-
-    Psi_Ek :
-
-    Psi_GM :
-
-    Psi :
-
+    f : number; input
+        Coriolis parameter. Units s\ :sup:`-1`
+    rho : number; input
+          Density of sea water for Boussinesq approximation. Units: kg/m\ :sup:`3`
+    L : number; input
+        Zonal length of the modeled ACC. Units: m
+    KGM : number; input
+          Gent & McWilliams (GM) eddy diffusivity coefficient. Units: 
+    c : number; input
+        Phase speed cutoff for smoothing when solving the GM boundary value problem. Units: m/s 
+    bvp_with_Ek : logical; input
+            Whether to enforce the boundary condition that Psi_GM=-Psi_Ek at the ocean
+            surface and bottom when solving the boundary value problem for the GM streamfunction.
+    Hsill : number; input
+            Height above the bottom at which the Ekman streamfunction is tapered. Units: m
+    Hek : number; input
+          Depth of the surface Ekman layer. Units: m
+    Htapertop : number; input
+                Height of the quadratic surface tapering layer for the GM streamfunction. Units: m
+    Htaperbot : number; input
+                Height of the quadratic bottom tapering layer for the GM streamfunction. Units: m
+    smax : number; input
+           Maximum slope of the GM streamfunction, above which Psi_GM is clipped. Units: m\ :sup:`-1`
+    Psi_Ek : ndarray; output
+             Eulerian (Ekman induced) overturning streamfunction. Units: m\ :sup:`2`/s
+    Psi_GM : ndarray; output
+             Gent & McWilliams type eddy overturning streamfunction. Units: m\ :sup`2`/s
+    Psi : ndarray; output
+          Residual overturning streamfunction. Units: m\ :sup:`2`/s 
     """
 
     # initialize grid:
