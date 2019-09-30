@@ -115,8 +115,6 @@ class Psi_SO(object):
 
     The meridional location at which the surface buoyancy bs is equal to the supplied buoyancy value b.
     """
-
-    # inverse of bs(y)
     def func(y):
       return self.bs(y) - b
 
@@ -135,6 +133,15 @@ class Psi_SO(object):
       return optimize.brentq(func, self.y[minind], self.y[-1])
 
   def calc_N2(self):
+    r"""
+    Calculate the buouyancy (Brunt-Väisällä) frequency profile for the Southern Ocean
+
+    Returns
+    -------
+
+    A depth dependent function that returns the buoyancy frequency :math:`N^2` for a given depth :math:`z`.
+    """
+
     dz = self.z[1:] - self.z[:-1]
     N2 = np.zeros(np.size(self.z))
     b = self.b(self.z)
@@ -146,11 +153,46 @@ class Psi_SO(object):
     return make_func(N2, self.z, 'N2')
 
   def calc_bottom_taper(self, H, z):
+    r"""
+    Calculate the quadratic tapering profile relative to the ocean floor.
+
+    Parameters
+    ==========
+
+    H : number
+        Height above the bottom at which the streamfunction is tapered. Units: m
+    z : ndarray; input
+        Vertical depth levels of overturning grid. Units: m
+
+    Returns
+    =======
+
+    An array containing weights (0.0-1.0) corresponding to how much of the 
+    streamfunction should remain after tapering.
+    """
+
     if H is not None:
       return 1. - np.maximum(z[0] + H - z, 0.)**2. / H**2.
     return 1.
 
   def calc_top_taper(self, H, z, scalar=True):
+    r"""
+    Calculate the quadratic tapering profile relative to the ocean surface.
+
+    Parameters
+    ==========
+
+    H : number
+        Depth from the surface at which the streamfunction is tapered. Units: m
+    z : ndarray; input
+        Vertical depth levels of overturning grid. Units: m
+
+    Returns
+    =======
+
+    An array containing weights (0.0-1.0) corresponding to how much of the 
+    streamfunction should remain after tapering.
+    """
     if H is not None:
       return 1 - np.maximum(z + H, 0)**2. / H**2.
     elif scalar:
@@ -161,8 +203,18 @@ class Psi_SO(object):
       return taper
 
   def calc_Ekman(self):
-    # compute Ekman transport on z grid
-    # based on average wind stress between outcrop and northern end of channel
+    r"""
+    Compute the Ekman transport from the wind stress averaged from the
+    northern boundary of the domain to the latitude of the northernmost
+    outcropped isopycnal.
+
+    Returns
+    =======
+
+    An array representing the meridional average of the Ekman transport at
+    each vertical level of the Southern Ocean model.
+    """
+
     tau_ave = 0 * self.z
     for ii in range(0, np.size(self.z)):
       y0 = self.ys(self.b(self.z[ii]))    # outcrop latitude
@@ -181,8 +233,17 @@ class Psi_SO(object):
       return np.array([ya[0], yb[0]])
 
   def calc_GM(self):
-    # compute GM ransport on z grid
-    # based on average isopycnal slope
+    r"""
+    Compute the eddy (Gent & Mcwilliams) transport based on the meridionally
+    averaged isopycnal slope.
+
+    Returns
+    =======
+
+    An array representing the meridional average of the eddy transport at
+    each vertical level of the Southern Ocean model.
+    """
+
     dy_atz = 0 * self.z
     eps = 0.1    # minimum dy (in meters) (to avoid div. by 0)
     for ii in range(0, np.size(self.z)):
@@ -215,7 +276,17 @@ class Psi_SO(object):
     return temp
 
   def solve(self):
-    #Solve for overturning circ.
+    r"""
+    Compute the residual overturning transport in the Southern Ocean.
+
+    Returns
+    =======
+
+    An array representing the meridional average of the residual overturning
+    transport at each vertical level of the Southern Ocean. This is a scaled
+    sum of the Ekman and eddy transports.
+    """
+
     self.Psi_Ek = self.calc_Ekman() / 1e6
     self.Psi_GM = self.calc_GM() / 1e6
     self.Psi = self.Psi_Ek + self.Psi_GM
@@ -225,7 +296,21 @@ class Psi_SO(object):
     self.Psi[0] = self.Psi[1]
 
   def update(self, b=None, bs=None):
-    # update buoyancy profiles
+    r"""
+    Update the vertical buoyancy profile and surface buoyancy, based on changes
+    in the adjoining basin and/or in the surface boundary conditions.
+
+    Parameters
+    ==========
+
+    b : number, function, or ndarray; input
+        Vertical buoyancy profile from the adjoining basin, on the north
+        side of the ACC. Units: m/s\ :sup:`2`
+    bs : number, function, or ndarray; input
+         Surface level buoyancy boundary condition. Can be a constant,
+         or an array or function in y. Units: m/s\ :sup:`2`
+    """
+
     if b is not None:
       self.b = make_func(b, self.z, 'b')
     if bs is not None:
