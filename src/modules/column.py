@@ -31,21 +31,21 @@ class Column(object):
     Parameters
     ----------
 
-    z : ndarray; input
+    z : ndarray
         Vertical depth levels of column grid. Units: m
-    kappa : number, function, or ndarray; input
+    kappa : float, function, or ndarray
             Vertical diffusivity profile. Units: m\ :sup:`2`/s
-    bs : number; input
+    bs : float
          Surface level buoyancy boundary condition. Units: m/s\ :sup:`2`
-    bbot : number; optional; input
+    bbot : float; optional
            Bottom level buoyancy boundary condition. Units: m/s\ :sup:`2`
-    bzbot : number; optional; input
+    bzbot : float; optional
             Bottom level buoyancy stratification. Can be used as an alternative to **bbot**. Units: s\ :sup:`-2`
-    b : number, function, or ndarray; input, output
+    b : float, function, or ndarray
         Initial vertical buoyancy profile. Recalculated on model run. Units: m/s
-    Area : number, function, or ndarray; input
+    Area : float, function, or ndarray
            Horizontal area of basin. Units: m\ :sup:`2`
-    N2min : number; optional; input
+    N2min : float; optional
             Minimum stratification for convective adjustment. Units: s\ :sup:`-1`
     """
 
@@ -79,14 +79,16 @@ class Column(object):
     Parameters
     ----------
 
-    z : number or ndarray; input
+    z : float or ndarray
         Vertical depth level(s) at which to retrieve the integrated diffusivity.
     
     Returns
     -------
+    AKappa : float or ndarray
+             If z is a number, a number corresponding to the integrated diffusivity :math:`A\kappa` at that depth.
+             If z is an ndarray, an ndarray where each entry corresponds to the integrated diffusivity :math:`A\kappa`
+             at the z value with the same index.
 
-    If z is a number, a number corresponding to the integrated diffusivity :math:`A\kappa` at that depth.
-    If z is an ndarray, an ndarray where each entry corresponds to the integrated diffusivity :math:`A\kappa` at the z value with the same index.
     """
 
     return self.Area(z) * self.kappa(z)
@@ -99,14 +101,18 @@ class Column(object):
     Parameters
     ----------
 
-    z : number or ndarray; input
+    z : float or ndarray
         Vertical depth level(s) at which to retrieve the integrated diffusivity gradient.
 
     Returns
     -------
 
-    If z is a number, a number corresponding to the ther vertical gradient in the integrated diffusivity :math:`\partial_zA\kappa` at that depth.
-    If z is an ndarray, an ndarray where each entry corresponds to the vertical gradient in the integrated diffusivity :math:`\partial_zA\kappa` at the z value with the same index.
+    dAkappa_dz : float or ndarray
+                 If z is a number, a number corresponding to the ther vertical gradients
+                 in the integrated diffusivity :math:`\partial_zA\kappa` at that depth.
+                 If z is an ndarray, an ndarray where each entry corresponds to the vertical gradient
+                 in the integrated diffusivity :math:`\partial_zA\kappa` at the z value with the same index.
+
     """
 
     if not check_numpy_version():
@@ -123,16 +129,20 @@ class Column(object):
     Parameters
     ----------
 
-    ya : ndarray; input
+    ya : ndarray
          Bottom boundary condition. Units: m/s\ :sup:`2`
-    yb : ndarray; input
+    yb : ndarray
          Surface boundary condition. Units: m/s\ :sup:`2`
 
     Returns
     -------
 
-    If the bottom buoyancy stratification is defined as a boundary condition, an array containing the residuals of the imposed and calculated bottom buoyancy stratification and surface buoyancy.
-    If the bottom buoyancy stratification is undefined as a boundary condition, an array containing the residuals of the imposed and calculated bottom buoyancy and surface buoyancy.
+    bc : ndarray
+         If the bottom buoyancy stratification is defined as a boundary condition,
+         an array containing the residuals of the imposed and calculated bottom buoyancy stratification and surface buoyancy.
+         If the bottom buoyancy stratification is undefined as a boundary condition,
+         an array containing the residuals of the imposed and calculated bottom buoyancy and surface buoyancy.
+
     """
 
     if self.bzbot is None:
@@ -150,21 +160,22 @@ class Column(object):
     Parameters
     ----------
 
-    z : ndarray; input
+    z : ndarray
         Vertical depth levels of column grid on which to solve the ode. Units: m
-    y : ndarray; input
+    y : ndarray
         Initial values for buoyancy and buoyancy gradient profiles.
 
     Returns
     -------
+    ode : ndarray
+          A vertically oriented array, containing the system of linear equations:
 
-    A vertically oriented array, containing the system of linear equations:
+          .. math::
+            \begin{aligned}
+            \partial_zy_1 &= y_2 \\
+            \partial_zy_2 &= wA - \partial_zy_2\cdot\frac{\partial_zA\kappa}{A\kappa}
+            \end{aligned}
 
-      .. math::
-        \begin{aligned}
-        \partial_zy_1 &= y_2 \\
-        \partial_zy_2 &= wA - \partial_zy_2\cdot\frac{\partial_zA\kappa}{A\kappa}
-        \end{aligned}
     """
 
     return np.vstack(
@@ -179,8 +190,9 @@ class Column(object):
     Parameters
     ----------
 
-    wA : ndarray; input
+    wA : ndarray
          Area integrated velocity profile for the equilibrium solution. Units: m\ :sup:`3`/s
+
     """
 
     self.wA = make_func(wA, self.z, 'w')
@@ -201,10 +213,11 @@ class Column(object):
     Parameters
     ----------
 
-    wA : number or ndarray; input
+    wA : float or ndarray
          Area integrated velocity profile for the timestepping solution. Units: m\ :sup:`3`/s
-    dt : number; input
+    dt : int
          Numerical timestep over which solution are iterated. Units: s
+
     """
 
     wA = make_array(wA, self.z, 'wA')
@@ -236,6 +249,7 @@ class Column(object):
     Carry out downward convective adustment of the vertical buoyancy profile to
     the minimum stratification, :math:`N^2_{m\!i\!n}`. This adjustment assumes a fixed surface 
     buoyancy boundary condition.
+
     """
     # do convective adjustment to minimum strat N2min
     # notice that this parameterization currently only handles convection
@@ -264,13 +278,14 @@ class Column(object):
     Parameters
     ----------
 
-    vdx_in : number or ndarray; input
+    vdx_in : float or ndarray
              Total advective transport per unit height into the column for the timestepping
              solution. Positive values indicate transport into the column. Units: m\ :sup:`2`/s
-    b_in : number or ndarray; input
+    b_in : float or ndarray
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
-    dt : number; input
+    dt : int
          Numerical timestep over which solution are iterated. Units: s
+
     """
 
     vdx_in = make_array(vdx_in, self.z, 'vdx_in')
@@ -290,17 +305,18 @@ class Column(object):
     Parameters
     ----------
 
-    wA : number or ndarray; input
+    wA : float or ndarray
          Area integrated velocity profile for the timestepping solution. Units: m\ :sup:`3`/s
-    dt : number; input
+    dt : int
          Numerical timestep over which solution are iterated. Units: s
-    do_conv : logical; input
+    do_conv : logical
               Whether to carry out convective adjustment during model integration.
-    vdx_in : number or ndarray; input
+    vdx_in : float or ndarray
              Total advective transport per unit height into the column for the timestepping
              solution. Positive values indicate transport into the column. Units: m\ :sup:`2`/s
-    b_in : number or ndarray; input
+    b_in : float or ndarray
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
+           
     """
 
     self.vertadvdiff(wA=wA, dt=dt)
