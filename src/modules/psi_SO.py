@@ -34,41 +34,41 @@ class Psi_SO(object):
     Parameters
     ----------
 
-    z : ndarray; input
+    z : ndarray
         Vertical depth levels of overturning grid. Units: m
-    y : ndarray; input
+    y : ndarray
         Meridional overturning grid. Units: m
-    b : number, function, or ndarray; input
+    b : float, function, or ndarray
         Vertical buoyancy profile from the adjoining basin, on the north
         side of the ACC. Units: m/s\ :sup:`2`
-    bs : number, function, or ndarray; input
+    bs : float, function, or ndarray
          Surface level buoyancy boundary condition. Can be a constant,
          or an array or function in y. Units: m/s\ :sup:`2`
-    tau : number, function, or ndarray; input
+    tau : float, function, or ndarray
           Surface wind stress. Can be a constant, or an array or function
           in y. Units: N/m\ :sup:`2`
-    f : number; input
+    f : float
         Coriolis parameter. Units s\ :sup:`-1`
-    rho : number; input
+    rho : float
           Density of sea water for Boussinesq approximation. Units: kg/m\ :sup:`3`
-    L : number; input
+    L : float
         Zonal length of the modeled ACC. Units: m
-    KGM : number; input
+    KGM : float
           Gent & McWilliams (GM) eddy diffusivity coefficient. Units: 
-    c : number; input
+    c : float
         Phase speed cutoff for smoothing when solving the GM boundary value problem. Units: m/s 
-    bvp_with_Ek : logical; input
+    bvp_with_Ek : logical
             Whether to enforce the boundary condition that Psi_GM=-Psi_Ek at the ocean
             surface and bottom when solving the boundary value problem for the GM streamfunction.
-    Hsill : number; input
+    Hsill : float
             Height above the bottom at which the Ekman streamfunction is tapered. Units: m
-    Hek : number; input
+    Hek : float
           Depth of the surface Ekman layer. Units: m
-    Htapertop : number; input
+    Htapertop : float
                 Height of the quadratic surface tapering layer for the GM streamfunction. Units: m
-    Htaperbot : number; input
+    Htaperbot : float
                 Height of the quadratic bottom tapering layer for the GM streamfunction. Units: m
-    smax : number; input
+    smax : float
            Maximum slope of the GM streamfunction, above which Psi_GM is clipped. Units: m\ :sup:`-1`
     """
 
@@ -107,13 +107,15 @@ class Psi_SO(object):
     Parameters
     ----------
 
-    b: number; input
+    b: float
        The surface buoyancy value for whose meridional location is being calculated.
 
     Returns
     -------
 
-    The meridional location at which the surface buoyancy bs is equal to the supplied buoyancy value b.
+    ys : float
+        The meridional location at which the surface buoyancy bs is equal to the supplied buoyancy value b.
+
     """
     def func(y):
       return self.bs(y) - b
@@ -139,7 +141,9 @@ class Psi_SO(object):
     Returns
     -------
 
-    A depth dependent function that returns the buoyancy frequency :math:`N^2` for a given depth :math:`z`.
+    N2 : function
+         A depth dependent function that returns the buoyancy frequency :math:`N^2` for a given depth :math:`z`.
+
     """
 
     dz = self.z[1:] - self.z[:-1]
@@ -157,18 +161,20 @@ class Psi_SO(object):
     Calculate the quadratic tapering profile relative to the ocean floor.
 
     Parameters
-    ==========
+    ----------
 
-    H : number
+    H : float
         Height above the bottom at which the streamfunction is tapered. Units: m
-    z : ndarray; input
+    z : ndarray
         Vertical depth levels of overturning grid. Units: m
 
     Returns
-    =======
+    -------
 
-    An array containing weights (0.0-1.0) corresponding to how much of the 
-    streamfunction should remain after tapering.
+    bottom_taper : ndarray
+                   An array containing weights (0.0-1.0) corresponding to how much of the 
+                   streamfunction should remain after tapering.
+
     """
 
     if H is not None:
@@ -180,18 +186,20 @@ class Psi_SO(object):
     Calculate the quadratic tapering profile relative to the ocean surface.
 
     Parameters
-    ==========
+    ----------
 
-    H : number
+    H : float
         Depth from the surface at which the streamfunction is tapered. Units: m
-    z : ndarray; input
+    z : ndarray
         Vertical depth levels of overturning grid. Units: m
 
     Returns
-    =======
+    -------
 
-    An array containing weights (0.0-1.0) corresponding to how much of the 
-    streamfunction should remain after tapering.
+    top_taper : ndarray
+                An array containing weights (0.0-1.0) corresponding to how much of the 
+                streamfunction should remain after tapering.
+
     """
     if H is not None:
       return 1 - np.maximum(z + H, 0)**2. / H**2.
@@ -209,10 +217,12 @@ class Psi_SO(object):
     outcropped isopycnal.
 
     Returns
-    =======
+    -------
 
-    An array representing the meridional average of the Ekman transport at
-    each vertical level of the Southern Ocean model.
+    Psi_Ek : ndarray
+             An array representing the meridional average of the Ekman transport at
+             each vertical level of the Southern Ocean model.
+
     """
 
     tau_ave = 0 * self.z
@@ -238,10 +248,12 @@ class Psi_SO(object):
     averaged isopycnal slope.
 
     Returns
-    =======
+    -------
 
-    An array representing the meridional average of the eddy transport at
-    each vertical level of the Southern Ocean model.
+    Psi_GM : ndarray
+             An array representing the meridional average of the eddy transport at
+             each vertical level of the Southern Ocean model.
+
     """
 
     dy_atz = 0 * self.z
@@ -280,11 +292,12 @@ class Psi_SO(object):
     Compute the residual overturning transport in the Southern Ocean.
 
     Returns
-    =======
+    -------
 
-    An array representing the meridional average of the residual overturning
-    transport at each vertical level of the Southern Ocean. This is a scaled
-    sum of the Ekman and eddy transports.
+    Psi : ndarray
+          An array representing the meridional average of the residual overturning
+          transport at each vertical level of the Southern Ocean. This is a scaled
+          sum of the Ekman and eddy transports.
     """
 
     self.Psi_Ek = self.calc_Ekman() / 1e6
@@ -301,12 +314,12 @@ class Psi_SO(object):
     in the adjoining basin and/or in the surface boundary conditions.
 
     Parameters
-    ==========
+    ----------
 
-    b : number, function, or ndarray; input
+    b : float, function, or ndarray
         Vertical buoyancy profile from the adjoining basin, on the north
         side of the ACC. Units: m/s\ :sup:`2`
-    bs : number, function, or ndarray; input
+    bs : float, function, or ndarray
          Surface level buoyancy boundary condition. Can be a constant,
          or an array or function in y. Units: m/s\ :sup:`2`
     """
