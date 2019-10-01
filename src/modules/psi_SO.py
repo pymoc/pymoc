@@ -260,7 +260,8 @@ class Psi_SO(object):
 
     Where :math:`z_B\left(b\right)` is the depth of isopycnals of density class :math:`b`
     in the adjoining basin, and :math:`y_{SO}\left(b\right)` is the outcropping latitude
-    of isopycnals of density class :math:`b` in the Southern Ocean, available via ys(b).
+    of isopycnals of density class :math:`b` in the Southern Ocean, available via
+    :meth:`pymoc.modules.Psi_SO.ys`.
 
     Returns
     -------
