@@ -102,7 +102,8 @@ class Psi_SO(object):
 
   def ys(self, b):
     r"""
-    Inversion function of :math:`bs\left(y\right)`.
+    Inversion function of :math:`bs\left(y\right)`. This is equivalent to the outcopping
+    latitude of the isopycnal of density class :math:`b`.
 
     Parameters
     ----------
@@ -114,7 +115,8 @@ class Psi_SO(object):
     -------
 
     ys : float
-        The meridional location at which the surface buoyancy bs is equal to the supplied buoyancy value b.
+        The meridional location at which the surface buoyancy bs is equal to the supplied
+        buoyancy value b.
 
     """
     def func(y):
@@ -216,6 +218,9 @@ class Psi_SO(object):
     northern boundary of the domain to the latitude of the northernmost
     outcropped isopycnal.
 
+    .. math::
+      \Psi_{Ek} = -\frac{\tau L_x}{\rho_of_{SO}}
+
     Returns
     -------
 
@@ -246,6 +251,16 @@ class Psi_SO(object):
     r"""
     Compute the eddy (Gent & Mcwilliams) transport based on the meridionally
     averaged isopycnal slope.
+
+    .. math::
+      \begin{aligned}
+      \Psi_{GM} &= K_{GM}\cdot s \\
+      s\left(b\right) &\equiv \frac{z_B\left(b\right)}{L_y - y_{SO}\left(b\right)}
+      \end{aligned}
+
+    Where :math:`z_B\left(b\right)` is the depth of isopycnals of density class :math:`b`
+    in the adjoining basin, and :math:`y_{SO}\left(b\right)` is the outcropping latitude
+    of isopycnals of density class :math:`b` in the Southern Ocean, available via ys(b).
 
     Returns
     -------
@@ -290,6 +305,9 @@ class Psi_SO(object):
   def solve(self):
     r"""
     Compute the residual overturning transport in the Southern Ocean.
+
+    .. math::
+      \Psi_{SO} = \Psi_{Ek} + \Psi_{GM}
 
     Returns
     -------

@@ -316,7 +316,7 @@ class Column(object):
              solution. Positive values indicate transport into the column. Units: m\ :sup:`2`/s
     b_in : float or ndarray
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
-           
+
     """
 
     self.vertadvdiff(wA=wA, dt=dt)
