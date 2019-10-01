@@ -64,7 +64,7 @@ jobs:
             git config user.name "ci-build"
       - run:
           name: Deploy docs to gh-pages branch
-          command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/_build/html
+          command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/_build/html --repo https://www.github.com/pymoc/pymoc.github.io --branch master
 
 workflows:
   version: 2
