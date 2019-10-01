@@ -6,4 +6,4 @@ exclude_patterns:
   - "examples/**/*.py"
   - "tests/**/*.py"
   - "src/plotting/*"
-  - "src/setup.py"
+  - "setup.py"

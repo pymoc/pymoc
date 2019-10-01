@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run:
           name: install pymoc
-          command: python src/setup.py install
+          command: python setup.py install
       - run:
           name: setup codeclimate reporter
           command: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporter
@@ -36,7 +36,7 @@ jobs:
       - checkout
       - run:
           name: install pymoc
-          command: python src/setup.py install
+          command: python setup.py install
       - run:
           name: Build docs
           command: cd docs/ && make html

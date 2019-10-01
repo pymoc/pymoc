@@ -11,7 +11,7 @@ coverage:
   ignore:
     - "examples/**/*.py"
     - "tests/**/*.py"
-    - "src/setup.py"
+    - "setup.py"
     - "src/plotting/*"
 
 codecov:

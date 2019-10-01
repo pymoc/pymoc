@@ -77,14 +77,14 @@ You can then navigate into the pymoc directory, and install the model
 .. code-block:: bash
 
   $ cd pymoc
-  $ python src/setup.py install
+  $ python setup.py install
 
 If you plan on modifying the model code for your own purposes, you should
 install in development mode instead
 
 .. code-block:: bash
 
-  $ python src/setup.py develop
+  $ python setup.py develop
 
 Should you receive an error from either of the above installation commands
 regarding system privileges, you will need to either install as root (via
