@@ -139,9 +139,11 @@ class Column(object):
 
     bc : ndarray
          If the bottom buoyancy stratification is defined as a boundary condition,
-         an array containing the residuals of the imposed and calculated bottom buoyancy stratification and surface buoyancy.
+         an array containing the residuals of the imposed and calculated bottom buoyancy
+         stratification and surface buoyancy.
          If the bottom buoyancy stratification is undefined as a boundary condition,
-         an array containing the residuals of the imposed and calculated bottom buoyancy and surface buoyancy.
+         an array containing the residuals of the imposed and calculated bottom buoyancy
+         and surface buoyancy.
 
     """
 

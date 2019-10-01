@@ -240,6 +240,30 @@ class Psi_SO(object):
     return tau_ave / self.f / self.rho * self.L * silltaper * Ektaper
 
   def bc_GM(self, ya, yb):
+    r"""
+    Calculate the residuals of boundary conditions for the eddy driven transport
+    boundary value problem.
+
+    Parameters
+    ----------
+
+    ya : ndarray
+         Bottom boundary condition. Units: Sv
+    yb : ndarray
+         Surface boundary condition. Units: Sv
+
+    Returns
+    -------
+
+    bc : ndarray
+         If bvp_with_Ek is false, an array containing the bottom boundary condition
+         ya[0] and surface boundary condition yb[0].
+         If bvp_with_Ek is true, an array containing the residuals of the supplied
+         boundary conditions and the value of the Ekman transport :math:`\Psi_{Ek}`
+         at those boundaries.
+         
+    """
+
     if self.bvp_with_Ek:
       return np.array([
           ya[0] + self.Psi_Ek[0] * 1e6, yb[0] + self.Psi_Ek[-1] * 1e6
