@@ -14,10 +14,6 @@ class SO_ML(object):
   and buoyancy profile in the basin.
 
   """
-
-  # This module creates an advective-diffusive column
-  # Notice that the column here represents a horizontal integral, rather than
-  # an average, thus allowing for the area of to be a function of depth
   def __init__(
       self,
       y=None,    # grid (input)
@@ -37,25 +33,25 @@ class SO_ML(object):
     ----------
 
     y : ndarray
-
+        Meridional mixed layer grid. Units: m
     Ks : float
-
+         Horizontal diffusivity in the mixed layer. Units: 
     h : float
-
+        Mixed layer depth. Units: m
     L : float
-
-    surflux : float, ndarray, or function (optional)
-
-    rest_mask : float, ndarray, or function (optional)
-
-    b_rest : float, ndarray, or function (optional)
-
-    v_pist : float (optional)
-
-    bs : float, ndarray, or function (optional)
-
-    Psi_s : ndarray (optional)
-
+        Zonal length of the mixed layer. Units: m
+    surflux : float, ndarray, or function; optional
+              Prescribed surface buoyancy flux. Units: m\ :sup:`2`/s\ :sup:`3`
+    rest_mask : float, ndarray, or function; optional
+                Surface restoring mask, prescribed as 1 where restoring is desired, and 0 elsewhere.
+    b_rest : float, ndarray, or function; optional
+             Prescribed surface buoyancy profile towards which mixed layer buoyancy is restored. Units: 
+    v_pist : float; optional
+             Prescribed piston velocity for buoyancy restoration. Units: m/s
+    bs : float, ndarray, or function; optional
+         Initial meridional surface buoyancy profile in the mixed layer. Units:
+    Psi_s : ndarray; optional
+         Initial overturning transport in the mixed layer. Units: Sv 
 
     """
     # initialize grid:

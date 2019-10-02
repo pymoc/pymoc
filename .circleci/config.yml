@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run:
           name: install pymoc
-          command: python setup.py install
+          command: python setup.py clean; python setup.py bdist_wheel; pip3 install dist/pymoc-0.0.1-py3-none-any.whl  --user -I
       - run:
           name: setup codeclimate reporter
           command: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && chmod +x ./cc-test-reporter
