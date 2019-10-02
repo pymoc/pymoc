@@ -7,9 +7,10 @@ class Psi_SO(object):
   r"""
   Southern Ocean Overturning Trasport Model
 
-  A 1D model of the Southern Ocean overturning transport,
-  calculated based on a density profile in the adjoining basin,
-  and local surface buoyancy and surface wind stress in the SO.
+  INstances of this class represent a 1D model of the overturning transport in
+  the Southern Ocean interior, calculated based on a density profile in the
+  adjoining basin, and local surface buoyancy and surface wind stress in the SO.
+  
   """
   def __init__(
       self,

@@ -1,16 +1,20 @@
-'''
-Instances of this class represent 1D representations of buoyancy 
-in the S.O. mixed layer. An advective-diffusive equation is solved.
-Surface fluxes can be prescribed via a fixed flux and/or restoring
-Northen and southern boundary conditions are determined internally based on the
-overturning streamfunction and buoyancy profile in the basin
-'''
-
 import numpy as np
 from pymoc.utils import make_array
 
 
 class SO_ML(object):
+  r"""
+  Southern Ocean Mixed Layer Model
+
+  Instances of this class represent 1D representations of the meridional buoyancy structure
+  in the Southern Ocean mixed layer, based on the solution to an advective-diffusive equation.
+  Surface fluxes can be specified via a prescribed  fixed flux at the surface and/or
+  a restoring buoyancy. Boundary conditions at the northern and southern boundaries
+  of the Southern Ocean are determined internally based on the overturning streamfunction
+  and buoyancy profile in the basin.
+
+  """
+
   # This module creates an advective-diffusive column
   # Notice that the column here represents a horizontal integral, rather than
   # an average, thus allowing for the area of to be a function of depth
@@ -28,7 +32,32 @@ class SO_ML(object):
       bs=0.0,    # Surface buoyancy (input, output)
       Psi_s=None    # Overturning in the ML (output)
   ):
+    r"""
+    Parameters
+    ----------
 
+    y : ndarray
+
+    Ks : float
+
+    h : float
+
+    L : float
+
+    surflux : float, ndarray, or function (optional)
+
+    rest_mask : float, ndarray, or function (optional)
+
+    b_rest : float, ndarray, or function (optional)
+
+    v_pist : float (optional)
+
+    bs : float, ndarray, or function (optional)
+
+    Psi_s : ndarray (optional)
+
+
+    """
     # initialize grid:
     if isinstance(y, np.ndarray):
       self.y = y
@@ -38,15 +67,12 @@ class SO_ML(object):
     self.Ks = Ks
     self.h = h
     self.L = L
-    self.surflux = self.make_array(surflux, 'surflux')
-    self.rest_mask = self.make_array(rest_mask, 'rest_mask')
-    self.b_rest = self.make_array(b_rest, 'b_rest')
+    self.surflux = make_array(surflux, self.y, 'surflux')
+    self.rest_mask = make_array(rest_mask, self.y, 'rest_mask')
+    self.b_rest = make_array(b_rest, self.y, 'b_rest')
     self.v_pist = v_pist
     self.Psi_s = Psi_s
-    self.bs = self.make_array(bs, 'bs')
-
-  def make_array(self, myst, name):
-    return make_array(myst, self.y, name)
+    self.bs = make_array(bs, self.y, 'bs')
 
   def solve_equi(self):
     #Solve for equilibrium solution given inputs
