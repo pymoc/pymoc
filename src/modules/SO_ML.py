@@ -196,6 +196,21 @@ class SO_ML(object):
     return np.dot(np.dot(Uinv, V), self.bs)
 
   def advdiff(self, b_basin, Psi_b, dt):
+    r"""
+    Compute and apply advective-diffusive transport to the Souther Ocean Mixed Layer model,
+    based on conditions in the adjoining basin.
+
+    Parameters
+    ----------
+
+    b_basin: ndarray
+              The buoyancy profile in the adjoining basin. Units:
+    Psi_b: ndarray
+            The transport streamfunction in the Southern Ocean. Units: Sv
+    dt: float
+        The timestep duration for the mixed layer model.
+
+    """
     # update surface buoyancy profile via advect. and diff
 
     # First we need to determine Psi at the surface in the ML:
@@ -259,6 +274,21 @@ class SO_ML(object):
     self.set_boundary_conditions(b_basin, Psi_b)
 
   def timestep(self, b_basin=None, Psi_b=None, dt=1.):
+    r"""
+    Integrate the mixed layer buoyancy profile for one timestep.
+
+    Parameters
+    ----------
+
+    b_basin: ndarray
+              The buoyancy profile in the adjoining basin. Units:
+    Psi_b: ndarray
+            The transport streamfunction in the Southern Ocean. Units: Sv
+    dt: float
+        The timestep duration for the mixed layer model.
+
+    """
+
     #Integrate buoyancy profile evolution for one time-step
     if not isinstance(b_basin, np.ndarray):
       raise TypeError(
