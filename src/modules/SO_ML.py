@@ -103,7 +103,7 @@ class SO_ML(object):
 
     .. math::
         \begin{aligned}
-        \partial_tb_{SO} &= -v_{SO}^\dagger\partial_yb_{SO} \\
+        \left[\partial_tb_{SO}\right]_{adv} &= -v_{SO}^\dagger\partial_yb_{SO} \\
         v_{SO}^\dagger &= \frac{\Psi_{SO}}{h\cdot L_x}
         \end{aligned}
 
@@ -134,6 +134,24 @@ class SO_ML(object):
     return dbdt_ad
 
   def calc_diffusion_matrix(self, s):
+    r"""
+    Compute the forward time centered space (FTCS) coeffient matrix for the implicit diffusion scheme, based on
+    the stability criterion:
+
+    .. math::
+        s = K_s\cdot\frac{dt}{dy^2}
+
+    Paramaers
+    ---------
+    s: float
+       Stability criterion for FTCS implicit solution.
+
+    Returns
+    -------
+    U: ndarray
+       Coefficient matrix representing the system of linear equations being solved by the implicit diffusion scheme.
+
+    """
     U = (
         np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
         np.diag((1+s) * np.ones(len(self.y)), 0) +
@@ -151,7 +169,7 @@ class SO_ML(object):
     Compute the diffusive transport in Southern Ocean mixed layer:
 
     .. math::
-        \partial_tb_{SO} = \partial_y\left(K_s\partial_yb_{SO}\right)
+        \left[\partial_tb_{SO}\right]_{di\hspace{-0.1em}f\hspace{-0.2em}f} = \partial_y\left(K_s\partial_yb_{SO}\right)
 
     via an implicit scheme and apply it to the surface buoyancy.
 
