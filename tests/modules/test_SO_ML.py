@@ -84,10 +84,10 @@ class TestSO_ML(object):
   #     so_ml.make_array(myst, 'myst')
   #   assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
 
-  def test_solve_equi(self, so_ml):
-    with pytest.raises(TypeError) as info:
-      so_ml.solve_equi()
-    assert (str(info.value) == "This functionality is not yet implemented")
+  # def test_solve_equi(self, so_ml):
+  #   with pytest.raises(TypeError) as info:
+  #     so_ml.solve_equi()
+  #   assert (str(info.value) == "This functionality is not yet implemented")
 
   def test_timestep(self, so_ml_config):
     dt = 60 * 86400

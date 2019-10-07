@@ -33,7 +33,7 @@ class SO_ML(object):
     ----------
 
     y : ndarray
-        Meridional mixed layer grid. Units: m
+        Uniform meridional mixed layer grid. Units: m
     Ks : float
          Horizontal diffusivity in the mixed layer. Units: 
     h : float
@@ -70,11 +70,26 @@ class SO_ML(object):
     self.Psi_s = Psi_s
     self.bs = make_array(bs, self.y, 'bs')
 
-  def solve_equi(self):
-    #Solve for equilibrium solution given inputs
-    raise TypeError('This functionality is not yet implemented')
+  # def solve_equi(self):
+  #Solve for equilibrium solution given inputs
+  # raise TypeError('This functionality is not yet implemented')
 
   def set_boundary_conditions(self, b_basin, Psi_b):
+    r"""
+    Set the surface boundary conditions at the southern boundary of the Southern
+    Ocean mixed layer. If upwelling takes place at the boundary, set the buoyancy
+    there to match the densest upwelled density class from the adjoining basin.
+    Otherwisee, impose a no-flux boundary condition.
+
+    Parameters
+    ----------
+
+    b_basin : ndarray
+              The buoyancy profile in the adjoining basin. Units:
+    Psi_b : ndarray
+            The transport streamfunction in the Southern Ocean. Units: Sv
+
+    """
     if self.Psi_s[1] > 0:
       # set buoyancy at southern boundary to buoyancy of densest upwelling water
       self.bs[0] = b_basin[np.argwhere(Psi_b > 0)[0][0]]
@@ -83,6 +98,29 @@ class SO_ML(object):
       self.bs[0] = self.bs[1]
 
   def calc_advective_tendency(self, dy):
+    r"""
+    Compute the advective transport tendency in the Southern Ocean mixed layer:
+
+    .. math::
+        \begin{aligned}
+        \partial_tb_{SO} &= -v_{SO}^\dagger\partial_yb_{SO} \\
+        v_{SO}^\dagger &= \frac{\Psi_{SO}}{h\cdot L_x}
+        \end{aligned}
+
+    Parameters
+    ----------
+
+    dy: float
+        The horizontal grid spacing for the mixed layer model.
+
+    Returns
+    -------
+
+    dbdb_ad: ndarray
+             An array representing the advecting tendency at each grid point.
+
+    """
+
     # Notice that the current implementation assumes an evenly spaced grid!
     dbdt_ad = 0. * self.y
     indneg = self.Psi_s[1:-1] < 0.
@@ -95,7 +133,7 @@ class SO_ML(object):
     ) / self.h / self.L / dy
     return dbdt_ad
 
-  def calc_implicit_diffusion(self, s):
+  def calc_diffusion_matrix(self, s):
     U = (
         np.diag(-s / 2. * np.ones(len(self.y) - 1), -1) +
         np.diag((1+s) * np.ones(len(self.y)), 0) +
@@ -105,7 +143,39 @@ class SO_ML(object):
     U[0, 1] = 0
     U[-1, -2] = 0
     U[-1, -1] = 1
+
     return U
+
+  def calc_implicit_diffusion(self, dy, dt):
+    r"""
+    Compute the diffusive transport in Southern Ocean mixed layer:
+
+    .. math::
+        \partial_tb_{SO} = \partial_y\left(K_s\partial_yb_{SO}\right)
+
+    via an implicit scheme and apply it to the surface buoyancy.
+
+    Parameters
+    ----------
+    
+    dy: float
+        The horizontal grid spacing for the mixed layer model.
+    dt: float
+        The timestep duration for the mixed layer model.
+
+    Returns
+    -------
+
+    bs: ndarray
+        Updated surface buoyancy, with the implicit diffusion applied.
+    """
+
+    s = self.Ks * dt / dy**2
+    U = self.calc_diffusion_matrix(s)
+    V = self.calc_diffusion_matrix(-s)
+    Uinv = np.linalg.inv(U)
+
+    return np.dot(np.dot(Uinv, V), self.bs)
 
   def advdiff(self, b_basin, Psi_b, dt):
     # update surface buoyancy profile via advect. and diff
@@ -163,11 +233,7 @@ class SO_ML(object):
       self.bs[0] = self.bs[1]
 
     # Do implicit diffusion:
-    s = self.Ks * dt / dy**2
-    U = self.calc_implicit_diffusion(s)
-    V = self.calc_implicit_diffusion(-s)
-    Uinv = np.linalg.inv(U)
-    self.bs = np.dot(np.dot(Uinv, V), self.bs)
+    self.bs = self.calc_implicit_diffusion(dy, dt)
 
     #re-set southern boundary condition:
     # this final re-set is just to pass back a state where boundary point is consistent with bcs
