@@ -12,10 +12,7 @@ coverage:
     - "examples/**/*.py"
     - "tests/**/*.py"
     - "setup.py"
-    - "src/plotting/*"
+    - "pymoc/plotting/*"
 
 codecov:
   max_report_age: off
-
-#fixes:
-#  - "/usr/local/lib/**/dist-packages/pymoc/::src/modules/"

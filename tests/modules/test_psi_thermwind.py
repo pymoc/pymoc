@@ -4,42 +4,52 @@ import inspect
 import numpy as np
 from numpy import testing
 from matplotlib import pyplot as plt
-sys.path.append('/pymoc/src/modules')
+sys.path.append('/pymoc/pymoc/modules')
 from psi_thermwind import Psi_Thermwind
 
-@pytest.fixture(scope="module", params=[
-  {
-  },
-  {
-    'z': np.asarray(np.linspace(-4000, 0, 80)),
-    'b1': np.linspace(0.03, -0.001, 80),
-    'b2': np.linspace(0.02, 0.0, 80),
-  },
-  {
-    'z': np.asarray(np.linspace(-4000, 0, 80)),
-    'b1': np.linspace(0.03, -0.001, 80),
-    'b2': np.linspace(0.02, 0.0, 80),
-    'sol_init': np.ones((2, 80))
-  },
-])
+
+@pytest.fixture(
+    scope="module",
+    params=[
+        {},
+        {
+            'z': np.asarray(np.linspace(-4000, 0, 80)),
+            'b1': np.linspace(0.03, -0.001, 80),
+            'b2': np.linspace(0.02, 0.0, 80),
+        },
+        {
+            'z': np.asarray(np.linspace(-4000, 0, 80)),
+            'b1': np.linspace(0.03, -0.001, 80),
+            'b2': np.linspace(0.02, 0.0, 80),
+            'sol_init': np.ones((2, 80))
+        },
+    ]
+)
 def psi_config(request):
   return request.param
 
+
 @pytest.fixture(scope="module")
 def psi(request):
-  return Psi_Thermwind(**{
-    'z': np.asarray(np.linspace(-4000, 0, 80)),
-    'b1': np.linspace(0.03, -0.01, 80),
-    'b2': np.linspace(0.02, 0.0, 80),
-    'sol_init': np.ones((2, 80))
-  })
+  return Psi_Thermwind(
+      **{
+          'z': np.asarray(np.linspace(-4000, 0, 80)),
+          'b1': np.linspace(0.03, -0.01, 80),
+          'b2': np.linspace(0.02, 0.0, 80),
+          'sol_init': np.ones((2, 80))
+      }
+  )
+
 
 class TestPsi_Thermwind(object):
   def test_psi_thermwind_init(self, psi_config):
-    if not 'z' in psi_config or not isinstance(psi_config['z'], np.ndarray) or not len(psi_config['z']):
+    if not 'z' in psi_config or not isinstance(psi_config['z'], np.ndarray
+                                               ) or not len(psi_config['z']):
       with pytest.raises(TypeError) as zinfo:
         Psi_Thermwind(**psi_config)
-      assert(str(zinfo.value) == "z needs to be numpy array providing grid levels")
+      assert (
+          str(zinfo.value) == "z needs to be numpy array providing grid levels"
+      )
       return
 
     psi = Psi_Thermwind(**psi_config)
@@ -49,10 +59,13 @@ class TestPsi_Thermwind(object):
     psi_signature = inspect.signature(Psi_Thermwind)
 
     for k in ['f']:
-      assert getattr(psi, k)  == (psi_config[k] if k in psi_config and psi_config[k] else psi_signature.parameters[k].default)
+      assert getattr(psi, k) == (
+          psi_config[k] if k in psi_config and psi_config[k] else
+          psi_signature.parameters[k].default
+      )
 
     if not 'sol_init' in psi_config:
-      testing.assert_array_equal(psi.sol_init, np.zeros((2, len(psi.z))) )
+      testing.assert_array_equal(psi.sol_init, np.zeros((2, len(psi.z))))
 
     for k in ['b1', 'b2']:
       f = getattr(psi, k)
@@ -72,7 +85,11 @@ class TestPsi_Thermwind(object):
     myst = 1
     with pytest.raises(TypeError) as mystinfo:
       psi.make_func(myst, 'myst', psi.z)
-    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+    assert (
+        str(
+            mystinfo.value
+        ) == "('myst', 'needs to be either function, numpy array, or float')"
+    )
 
   def test_make_array(self, psi):
     myst = np.arange(0.0, 8.0, 0.1)
@@ -84,7 +101,11 @@ class TestPsi_Thermwind(object):
     myst = 1
     with pytest.raises(TypeError) as mystinfo:
       psi.make_array(myst, 'myst')
-    assert(str(mystinfo.value) == "('myst', 'needs to be either function, numpy array, or float')")
+    assert (
+        str(
+            mystinfo.value
+        ) == "('myst', 'needs to be either function, numpy array, or float')"
+    )
 
   def test_bc(self, psi):
     testing.assert_array_equal(psi.bc([1, 2], [3, 4]), np.array([1, 3]))
@@ -95,21 +116,28 @@ class TestPsi_Thermwind(object):
     b2 = 0.005
     f = 1.2e-4
     assert ode[0] == 1
-    testing.assert_approx_equal(ode[1][0], 1.0/f*(b2 - b1))
+    testing.assert_approx_equal(ode[1][0], 1.0 / f * (b2-b1))
 
-  def test_solve  (self, psi):
+  def test_solve(self, psi):
     psi.solve()
     d = -4e3
-    p = 1e-2*((2.5/3.0)*psi.z**3 + 5000.0*psi.z**2 - d*((2.5/3.0)*d + 5000.0)*psi.z)
-    assert all([np.abs(p[i] - psi.Psi[i]*1e6)/np.abs(p[i]) < 0.25 for i in range(1, len(psi.z) - 1)])
+    p = 1e-2 * ((2.5/3.0) * psi.z**3 + 5000.0 * psi.z**2 - d *
+                ((2.5/3.0) * d + 5000.0) * psi.z)
+    assert all([
+        np.abs(p[i] - psi.Psi[i] * 1e6) / np.abs(p[i]) < 0.25
+        for i in range(1,
+                       len(psi.z) - 1)
+    ])
 
-  def test_Psib(self ):
-    psi = Psi_Thermwind(**{
-      'z': np.asarray(np.linspace(-4000, 0, 81)),
-      'b1': np.linspace(0.03, -0.01, 81),
-      'b2': np.linspace(0.02, 0.0, 81),
-      'sol_init': np.ones((2, 81))
-    })
+  def test_Psib(self):
+    psi = Psi_Thermwind(
+        **{
+            'z': np.asarray(np.linspace(-4000, 0, 81)),
+            'b1': np.linspace(0.03, -0.01, 81),
+            'b2': np.linspace(0.02, 0.0, 81),
+            'sol_init': np.ones((2, 81))
+        }
+    )
 
     d = -4e3
     psi.solve()
@@ -119,7 +147,9 @@ class TestPsi_Thermwind(object):
     izop = np.where(psi.z == zop)[0][0]
     zom = int(izom)
     zop = int(izop)
-    b_up = np.concatenate((psi.b2(psi.z)[:izom], psi.b1(psi.z)[izom:izop], psi.b2(psi.z)[izop:]))
+    b_up = np.concatenate(
+        (psi.b2(psi.z)[:izom], psi.b1(psi.z)[izom:izop], psi.b2(psi.z)[izop:])
+    )
 
     bgrid = np.linspace(-0.01, 0.03, 500)
     psib = np.zeros((500))
@@ -129,11 +159,11 @@ class TestPsi_Thermwind(object):
         if b < b_up[j]:
           psib[i] += dp_dz[j]
         elif b == b_up[j]:
-          psib[i] += dp_dz[j]/2.0
+          psib[i] += dp_dz[j] / 2.0
 
     psib *= 50.0
     bo = np.where(np.abs(bgrid) == np.min(np.abs(bgrid)))[0][0]
-    bf = np.where(np.abs(bgrid - 0.02) ==np.min(np.abs(bgrid - 0.02)))[0][0]
+    bf = np.where(np.abs(bgrid - 0.02) == np.min(np.abs(bgrid - 0.02)))[0][0]
 
     f = np.ones(15) / 15
     psib = np.convolve(psib, f, 'same')
@@ -141,14 +171,15 @@ class TestPsi_Thermwind(object):
 
     assert np.sqrt((psib[bo:bf] - psi.Psib()[bo:bf])**2).mean() < 0.25
 
-
   def test_Psibz(self, psi):
-    psi = Psi_Thermwind(**{
-      'z': np.asarray(np.linspace(-4000, 0, 81)),
-      'b1': np.linspace(0.03, -0.01, 81),
-      'b2': np.linspace(0.02, 0.0, 81),
-      'sol_init': np.ones((2, 81))
-    })
+    psi = Psi_Thermwind(
+        **{
+            'z': np.asarray(np.linspace(-4000, 0, 81)),
+            'b1': np.linspace(0.03, -0.01, 81),
+            'b2': np.linspace(0.02, 0.0, 81),
+            'sol_init': np.ones((2, 81))
+        }
+    )
 
     d = -4e3
     psi.solve()
@@ -158,7 +189,9 @@ class TestPsi_Thermwind(object):
     izop = np.where(psi.z == zop)[0][0]
     zom = int(izom)
     zop = int(izop)
-    b_up = np.concatenate((psi.b2(psi.z)[:izom], psi.b1(psi.z)[izom:izop], psi.b2(psi.z)[izop:]))
+    b_up = np.concatenate(
+        (psi.b2(psi.z)[:izom], psi.b1(psi.z)[izom:izop], psi.b2(psi.z)[izop:])
+    )
 
     bgrid = psi.b1(psi.z)
     psib = np.zeros((len(psi.z)))
@@ -168,14 +201,14 @@ class TestPsi_Thermwind(object):
         if b < b_up[j]:
           psib[i] += dp_dz[j]
         elif b == b_up[j]:
-          psib[i] += dp_dz[j]/2.0
+          psib[i] += dp_dz[j] / 2.0
 
     psib *= 50.0
     bo = np.where(np.abs(bgrid - 0.02) == np.min(np.abs(bgrid - 0.02)))[0][0]
     bf = np.where(np.abs(bgrid) == np.min(np.abs(bgrid)))[0][0]
     psib -= 1.5
     assert np.sqrt((psib[bo:bf] - psi.Psibz()[0][bo:bf])**2).mean() < 0.3
-  
+
     bgrid = psi.b2(psi.z)
     psib = np.zeros((len(psi.z)))
     for i in range(len(psi.z)):
@@ -184,7 +217,7 @@ class TestPsi_Thermwind(object):
         if b < b_up[j]:
           psib[i] += dp_dz[j]
         elif b == b_up[j]:
-          psib[i] += dp_dz[j]/2.0
+          psib[i] += dp_dz[j] / 2.0
 
     psib *= 50.0
     bo = np.where(np.abs(bgrid - 0.02) == np.min(np.abs(bgrid - 0.02)))[0][0]
@@ -201,6 +234,5 @@ class TestPsi_Thermwind(object):
     b1_func = psi.make_func(b1, 'b1', z)
     b2_func = psi.make_func(b2, 'b2', z)
 
-    assert(all(psi.b1(z) == b1_func(z)))
-    assert(all(psi.b2(z) == b2_func(z)))
-    
+    assert (all(psi.b1(z) == b1_func(z)))
+    assert (all(psi.b2(z) == b2_func(z)))

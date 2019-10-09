@@ -3,7 +3,7 @@ import sys
 import inspect
 import numpy as np
 from scipy import integrate
-sys.path.append('/pymoc/src/modules')
+sys.path.append('/pymoc/pymoc/modules')
 from SO_ML import SO_ML
 from pymoc.utils import make_array
 
