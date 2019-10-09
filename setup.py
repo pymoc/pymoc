@@ -1,11 +1,11 @@
-import setuptools
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
   long_description = fh.read()
 
-setuptools.setup(
+setup(
     name='pymoc',
-    version='0.0.1rc1',
+    version='1.0.0',
     description="A simple model suite for the MOC",
     long_description=long_description,
     # long_description_content_type="text/markdown",
