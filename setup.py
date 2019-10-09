@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
   long_description = fh.read()
 
 setup(
-    name='pymoc',
-    version='1.0.0',
+    name='py-moc',
+    version='0.0.1rc3',
     description="A simple model suite for the MOC",
     long_description=long_description,
-    # long_description_content_type="text/markdown",
+    long_description_content_type="text/markdown",
     url='https://pymoc.github.io',
     package_dir={'': 'src'},
     packages=find_packages('src'),
