@@ -1,7 +1,7 @@
 # import pytest
 # import sys
 # import numpy as np
-# sys.path.append('/pymoc/pymoc/modules')
+# sys.path.append('/pymoc/src/pymoc/modules')
 # from interp_twocol import Interpolate_twocol
 # from matplotlib import pyplot as plt
 

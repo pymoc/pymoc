@@ -10,7 +10,8 @@ setup(
     long_description=long_description,
     # long_description_content_type="text/markdown",
     url='https://pymoc.github.io',
-    packages=find_packages(),
+    package_dir={'': 'src'},
+    packages=find_packages('src'),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

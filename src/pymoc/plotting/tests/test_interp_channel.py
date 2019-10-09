@@ -1,6 +1,6 @@
 # import sys
 # import numpy as np
-# sys.path.append('/pymoc/pymoc/modules')
+# sys.path.append('/pymoc/src/pymoc/modules')
 # from interp_channel import Interpolate_channel
 # from matplotlib import pyplot as plt
 

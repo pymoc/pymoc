@@ -4,7 +4,7 @@ import inspect
 import numpy as np
 from numpy import testing
 from matplotlib import pyplot as plt
-sys.path.append('/pymoc/pymoc/modules')
+sys.path.append('/pymoc/src/pymoc/modules')
 from equi_column import Equi_Column
 
 

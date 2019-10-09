@@ -7,7 +7,7 @@ import pytest
 import sys
 from collections.abc import Iterable
 from pymoc.utils import make_func, make_array
-sys.path.append('/pymoc/pymoc/modules')
+sys.path.append('/pymoc/src/pymoc/modules')
 from column import Column
 
 

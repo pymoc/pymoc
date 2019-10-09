@@ -2,7 +2,7 @@ import pytest
 import inspect
 import sys
 import numpy as np
-sys.path.append('/pymoc/pymoc/modules')
+sys.path.append('/pymoc/src/pymoc/modules')
 from psi_SO import Psi_SO
 from pymoc.utils import make_func
 from matplotlib import pyplot as plt
