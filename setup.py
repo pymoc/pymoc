@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='py-moc',
-    version='0.0.1rc3',
+    version='0.0.1rc4',
     description="A simple model suite for the MOC",
     long_description=long_description,
     long_description_content_type="text/markdown",

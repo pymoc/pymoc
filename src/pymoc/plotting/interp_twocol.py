@@ -6,9 +6,7 @@ with constant slope - only to make fancy plots
 import sys
 import numpy as np
 from scipy.optimize import brenth
-sys.path.append('/pymoc/src/pymoc/utils')
-from gridit import gridit
-from make_func import make_func
+from pymoc.utils import gridit, make_func
 
 
 class Interpolate_twocol(object):
