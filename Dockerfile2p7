@@ -6,7 +6,7 @@ WORKDIR /pymoc
 RUN apt-get update -y && \
     apt-get install -y python2.7-dev python-pip git curl
 RUN pip install numpy==1.13 && \
-    pip install scipy==1.3 && \
+    pip install scipy==1.2.2 && \
     pip install matplotlib && \
     pip install pytest==5.1.1 && \
     pip install codecov && \
