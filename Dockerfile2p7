@@ -18,6 +18,5 @@ RUN pip install numpy==1.13 && \
     pip install sphinx-rtd-theme && \
     pip install jupyter-sphinx-theme && \
     pip install funcsigs
-RUN ln -s /usr/bin/python2.7 /usr/bin/python
 
 CMD bash
