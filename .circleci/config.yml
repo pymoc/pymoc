@@ -4,9 +4,9 @@
 #
 version: 2
 jobs:
-  test:
+  test-python-3.6:
     docker:
-      - image: pymoc/pymoc:latest
+      - image: pymoc/pymoc:3.6
     working_directory: /pymoc
     steps:
       - checkout
@@ -28,6 +28,18 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
+  test-python-2.7:
+    docker:
+      - image: pymoc/pymoc:2.7
+    working_directory: /pymoc
+    steps:
+      - checkout
+      - run:
+          name: install pymoc
+          command: python setup.py install
+      - run:
+          name: run tests
+          command: py.test -v --cov=src/pymoc --cov-report=xml --cov-config=.coveragerc
   docs-build:
     docker:
       - image: pymoc/pymoc:latest
@@ -70,11 +82,13 @@ workflows:
   version: 2
   build:
     jobs:
-      - test
+      - test-python-3.6
+      - test-python-2.7
       - docs-build
       - docs-deploy:
           requires:
-            - test
+            - test-python-3.6
+            - test-python-2.7
             - docs-build
           filters:
             branches:
