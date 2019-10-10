@@ -8,7 +8,7 @@ RUN apt-get update -y && \
 RUN pip install numpy==1.13 && \
     pip install scipy==1.2.2 && \
     pip install matplotlib && \
-    pip install pytest==5.1.1 && \
+    pip install pytest==4.6.5 && \
     pip install codecov && \
     pip install pytest-cov && \
     pip install sphinx && \
