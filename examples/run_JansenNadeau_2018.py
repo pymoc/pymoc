@@ -52,11 +52,11 @@ if __name__ == '__main__':
   fixpsiSO = args.fixPsiSO
 
   if fixbSO:
-    print 'bSO fixed'
+    print('bSO fixed')
   if fixpsiN:
-    print 'psiN fixed'
+    print('psiN fixed')
   if fixpsiSO:
-    print 'psiSO fixed'
+    print('psiSO fixed')
 
   if args.pickup is not None:
     pickup = np.load(args.pickup)
@@ -189,13 +189,13 @@ if __name__ == '__main__':
   )
 
   # Create empty arrays to save time-dependent diagnostics
-  AMOC_save = np.zeros((len(z), total_iters / Diag_iters))
-  AMOC_b_save = np.zeros((nb, total_iters / Diag_iters))
-  bgrid_save = np.zeros((nb, total_iters / Diag_iters))
-  b_basin_save = np.zeros((len(z), total_iters / Diag_iters))
-  b_north_save = np.zeros((len(z), total_iters / Diag_iters))
-  bs_SO_save = np.zeros((len(y), total_iters / Diag_iters))
-  Psi_SO_save = np.zeros((len(z), total_iters / Diag_iters))
+  AMOC_save = np.zeros((len(z), int(total_iters / Diag_iters)))
+  AMOC_b_save = np.zeros((nb, int(total_iters / Diag_iters)))
+  bgrid_save = np.zeros((nb, int(total_iters / Diag_iters)))
+  b_basin_save = np.zeros((len(z), int(total_iters / Diag_iters)))
+  b_north_save = np.zeros((len(z), int(total_iters / Diag_iters)))
+  bs_SO_save = np.zeros((len(y), int(total_iters / Diag_iters)))
+  Psi_SO_save = np.zeros((len(z), int(total_iters / Diag_iters)))
 
   # *****************************************************************************
   for ii in range(0, total_iters):
@@ -217,13 +217,13 @@ if __name__ == '__main__':
         PsiSO.solve()
       if ii % Diag_iters == 0:
         # save diagnostics:
-        AMOC_save[:, ii / Diag_iters] = AMOC.Psi
-        AMOC_b_save[:, ii / Diag_iters] = AMOC.Psib(nb=nb)
-        bgrid_save[:, ii / Diag_iters] = AMOC.bgrid
-        b_basin_save[:, ii / Diag_iters] = basin.b
-        b_north_save[:, ii / Diag_iters] = north.b
-        bs_SO_save[:, ii / Diag_iters] = channel.bs
-        Psi_SO_save[:, ii / Diag_iters] = PsiSO.Psi
+        AMOC_save[:, int(ii / Diag_iters)] = AMOC.Psi
+        AMOC_b_save[:, int(ii / Diag_iters)] = AMOC.Psib(nb=nb)
+        bgrid_save[:, int(ii / Diag_iters)] = AMOC.bgrid
+        b_basin_save[:, int(ii / Diag_iters)] = basin.b
+        b_north_save[:, int(ii / Diag_iters)] = north.b
+        bs_SO_save[:, int(ii / Diag_iters)] = channel.bs
+        Psi_SO_save[:, int(ii / Diag_iters)] = PsiSO.Psi
 
     # update residual vertical velocity in columns:
     wAb = (Psi_res_b - PsiSO.Psi) * 1e6
