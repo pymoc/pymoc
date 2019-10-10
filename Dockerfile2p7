@@ -17,6 +17,5 @@ RUN pip install numpy==1.13 && \
     pip install recommonmark && \
     pip install sphinx-rtd-theme && \
     pip install jupyter-sphinx-theme
-RUN ln -s /usr/bin/python2.7 /usr/bin/python
 
 CMD bash
