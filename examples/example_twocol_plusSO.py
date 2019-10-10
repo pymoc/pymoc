@@ -8,7 +8,6 @@ and at the southern end of the basin (at the interface to the channel).
 The parameters chosen here follow more or less the "control" experiment of Nikurashin
 and Vallis (2012, JPO).
 '''
-import sys
 from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel
 import numpy as np
@@ -55,10 +54,12 @@ z = np.asarray(np.linspace(-4000, 0, 80))
 # Initial conditions for buoyancy profile in the basin
 def b_basin(z):
   return bs * np.exp(z / 300.)
+def b_north(z):
+  return 1e-3*bs * np.exp(z / 300.)
 
 
 # create N.A. overturning model instance
-AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=0., f=1e-4)
+AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north, f=1e-4)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 # evaluate overturning in isopycnal space:
@@ -86,7 +87,7 @@ SO.solve()
 # create adv-diff column model instance for basin
 basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)
 # create adv-diff column model instance for basin
-north = Column(z=z, kappa=kappa, Area=A_north, b=0., bs=bs_north, bbot=bmin)
+north = Column(z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bmin)
 
 # Create figure:
 fig = plt.figure(figsize=(6, 10))

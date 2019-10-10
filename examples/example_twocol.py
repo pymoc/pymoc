@@ -10,7 +10,7 @@ the mean depth of the respective isopycnal in the column.
 '''
 
 import sys
-from pymoc.modules import Psi_Thermwind as Model_Thermwind, Column as Model_Colemn
+from pymoc.modules import Psi_Thermwind, Column
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -51,10 +51,13 @@ z = np.asarray(np.linspace(-4000, 0, 80))
 # Initial conditions for buoyancy profile in the basin:
 def b_basin(z):
   return bs * np.exp(z / 300.)
+def b_north(z):
+  return 1e-3*bs * np.exp(z / 300.)
+
 
 
 # create overturning model instance
-AMOC = Model_Thermwind(z=z, b1=b_basin, b2=0.)
+AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north)
 # and solve for initial overturning streamfunction:
 AMOC.solve()
 # evaluate overturning in isopycnal space:
@@ -71,12 +74,12 @@ ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
 # create adv-diff column model instance for basin
-basin = Model_Column(
+basin = Column(
     z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot
 )
 # create adv-diff column model instance for basin
-north = Model_Column(
-    z=z, kappa=kappa, Area=A_north, b=0., bs=bs_north, bbot=bbot
+north = Column(
+    z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bbot
 )
 
 # Main time stepping loop
