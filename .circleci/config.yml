@@ -84,11 +84,12 @@ workflows:
     jobs:
       - test-python-3.6
       - test-python-2.7
-      - docs-build
-      - docs-deploy:
+      - docs-build:
           requires:
             - test-python-3.6
             - test-python-2.7
+      - docs-deploy:
+          requires:
             - docs-build
           filters:
             branches:
