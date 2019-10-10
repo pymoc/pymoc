@@ -1,6 +1,6 @@
 import pytest
 import sys
-import inspect
+import funcsigs
 import numpy as np
 from scipy import integrate
 sys.path.append('/pymoc/src/pymoc/modules')
@@ -56,7 +56,7 @@ class TestSO_ML(object):
     ]:
       assert hasattr(so_ml, k)
 
-    so_ml_signature = inspect.signature(SO_ML)
+    so_ml_signature = funcsigs.signature(SO_ML)
 
     for k in ['Ks', 'h', 'L', 'v_pist', 'Psi_s']:
       assert getattr(so_ml, k) == (

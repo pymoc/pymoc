@@ -1,11 +1,10 @@
 import sys
 import os
-import inspect
+import funcsigs
 import numpy as np
 from scipy import integrate
 import pytest
 import sys
-from collections.abc import Iterable
 from pymoc.utils import make_func, make_array
 sys.path.append('/pymoc/src/pymoc/modules')
 from column import Column
@@ -118,7 +117,7 @@ class TestColumn(object):
     for k in ['z', 'kappa', 'Area', 'b', 'bs', 'bbot', 'bzbot', 'N2min']:
       assert hasattr(column, k)
 
-    column_signature = inspect.signature(Column)
+    column_signature = funcsigs.signature(Column)
 
     # The constructor initializes all scalar properties
     # Uses explicit property if present, or the default

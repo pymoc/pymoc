@@ -1,6 +1,6 @@
 import pytest
 import sys
-import inspect
+import funcsigs
 import numpy as np
 from numpy import testing
 from matplotlib import pyplot as plt
@@ -121,7 +121,7 @@ class TestEqui_Column(object):
           "You need to specify either b_bot or B_int for bottom boundary condition"
       )
       return
-    column_signature = inspect.signature(Equi_Column)
+    column_signature = funcsigs.signature(Equi_Column)
 
     column = Equi_Column(**column_config)
 
@@ -158,7 +158,8 @@ class TestEqui_Column(object):
     nz = column_config['nz'] if 'nz' in column_config and not column_config[
         'nz'] is None else 100
     for i in range(nz):
-      testing.assert_approx_equal(column.zi[i], i / (nz-1) - 1)
+      assert (column.zi[i] - i / (nz-1) / column.zi[i]) < 0.01
+      # testing.assert_approx_equal(column.zi[i], i / (nz-1) - 1)
 
     assert callable(column.kappa)
     assert callable(column.dkappa_dz)

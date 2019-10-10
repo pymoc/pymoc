@@ -1,6 +1,6 @@
 import pytest
 import sys
-import inspect
+import funcsigs
 import numpy as np
 from numpy import testing
 from matplotlib import pyplot as plt
@@ -56,7 +56,7 @@ class TestPsi_Thermwind(object):
     for k in ['z', 'f', 'sol_init', 'b1', 'b2']:
       assert hasattr(psi, k)
 
-    psi_signature = inspect.signature(Psi_Thermwind)
+    psi_signature = funcsigs.signature(Psi_Thermwind)
 
     for k in ['f']:
       assert getattr(psi, k) == (

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import numpy as np
 from scipy import integrate, optimize
 from pymoc.utils import make_func

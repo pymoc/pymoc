@@ -4,7 +4,7 @@ FROM ubuntu:18.04
 WORKDIR /pymoc
 
 RUN apt-get update -y && \
-    apt-get install -y python2.7-dev python-pip git curl
+    apt-get install -y python2.7-dev python-pip git curl python-tk
 RUN pip install numpy==1.13 && \
     pip install scipy==1.2.2 && \
     pip install matplotlib && \
@@ -16,7 +16,8 @@ RUN pip install numpy==1.13 && \
     pip install futures && \
     pip install recommonmark && \
     pip install sphinx-rtd-theme && \
-    pip install jupyter-sphinx-theme
+    pip install jupyter-sphinx-theme && \
+    pip install funcsigs
 RUN ln -s /usr/bin/python2.7 /usr/bin/python
 
 CMD bash

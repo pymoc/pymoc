@@ -13,6 +13,7 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     classifiers=[
+    # "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",

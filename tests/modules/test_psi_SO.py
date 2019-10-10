@@ -1,5 +1,5 @@
 import pytest
-import inspect
+import funcsigs
 import sys
 import numpy as np
 sys.path.append('/pymoc/src/pymoc/modules')
@@ -94,7 +94,7 @@ class TestPsi_SO(object):
     ]:
       assert hasattr(psi_so, k)
 
-    psi_so_signature = inspect.signature(Psi_SO)
+    psi_so_signature = funcsigs.signature(Psi_SO)
 
     for k in [
         'f', 'rho', 'L', 'KGM', 'c', 'bvp_with_Ek', 'Hsill', 'HEk',
