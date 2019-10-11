@@ -158,7 +158,10 @@ class TestEqui_Column(object):
     nz = column_config['nz'] if 'nz' in column_config and not column_config[
         'nz'] is None else 100
     for i in range(nz):
-      assert (column.zi[i] - i / (nz-1) / column.zi[i]) < 0.01
+      # print(column.zi[i])
+      # print(abs((column.zi[i] - i / (nz - 1) + 1)))
+      # assert abs((column.zi[i] - i / (nz - 1) + 1)) <= 0.01
+      assert np.round(column.zi[i] - (i / (nz-1) + 1), 2) <= 0.01
       # testing.assert_approx_equal(column.zi[i], i / (nz-1) - 1)
 
     assert callable(column.kappa)
