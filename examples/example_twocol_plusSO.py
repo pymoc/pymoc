@@ -78,11 +78,6 @@ SO = Psi_SO(
     c=0.1,
     bvp_with_Ek=False
 )
-SO.Psi_Ek = SO.calc_Ekman() / 1e6
-gm = SO.calc_GM()
-plt.plot(gm, SO.z)
-plt.savefig('GM_ex.png')
-SO.solve()
 
 # create adv-diff column model instance for basin
 basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)
