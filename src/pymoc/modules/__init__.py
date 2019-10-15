@@ -1,4 +1,4 @@
-__version__ = '0.0.1rc4'
+__version__ = '0.0.1rc5'
 from .column import Column
 from .equi_column import Equi_Column
 from .psi_SO import Psi_SO
