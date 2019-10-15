@@ -1,19 +1,3 @@
-'''
-This script defines a model class that can be used to compute the
-overturning circulation between two columns, given buoyancy profiles
-in the columns.
- 
-The model assumes a thermal-wind based equation for the overturning circulation
-as in Nikurashin and Vallis (2012):
-d_{zz}(\Psi) = f^{-1} (b_{2} - b_{1})
-
-This equation is solved subject to the boundary conditions that
-\Psi(0) = \Psi(-H) = 0 
-(these BCs are different to NV2012)
-
-An upwind isopycnal mapping is used to compute the isopycnal overturning transport
-'''
-
 import numpy as np
 from scipy import integrate
 from matplotlib import pyplot as plt
@@ -21,6 +5,28 @@ from pymoc.utils import make_func, make_array
 
 
 class Psi_Thermwind(object):
+  r"""
+  Thermal Wind Closure
+
+  Instances of this class represent the overturning circulation between two columns,
+  given buoyancy profiles in those columns.
+
+  The model assumes a thermal-wind based equation for the overturning circulation
+  as in Nikurashin and Vallis (2012):
+
+  .. math::
+    d_{zz}\left(\Psi\right) = f^{-1} (b_2 - b_1)
+
+  This equation is solved subject to the boundary conditions:
+
+  .. math::
+    \Psi(0) = \Psi(-H) = 0 
+
+  (these BCs are different than NV2012)
+
+  An upwind isopycnal mapping is used to compute the isopycnal overturning transport.
+
+  """
   def __init__(
       self,
       f=1.2e-4,    # Coriolis parameter (input)
@@ -28,8 +34,23 @@ class Psi_Thermwind(object):
       sol_init=None,    # Initial conditions for ODE solver (input)
       b1=None,    # Buoyancy in the basin (input, output)
       b2=0.,    # Buoyancy in the deep water formation region (input, output)
-      Psi=None,    # Streamfunction (output) 
   ):
+    r"""
+    Parameters
+    ----------
+
+    f : float
+        Coriolis parameter. Units s\ :sup:`-1`
+    z : ndarray
+        Vertical depth levels of overturning grid. Units: m
+    sol_init : ndarray; optional
+               Initial guess at the solution to the thermal wind overturning streamfunction. Units: [...]
+    b1 : float, function, or ndarray; optional
+         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+    b2 : float, function, or ndarray; optional
+         Vertical buoyancy profile from the northern basin, representing the
+         deepwater formation region. Units: m/s\ :sup:`2`
+    """
 
     self.f = f
     # initialize grid:
@@ -39,8 +60,8 @@ class Psi_Thermwind(object):
     else:
       raise TypeError('z needs to be numpy array providing grid levels')
 
-    self.b1 = self.make_func(b1, 'b1', self.z)
-    self.b2 = self.make_func(b2, 'b2', self.z)
+    self.b1 = make_func(b1, self.z, 'b1')
+    self.b2 = make_func(b2, self.z, 'b2')
 
     # Set initial conditions for BVP solver
     if sol_init is None:
@@ -48,20 +69,57 @@ class Psi_Thermwind(object):
     else:
       self.sol_init = sol_init
 
-  # end of init
-
-  def make_func(self, myst, name, zin):
-    return make_func(myst, zin, name)
-
-  def make_array(self, myst, name):
-    return make_array(myst, self.z, name)
-
   def bc(self, ya, yb):
-    #return the boundary conditions
+    r"""
+    Calculate the residuals of boundary conditions for the thermal wind closure
+    boundary value problem.
+
+    Parameters
+    ----------
+
+    ya : ndarray
+         Bottom boundary condition. Units:
+    yb : ndarray
+         Surface boundary condition. Units:
+
+    Returns
+    -------
+
+    bc : ndarray
+         An array containing the value of the streamfunction at the top and bottom
+         levels of the vertical grid.
+    """
+
     return np.array([ya[0], yb[0]])
 
   def ode(self, z, y):
-    #return the equation to be solved
+    r"""
+    Generate the ordinary differential equation for the thermal wind overturning streamfunction,
+    to be solved as a boundary value problem:
+
+    :math:`d_{zz}\left(\Psi\right) = f^{-1} (b_2 - b_1)`
+
+    Parameters
+    ----------
+
+    z : ndarray
+        Vertical depth levels of column grid on which to solve the ode. Units: m
+    y : ndarray
+        Initial values for the streamfunction and its vertical gradient.
+
+    Returns
+    -------
+    ode : ndarray
+          A vertically oriented array, containing the system of linear equations:
+
+          .. math::
+            \begin{aligned}
+            \partial_zy_1 &= y_2 \\
+            \partial_zy_2 &= \frac{b_2\left(z\right) - b_1\left(z\right)}{f}
+            \end{aligned}
+
+    """
+
     return np.vstack((y[1], 1. / self.f * (self.b2(z) - self.b1(z))))
 
   def solve(self):
@@ -74,8 +132,8 @@ class Psi_Thermwind(object):
 
   def Psib(self, nb=500):
     # map overturning into isopycnal space:
-    b1 = self.make_array(self.b1, 'b1')
-    b2 = self.make_array(self.b2, 'b2')
+    b1 = make_array(self.b1, self.z, 'b1')
+    b2 = make_array(self.b2, self.z, 'b2')
     bmin = min(np.min(b1), np.min(b2))
     bmax = max(np.max(b1), np.max(b2))
     self.bgrid = np.linspace(bmin, bmax, nb)
@@ -108,6 +166,6 @@ class Psi_Thermwind(object):
   def update(self, b1=None, b2=None):
     # update buoyancy profiles
     if b1 is not None:
-      self.b1 = self.make_func(b1, 'b1', self.z)
+      self.b1 = make_func(b1, self.z, 'b1')
     if b2 is not None:
-      self.b2 = self.make_func(b2, 'b2', self.z)
+      self.b2 = make_func(b2, self.z, 'b2')
