@@ -123,7 +123,10 @@ class Psi_Thermwind(object):
     return np.vstack((y[1], 1. / self.f * (self.b2(z) - self.b1(z))))
 
   def solve(self):
-    #Solve the boundary value problem
+    r"""
+    Solve for the thermal wind overturning streamfunction as a boundary value problem.
+    """
+
     # Note: The solution to this BVP is a relatively straightforward integral
     # it would probably be faster to just code it up that way.
     res = integrate.solve_bvp(self.ode, self.bc, self.z, self.sol_init)
@@ -131,6 +134,10 @@ class Psi_Thermwind(object):
     self.Psi = res.sol(self.z)[0, :] / 1e6
 
   def Psib(self, nb=500):
+    r"""
+    Remap the overturning streamfunction from physical depth space, into isopycnal
+    space, by computing upwind density classes 
+    """
     # map overturning into isopycnal space:
     b1 = make_array(self.b1, self.z, 'b1')
     b2 = make_array(self.b2, self.z, 'b2')

@@ -6,6 +6,7 @@ from numpy import testing
 from matplotlib import pyplot as plt
 sys.path.append('/pymoc/src/pymoc/modules')
 from psi_thermwind import Psi_Thermwind
+from pymoc.utils import make_func
 
 
 @pytest.fixture(
@@ -69,43 +70,9 @@ class TestPsi_Thermwind(object):
 
     for k in ['b1', 'b2']:
       f = getattr(psi, k)
-      ft = psi.make_func(psi_config[k], k, psi_config['z'])
+      ft = make_func(psi_config[k], psi_config['z'], k)
       for z in psi.z:
         assert f(z) == ft(z)
-
-  def test_make_func(self, psi):
-    myst = lambda: 42
-    assert psi.make_func(myst, 'myst', psi.z)() == myst()
-    myst = np.arange(0.0, 8.0, 0.1)
-    for z in psi.z:
-      assert psi.make_func(myst, 'myst', psi.z)(z) == np.interp(z, psi.z, myst)
-    myst = 6.0
-    for z in psi.z:
-      assert psi.make_func(myst, 'myst', psi.z)(z) == myst
-    myst = 1
-    with pytest.raises(TypeError) as mystinfo:
-      psi.make_func(myst, 'myst', psi.z)
-    assert (
-        str(
-            mystinfo.value
-        ) == "('myst', 'needs to be either function, numpy array, or float')"
-    )
-
-  def test_make_array(self, psi):
-    myst = np.arange(0.0, 8.0, 0.1)
-    assert all(psi.make_array(myst, 'myst') == myst)
-    myst = lambda n: 42 + n
-    assert all(psi.make_array(myst, 'myst') == myst(psi.z))
-    myst = 5.0
-    assert all(psi.make_array(myst, 'myst') == 5.0 * np.ones((len(psi.z))))
-    myst = 1
-    with pytest.raises(TypeError) as mystinfo:
-      psi.make_array(myst, 'myst')
-    assert (
-        str(
-            mystinfo.value
-        ) == "('myst', 'needs to be either function, numpy array, or float')"
-    )
 
   def test_bc(self, psi):
     testing.assert_array_equal(psi.bc([1, 2], [3, 4]), np.array([1, 3]))
@@ -231,8 +198,8 @@ class TestPsi_Thermwind(object):
     z = psi.z
     psi.update(b1, b2)
 
-    b1_func = psi.make_func(b1, 'b1', z)
-    b2_func = psi.make_func(b2, 'b2', z)
+    b1_func = make_func(b1, z, 'b1')
+    b2_func = make_func(b2, z, 'b2')
 
     assert (all(psi.b1(z) == b1_func(z)))
     assert (all(psi.b2(z) == b2_func(z)))
