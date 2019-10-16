@@ -153,7 +153,7 @@ class Psi_Thermwind(object):
       \end{aligned}
 
     where :math:`b_N\left(z\right)` is the density profiles in the northern region, :math:`b_B\left(z\right)` is
-    the density profile in the southern basin, and :math:`\mathcal{H}` is some thickness to look up.
+    the density profile in the southern basin, and :math:`\mathcal{H}` is the Heaviside step function.
 
     Parameters
     ----------
