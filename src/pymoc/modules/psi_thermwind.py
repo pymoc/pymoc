@@ -136,7 +136,34 @@ class Psi_Thermwind(object):
   def Psib(self, nb=500):
     r"""
     Remap the overturning streamfunction from physical depth space, into isopycnal
-    space, by computing upwind density classes 
+    space
+
+    .. math::
+      \Psi^b\left(b\right) = \int_{-H}^0 \partial_z\Psi\left(z\right)\mathcal{H}\left[b - b_{up}\left(z\right)\right]
+
+    by computing upwind density classes
+
+    .. math::
+      \begin{aligned}
+      b_{up}\left(z\right) = 
+      \begin{cases} 
+        b_N\left(z\right), & \partial_z\Psi\left(z\right)  > 0 \\
+        b_B\left(z\right), & \partial_z\Psi\left(z\right)  < 0
+      \end{cases}
+      \end{aligned}
+
+    where :math:`b_N\left(z\right)` is the density profiles in the northern region, :math:`b_B\left(z\right)` is
+    the density profile in the southern basin, and :math:`\mathcal{H}` is some thickness to look up.
+
+    Parameters
+    ----------
+    nb : int; optional
+         Number of upstream density classes into which the streamfunction is to be remapped.
+
+    Returns
+    -------
+    psib : ndarray
+           An array representing the values of the overturning streamfunction in each upwind density class.
     """
     # map overturning into isopycnal space:
     b1 = make_array(self.b1, self.z, 'b1')
@@ -157,6 +184,20 @@ class Psi_Thermwind(object):
     return psib
 
   def Psibz(self, nb=500):
+    r"""
+    Remap the overturning streamfunction onto the native isopycnal-depth space
+    of the columns in the northern region and southern basin.
+
+    Parameters
+    ----------
+    nb : int; optional
+         Number of upstream density classes into which the streamfunction is to be remapped in the intermediate Psib() step.
+
+    Returns
+    -------
+    psibz : ndarray
+            An array where the first element is an array representing the streamfunction at each depth level in the southern basin, and the second represents the same in the northern region.
+    """
     # map isopycnal overturning back into isopycnal-depth space of each column
     psib = self.Psib(nb)
     # This does a linear interploation in b:
@@ -171,6 +212,18 @@ class Psi_Thermwind(object):
     #return [np.interp(self.z,z1_of_bgrid,psib),np.interp(self.z,z2_of_bgrid,psib)]
 
   def update(self, b1=None, b2=None):
+    r"""
+    Update the vertical buoyancy profiles from the southern basin and northern region.
+
+    Parameters
+    ----------
+
+    b1 : float, function, or ndarray; optional
+         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+    b2 : float, function, or ndarray; optional
+         Vertical buoyancy profile from the northern basin, representing the
+         deepwater formation region. Units: m/s\ :sup:`2`
+    """
     # update buoyancy profiles
     if b1 is not None:
       self.b1 = make_func(b1, self.z, 'b1')
