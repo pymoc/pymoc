@@ -6,6 +6,7 @@ exclude_patterns:
   - "examples/**/*.py"
   - "tests/**/*.py"
   - "src/pymoc/plotting/*"
+  - "src/pymoc/utils/check_numpy_version.py"
   - "src/**/__init__.py"
   - "setup.py"
   - "docs/*"
