@@ -191,7 +191,7 @@ class Psi_Thermwind(object):
     Parameters
     ----------
     nb : int; optional
-         Number of upstream density classes into which the streamfunction is to be remapped in the intermediate Psib() step.
+         Number of upstream density classes into which the streamfunction is to be remapped in the intermediate :meth:`pymoc.modules.Psi_Thermwind.Psib` step.
 
     Returns
     -------
