@@ -39,7 +39,7 @@ jobs:
           command: python setup.py install
       - run:
           name: run tests
-          command: py.test -v --cov=src/pymoc --cov-report=xml --cov-config=.coveragerc
+          command: py.test -v 
   docs-build:
     docker:
       - image: pymoc/pymoc:latest
