@@ -5,7 +5,7 @@ checks:
 exclude_patterns:
   - "examples/**/*.py"
   - "tests/**/*.py"
-  - "pymoc/plotting/*"
+  - "src/pymoc/plotting/*"
   - "setup.py"
   - "docs/*"
   - "*.html"
