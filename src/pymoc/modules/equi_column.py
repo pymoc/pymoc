@@ -76,7 +76,7 @@ class Equi_Column(object):
     z : ndarray
         Vertical depth levels of column grid. Units: m
     H : float
-        Depth of hte upper cell, if specifying. Units: m
+        Depth of the upper cell, if specifying. Units: m
     """
 
     self.f = f
@@ -104,7 +104,21 @@ class Equi_Column(object):
     )
 
   def init_kappa(self, kappa):
-    # Initialize vertical diffusivity profile:
+    r"""
+    Initialize the vertical diffusivity profile.
+
+    Parameters
+    ----------
+    
+    kappa : float, function, or ndarray
+            Vertical diffusivity profile. Units: m\ :sup:`2`/s
+
+    Returns
+    -------
+    kappa(z,H) : function
+                 A function that returns the nondimensionalized vertical diffusivity profile :math:`\frac{\kappa}{H^2f}`
+                 as a function of depth :math:`z` and upper cell depth :math:`H`.
+    """
     if callable(kappa):
       return lambda z, H: kappa(z * H) / (
           H**2 * self.f
@@ -115,6 +129,24 @@ class Equi_Column(object):
       return lambda z, H: kappa / (H**2 * self.f)
 
   def init_dkappa_dz(self, kappa, dkappa_dz=None):
+    r"""
+    Initialize the vertical diffusivity gradient profile.
+
+    Parameters
+    ----------
+    
+    kappa : float, function, or ndarray
+            Vertical diffusivity profile. Units: m\ :sup:`2`/s
+    dkappa_dz : float, function, or ndarray
+                Vertical diffusivity profile. Units: m/s
+
+    Returns
+    -------
+    dkappa_dz(z,H) : function
+                     A function that returns the nondimensionalized vertical diffusivity gradient profile
+                     :math:`\frac{\partial_z\kappa}{H\cdot f}` as a function of depth :math:`z` and upper cell depth :math:`H`.
+    """
+
     if callable(kappa) and callable(dkappa_dz):
       return lambda z, H: dkappa_dz(z * H) / (H * self.f)
     elif callable(kappa):
