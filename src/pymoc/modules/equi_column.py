@@ -1,34 +1,36 @@
-'''
-This script defines a model class that can be used to solve a 1D column model
-for the MOC.
- 
-The model is written in terms of a boundary value problem
- 
-In dimensional units, the ODE is
-d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}(\Psi_{N} - \Psi_{SO} - A d_z(\kappa))d_{zzz}(\Psi_N)
-
-This equation is solved subject to the boundary conditions:
-(1) \Psi_N(0) = 0
-(2) \Psi_N(-H) = 0 
-(3) b(0)=-f \partial_{zz} \Psi_N (0) = b_s
-(4) either  b(-H)=-f \partial_{zz} \Psi_N (H) = b_bot
-    or d_z b(-H) = -f d_{zzz} \Psi_N (-H) =  (A \kappa(-H))^{-1} B_{int}
-Where H is the total depth of the upper cell, which can also be solved for
-with the additional BC that:
-(5) d_z\psi_N(-H) = 0
-
-The solution is found by non-dimensionalizing the equations using H and f as length and time scales
-The model is then solved between z^*=z/H=0..1
-Notice that H then appears as a parameter in the equations.
-5 boundary conditions are needed if we also want to solve for the parameter H
-'''
-
 import numpy as np
 from scipy import integrate
 from pymoc.utils import check_numpy_version
 
 
 class Equi_Column(object):
+  r"""
+  Equilibrium 1D Column Model
+
+  Instances of this class represent a 1D column model for the MOC. The model is written in terms
+  of a boundary value problem solving the the ODE:
+
+  .. math::
+    d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}(\Psi_{N} - \Psi_{SO} - A d_z(\kappa))d_{zzz}(\Psi_N)
+
+  That is subject to the boundary conditions:
+
+  .. math::
+    \begin{aligned}
+    (1)&\ \Psi_N(0) = 0 \\
+    (2)&\ \Psi_N(-H) = 0  \\
+    (3)&\ b(0)=-f \partial_{zz} \Psi_N (0) = b_s \\
+    (4)&\ b(-H)=-f \partial_{zz} \Psi_N (H) = b_{bot} \\
+       &\textrm{or} \\
+       &\ d_z b(-H) = -f d_{zzz} \Psi_N (-H) =  (A \kappa(-H))^{-1} B_{int} \\
+    \end{aligned}
+
+  Where :math:`H` is the total depth of the upper cell, which can also be solved for with the additional BC
+  that: :math:`d_z\psi_N(-H) = 0`
+
+  The solution is found by non-dimensionalizing the equations using :math:`H` and math:`f` as length and time scales, 
+  and solving between :math:`z^*=z/H=0..1`. Notice that :math:`H` then appears as a parameter in the equations.
+  """
   def __init__(
       self,
       f=1.2e-4,    # Coriolis parameter (input)
@@ -43,10 +45,39 @@ class Equi_Column(object):
       dkappa_dz=None,    # Vertical derivative of diffusivity profile (input; function or nothing)
       psi_so=None,    # SO streamfunction (input; function or array on grid given by z)
       z=None,    # vertical grid for I/O (input / output) 
-      psi=None,    # streamfunction (output)
-      b=None,    # streamfunction (output)
       H=None,    # depth of cell (input / output)
   ):
+    r"""
+    Parameters
+    ----------
+
+    f : float
+        Coriolis parameter. Units s\ :sup:`-1`
+    b_s : float
+          Buoyancy at the surface of the column. Units:
+    b_bot : float
+            Buoyancy at the bottom of the column. Units:
+    B_int : float
+            Integrated downward buyancy flux at the bottom of the surface cell. Units:
+    A : float
+           Horizontal area of basin. Units: m\ :sup:`2`
+    nz : int
+         Number of levels in the non-dimensional vertical grid for the numerical solver.
+    sol_init : ndarray
+               Initial guess of the solution to the boundary value problem.
+    H_guess : float
+              Initial guess for the depth of the upper cell, if solving for it. Units: m
+    kappa : float, function, or ndarray
+            Vertical diffusivity profile. Units: m\ :sup:`2`/s
+    dkappa_dz : float, function, or ndarray
+                Vertical diffusivity gradient profile. Units: m/s
+    psi_so : float, function, or ndarray
+             Streamfunction in the adjoining Southern Ocean basin. Units:
+    z : ndarray
+        Vertical depth levels of column grid. Units: m
+    H : float
+        Depth of hte upper cell, if specifying. Units: m
+    """
 
     self.f = f
     self.A = A
