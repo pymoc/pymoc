@@ -228,6 +228,21 @@ class Equi_Column(object):
   # initialize non-dimensional surface buoyancy and bottom buoyancy
   # or abyssal buoyancy flux boundary condition
   def init_b_boundaries(self, b_s, b_bot=None, B_int=None):
+    r"""
+    Initialize and set the nondimensionalize surface buoyance and bottom buoyance, or the
+    abyssal buoyancy flux boundary condition if no bottom buoyancy is specified.
+
+    Parameters
+    ----------
+
+    b_s : float
+          Buoyancy at the surface of the column. Units:
+    b_bot : float
+            Buoyancy at the bottom of the column. Units:
+    B_int : float
+            Integrated downward buyancy flux at the bottom of the surface cell. Units:
+
+    """
     if b_bot is None and B_int is None:
       raise Exception(
           'You need to specify either b_bot or B_int for bottom boundary condition'
@@ -239,14 +254,93 @@ class Equi_Column(object):
       self.B_int = B_int
 
   def alpha(self, z, H):
-    #return factor on the RHS of ODE
+    r"""
+    Calculate the nondimensional factor:
+
+    .. math::
+       \alpha\left(z, H\right) = \frac{H^2}{A\cdot\kappa\left(z, H\right)}
+
+    Parameters
+    ----------
+
+    z : ndarray
+        Vertical depth levels of column grid. Units: m
+    H : float
+        Depth of the upper cell, if specifying. Units: m
+
+    Returns
+    -------
+    alpha : float
+            The value of the nondimentional factor :math:`\alpha` for the specified
+            depth :math:`z` and upper cell depth :math:`H`.
+    """
+
     return H**2 / (self.A * self.kappa(z, H))
 
   def bz(self, H):
-    # return the properly non-dimensionalized stratification at the bottom of the cell
+    r"""
+    Calculate the nondimenzionalized stratification at the bottom of the upper cell
+
+    .. math::
+       \partial_zb\approx\frac{B_{int}}{f^3\cdot H^2\cdot A \cdot\kappa\left(-1, H\right)}
+
+    Parameters
+    ----------
+
+    H : float
+        Depth of the upper cell, if specifying. Units: m
+
+    Returns
+    -------
+  
+    bz : float
+         The value of the nondimensionalized stratification at the bottom of the cell with
+         specified depth H.
+
+    """
+
     return self.B_int / (self.f**3 * H**2 * self.A * self.kappa(-1, H))
 
   def bc(self, ya, yb, p=None):
+    r"""
+    Calculate the boundary conditions for the equilibrium column
+    boundary value problem.
+
+    Parameters
+    ----------
+
+    ya : ndarray
+         Bottom boundary condition. Units:
+    yb : ndarray
+         Surface boundary condition. Units:
+    p : ndarray
+        Initial guess for the unknown parameter, H, if not specified at model initialization. Units: m
+
+    Returns
+    -------
+
+    bc : ndarray
+         An array containing the boundary conditions of the ODE:
+
+         .. math::
+           \begin{aligned}
+            bc\left[0\right]&=\Psi_N(0) \\
+            bc\left[1\right]&=\Psi_N(-H) \\
+            bc\left[2\right]&=\begin{cases}
+              \partial_{zz}\Psi_N\left(0\right) - \frac{b_{bot}}{H} & b_{bot} \textrm{ is specified}\\
+              \partial_{zzz}\Psi_N\left(0\right) + d_zb\left(-H\right) & b_{bot} \textrm{ is unspecified}
+            \end{cases}\\
+            bc\left[3\right]&=\partial_{zz}\Psi_N\left(H\right)-\frac{b_s}{H} \\
+           \end{aligned}
+
+         If :math:`H` is not specified by the user, then there is an additional boundary condition  inserted:
+
+         .. math::
+           bc\left[2\right] = \partial_z\Psi_N\left(-H\right)
+
+         and each subsequent row moves up an index.
+
+    """
     try:
       bbot_set = getattr(self, 'b_bot', None) is not None
       y = np.array([ya[0], yb[0]])
