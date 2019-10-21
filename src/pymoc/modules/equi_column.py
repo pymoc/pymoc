@@ -99,9 +99,7 @@ class Equi_Column(object):
     self.dkappa_dz = self.init_dkappa_dz(kappa, dkappa_dz)
     self.init_psi_so(psi_so)
     self.init_b_boundaries(b_s, b_bot, B_int)
-    self.sol_init = sol_init if sol_init is not None else self.calc_sol_init(
-        sol_init, nz, b_bot
-    )
+    self.sol_init = self.calc_sol_init(sol_init, nz, b_bot)
 
   def init_kappa(self, kappa):
     r"""
@@ -157,20 +155,28 @@ class Equi_Column(object):
     else:
       return lambda z, H: 0
 
-  def calc_sol_init(self, sol_init, nz=None, b_bot=None):
-    # Set initial conditions for ODE solver
-    if nz is None:
-      nz = len(self.z)
-    b_init = -100.0 if b_bot is not None else -self.bz(1500.)
-
-    sol_init = np.zeros((4, nz))
-    sol_init[0, :] = np.ones((nz))
-    sol_init[2, :] = 0.0 * np.ones((nz))
-    sol_init[3, :] = b_init * np.ones((nz))
-    return sol_init
-
   # Initialize Southern Ocean Streamfunction
   def init_psi_so(self, psi_so=None):
+    r"""
+    Initialize the nondimensionalized streamfunction passed from the Southern Ocean.
+
+    Parameters
+    ----------
+
+    psi_so : float, function, or ndarray
+             Streamfunction in the adjoining Southern Ocean basin. Units:
+
+    Returns
+    -------
+
+    psi_so(z, H) : function
+                   If psi_so is specified as a function or array in depth space, returns the
+                   nondimensionalized Southern Ocean overturning streamfunction
+                   :math:`\frac{\Psi_{SO}}{f\cdot H^3}` as a function of depth :math:`z` and
+                   upper cell depth :math:`H`. Otherwise, a function that simply returns 0.
+
+    """
+
     if callable(psi_so):
       self.psi_so = lambda z, H: psi_so(z * H) / (
           self.f * H**3
@@ -180,6 +186,44 @@ class Equi_Column(object):
                                            ) / (self.f * H**3)
     else:
       self.psi_so = lambda z, H: 0
+
+  def calc_sol_init(self, sol_init, nz=None, b_bot=None):
+    r"""
+    Initialize the initial guess for the solutions to the system of ordinary differential equations
+    defined by :meth:`pymoc.modules.Equi_Column.ode`
+
+    Parameters
+    ----------
+
+    sol_init : ndarray
+               User specified initial guess of the solution to the boundary value problem.
+    nz : integer
+         Number of levels in the non-dimensional vertical grid for the numerical solver.
+    b_bot : float
+            Buoyancy at the bottom of the column. Units:
+
+    Returns
+    -------
+
+    sol_init : ndarray
+               If a user specified sol_init is provided, return that value. Otherwise, a shape (4, nz) array,
+               where the first column contains 1 at each row, the second and third columns contain 0 at each
+               row, and the fourth column contains -100 at each row if b_bot is specified, otherwise the 
+               stratification at the 1500m depth level provided by :meth:`pymoc.modules.Equi_Column.bz`.
+    """
+
+    if sol_init is not None:
+      return sol_init
+
+    if nz is None:
+      nz = len(self.z)
+    b_init = -100.0 if b_bot is not None else -self.bz(1500.)
+
+    sol_init = np.zeros((4, nz))
+    sol_init[0, :] = np.ones((nz))
+    sol_init[2, :] = 0.0 * np.ones((nz))
+    sol_init[3, :] = b_init * np.ones((nz))
+    return sol_init
 
   # initialize non-dimensional surface buoyancy and bottom buoyancy
   # or abyssal buoyancy flux boundary condition
