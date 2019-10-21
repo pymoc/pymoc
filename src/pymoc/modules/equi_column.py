@@ -360,7 +360,38 @@ class Equi_Column(object):
       )
 
   def ode(self, z, y, p=None):
-    #return the ODE to be solved
+    r"""
+    Generate the ordinary differential equation for the equilibrium column overturning streamfunction,
+    to be solved as a boundary value problem:
+
+    .. math::
+      d_{zzzz}(\Psi_{N}) = (\kappa A)^{-1}(\Psi_{N} - \Psi_{SO} - A d_z(\kappa))d_{zzz}(\Psi_N)
+
+    Parameters
+    ----------
+
+    z : ndarray
+        Vertical depth levels of column grid on which to solve the ode. Units: m
+    y : ndarray
+        Initial values for the streamfunction and its vertical gradient.
+    p : ndarray
+        Initial guess for the unknown parameter, H, if not specified at model initialization. Units: m
+
+    Returns  
+    -------
+    ode : ndarray
+          A vertically oriented array, containing the system of linear equations:
+
+          .. math::
+            \begin{aligned}
+            \partial_zy_1 &= y_2 \\
+            \partial_zy_2 &= y_3 \\
+            \partial_zy_3 &= y_4 \\
+            \partial_zy_4 &= \alpha\left(z, H\right)\cdot y_4\left(y_1 - \Psi_{SO}\left(z, H\right)-\frac{A\cdot\partial_z\kappa\left(z, H\right)}{H^2}\right)
+            \end{aligned}
+
+    """
+
     if self.H is None and p is not None and len(p) > 0:
       H = p[0]
     elif self.H is not None:
@@ -375,7 +406,12 @@ class Equi_Column(object):
     ))
 
   def solve(self):
-    #Solve the boundary value problem
+    r"""
+    Solve for the thermal wind overturning streamfunction as a boundary value problem
+    defined by the system of equations in :meth:`pymoc.modules.Equi_Column.ode`.
+
+    """
+
     if self.H is None:
       res = integrate.solve_bvp(
           self.ode, self.bc, self.zi, self.sol_init, p=[self.H_guess]
