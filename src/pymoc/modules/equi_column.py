@@ -408,7 +408,7 @@ class Equi_Column(object):
   def solve(self):
     r"""
     Solve for the thermal wind overturning streamfunction as a boundary value problem
-    defined by the system of equations in :meth:`pymoc.modules.Equi_Column.ode`.
+    based on the system of equations defined in :meth:`pymoc.modules.Equi_Column.ode`.
 
     """
 

@@ -124,7 +124,8 @@ class Psi_Thermwind(object):
 
   def solve(self):
     r"""
-    Solve for the thermal wind overturning streamfunction as a boundary value problem.
+    Solve for the thermal wind overturning streamfunction as a boundary value problem
+    based on the system of equations defined in :meth:`pymoc.modules.Psi_Thermwind.ode`.
     """
 
     # Note: The solution to this BVP is a relatively straightforward integral

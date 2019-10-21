@@ -187,7 +187,8 @@ class Column(object):
   def solve_equi(self, wA):
     r"""
     Solve for the equilibrium buoyancy profile, given a specified vertical
-    velocity profile, and pre-set surface and bottom boundary conditions.
+    velocity profile, and pre-set surface and bottom boundary conditions, based
+    on the system of equations defined by :meth:`pymoc.modules.Column.ode`.
 
     Parameters
     ----------
