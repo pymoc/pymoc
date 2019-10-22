@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/pymoc/pymoc/tree/master.svg?style=shield)](https://circleci.com/gh/pymoc/PyMOC/tree/master)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/test_coverage)](https://codeclimate.com/github/pymoc/PyMOC/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability)](https://codeclimate.com/github/pymoc/PyMOC/maintainability)
+[![PyPI version](https://badge.fury.io/py/py-moc.svg)](https://badge.fury.io/py/py-moc)
 [![Documentation](https://img.shields.io/badge/docs-PyMOC-informational)](https://pymoc.github.io/pymoc)
 [![License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 

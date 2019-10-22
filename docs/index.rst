@@ -13,6 +13,8 @@ PyMOC: Python Meridional Overturning Circulation Model
   :target: https://codeclimate.com/github/pymoc/PyMOC/test_coverage
 .. image:: https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability
   :target: https://codeclimate.com/github/pymoc/PyMOC/maintainability
+.. image:: https://badge.fury.io/py/py-moc.svg
+   :target: https://badge.fury.io/py/py-moc
 .. image:: https://img.shields.io/badge/license-MIT-informational
   :target: https://github.com/pymoc/PyMOC/blob/master/LICENSE
 
