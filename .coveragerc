@@ -1,6 +1,12 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
+omit =
+    **/__init__.py
+    **/plotting/**
+    tests/**
+    setup.py
+
 
 [report]
 # Regexes for lines to exclude from consideration
