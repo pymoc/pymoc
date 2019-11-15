@@ -1,9 +1,6 @@
 Vertical Buoyancy Balance
 =========================
 
-Residual-Mean Advection-Diffusion Equation
-##########################################
-
 The verical buoyancy profiles within ocean basins (e.g. the Atlantic 
 Ocean interior, the North Atlantic Deepwater formation region) is 
 maintained by a balance between vertical advection & diffusion, as first
