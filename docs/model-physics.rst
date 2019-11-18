@@ -8,5 +8,5 @@ Model Physics
 
   model-physics/vertical-buoyancy-balance
   model-physics/thermal-wind-closure
-  model-physics/overturning-transport-closure
-  model-physics/surface-buoyancy-balance
+  model-physics/channel-overturning-transport-closure
+  model-physics/channel-buoyancy-balance

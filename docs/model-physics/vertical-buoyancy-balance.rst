@@ -9,8 +9,8 @@ averaged sense, an approximation that is allowable given the flatness of
 the buoyancy slopwe in the ocean interior, where isopycnal outcropping is
 not a concern. As a note, this approximation makes this balance unsuitable
 for modeling of the Southern Ocean, where distinct
-:doc:`overturning transport <overturning-transport-closure>` &
-:doc:`surface buoyancy <surface-buoyancy-balance>` formulations are utilized.
+:doc:`overturning transport <channel-overturning-transport-closure>` &
+:doc:`surface buoyancy <channel-buoyancy-balance>` formulations are utilized.
 
 We derive our advection-diffusoing equation by starting with the Boussinesq 
 continuity equation in isopycnal space
