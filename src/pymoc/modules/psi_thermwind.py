@@ -69,6 +69,8 @@ class Psi_Thermwind(object):
     else:
       self.sol_init = sol_init
 
+    self.module_type = 'coupler'
+
   def bc(self, ya, yb):
     r"""
     Calculate the residuals of boundary conditions for the thermal wind closure

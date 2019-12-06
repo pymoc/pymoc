@@ -358,6 +358,7 @@ class Equi_Column(object):
       raise TypeError(
           'Must provide a p array if column does not have an H value'
       )
+    self.module_type = 'basin'
 
   def ode(self, z, y, p=None):
     r"""

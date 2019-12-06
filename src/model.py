@@ -63,10 +63,6 @@ class Model(object):
     basins = self.get_modules_by_type('basin')
     couplers = self.get_modules_by_type('coupler')
     for basin in basins:
-      wAn = basin.north.module.PsiS() if basin.north else 0
-      wAs = basin.south.module.PsiN() if basin.south else 0
-      wA = (wAn-wAs) * 1e6
-      basin.timestep(wA=wA, dt=dt)
+      basin.timestep(dt=dt)
     for coupler in couplers:
-      coupler.module.update(b_south=coupler.south, b_north=coupler.north)
-      coupler.module.solve()
+      coupler.timestep()

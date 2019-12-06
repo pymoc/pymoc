@@ -353,6 +353,7 @@ class Psi_SO(object):
     # only for BC. To avoid random fluctuation in bottom Psi, we here simply
     # set it to value of last gridpoint above
     self.Psi[0] = self.Psi[1]
+    self.module_type = 'coupler'
 
   def update(self, b=None, bs=None):
     r"""

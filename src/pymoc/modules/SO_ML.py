@@ -273,6 +273,8 @@ class SO_ML(object):
     # (preferable e.g. for computation of streamfunction)
     self.set_boundary_conditions(b_basin, Psi_b)
 
+    self.module_type = 'basin'
+
   def timestep(self, b_basin=None, Psi_b=None, dt=1.):
     r"""
     Integrate the mixed layer buoyancy profile for one timestep.

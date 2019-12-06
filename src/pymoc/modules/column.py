@@ -71,6 +71,8 @@ class Column(object):
     else:
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
 
+    self.module_type = 'basin'
+
   def Akappa(self, z):
     r"""
     Compute the area integrated diffusivity :math:`A\kappa`
