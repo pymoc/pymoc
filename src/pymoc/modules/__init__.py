@@ -4,3 +4,4 @@ from .equi_column import Equi_Column
 from .psi_SO import Psi_SO
 from .psi_thermwind import Psi_Thermwind
 from .SO_ML import SO_ML
+from .module import Module

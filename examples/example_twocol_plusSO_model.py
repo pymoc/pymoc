@@ -8,12 +8,13 @@ and at the southern end of the basin (at the interface to the channel).
 The parameters chosen here follow more or less the "control" experiment of Nikurashin
 and Vallis (2012, JPO).
 '''
+from pymoc import Model
 from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
-from datetime import datetime
+import cProfile
 
 # boundary conditions:
 bs = 0.03
@@ -63,12 +64,6 @@ def b_north(z):
 
 # create N.A. overturning model instance
 AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north, f=1e-4)
-# and solve for initial overturning streamfunction:
-AMOC.solve()
-# evaluate overturning in isopycnal space:
-[Psi_iso_b, Psi_iso_n] = AMOC.Psibz()
-
-# create S.O. overturning model instance
 SO = Psi_SO(
     z=z,
     y=y,
@@ -81,7 +76,6 @@ SO = Psi_SO(
     c=0.1,
     bvp_with_Ek=False
 )
-
 # create adv-diff column model instance for basin
 basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)
 # create adv-diff column model instance for basin
@@ -89,7 +83,12 @@ north = Column(
     z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bmin
 )
 
-# Create figure:
+model = Model()
+model.add_module(SO, 'Psi SO')
+model.add_module(basin, 'Atlantic Basin', south_key='psi_so')
+model.add_module(AMOC, 'AMOC', south_key='atlantic_basin')
+model.add_module(north, 'North Atlantic', south_key='amoc', do_conv=True)
+
 fig = plt.figure(figsize=(6, 10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
@@ -99,38 +98,32 @@ ax2.set_xlim((-0.02, 0.03))
 ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
-# Main time-stepping loop:
-for ii in range(0, total_iters):
-  # update buoyancy profile
-  # using z-coordinate overturning:
-  #wAb=(AMOC.Psi-SO.Psi)*1e6
-  #wAN=-AMOC.Psi*1e6
-  # using isopycnal overturning:
-  print(str(ii) + '/' + str(total_iters))
-  print(datetime.now())
-  wAb = (Psi_iso_b - SO.Psi) * 1e6
-  wAN = -Psi_iso_n * 1e6
-  basin.timestep(wA=wAb, dt=dt)
-  north.timestep(wA=wAN, dt=dt, do_conv=True)
-  if ii % MOC_up_iters == 0:
-    # update overturning streamfunction (can be done less frequently)
-    AMOC.update(b1=basin.b, b2=north.b)
-    AMOC.solve()
-    [Psi_iso_b, Psi_iso_n] = AMOC.Psibz()
-    SO.update(b=basin.b)
-    SO.solve()
-  if ii % plot_iters == 0:
-    # Plot current state:
-    ax1.cla()
-    ax2.cla()
-    ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5, color='r')
-    ax1.plot(SO.Psi, SO.z, linewidth=0.5, color='m')
-    ax2.plot(basin.b, basin.z, linewidth=0.5, color='b')
-    ax2.plot(north.b, north.z, linewidth=0.5, color='c')
-    plt.pause(0.01)
-  print(datetime.now())
+AMOC = model.get_module('amoc').module
+SO = model.get_module('psi_so').module
+basin = model.get_module('atlantic_basin').module
+north = model.get_module('north_atlantic').module
 
-# Plot final results over time-iteration plot:
+for snapshot in model.run(
+    basin_dt=dt,
+    coupler_dt=MOC_up_iters,
+    steps=total_iters,
+    snapshot_start=plot_iters,
+    snapshot_interval=plot_iters
+):
+  ax1.cla()
+  ax2.cla()
+  ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5, color='r')
+  ax1.plot(SO.Psi, SO.z, linewidth=0.5, color='m')
+  ax2.plot(basin.b, basin.z, linewidth=0.5, color='b')
+  ax2.plot(north.b, north.z, linewidth=0.5, color='c')
+  plt.pause(0.01)
+
+plt.show()
+# AMOC = model.get_module('amoc').module
+# SO = model.get_module('psi_so').module
+# basin = model.get_module('atlantic_basin').module
+# north = model.get_module('north_atlantic').module
+# # Plot final results over time-iteration plot:
 ax1.plot(AMOC.Psi, AMOC.z, linewidth=2, color='r')
 ax1.plot(SO.Psi, SO.z, linewidth=2, color='m')
 ax1.plot(SO.Psi_Ek, SO.z, linewidth=1, color='m', linestyle='--')
@@ -139,11 +132,11 @@ ax2.plot(basin.b, basin.z, linewidth=2, color='b')
 ax2.plot(north.b, basin.z, linewidth=2, color='c')
 ax1.plot(0. * AMOC.z, AMOC.z, linewidth=0.5, color='k')
 
-#==============================================================================
-# Everything below is just to make fancy 2D plots:
-# This is mostly an exercise in interpolation, but useful to visualize solutions
+# #==============================================================================
+# # Everything below is just to make fancy 2D plots:
+# # This is mostly an exercise in interpolation, but useful to visualize solutions
 
-# first interpolate buoyancy in channel along constant-slope isopycnals:
+# # first interpolate buoyancy in channel along constant-slope isopycnals:
 bint = Interpolate_channel(y=y, z=z, bs=bs_SO, bn=basin.b)
 bsouth = bint.gridit()
 # buoyancy in the basin is all the same:
