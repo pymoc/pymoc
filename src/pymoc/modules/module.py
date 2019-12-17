@@ -71,8 +71,4 @@ class Module(object):
 
   @property
   def b(self):
-    return self[self.b_type]
-    if isinstance(self.module, Column) or isinstance(self.module, Equi_Column):
-      return self.module.b
-    if isinstance(self.module, SO_ML):
-      return self.module.bs
+    return getattr(self.module, self.b_type)

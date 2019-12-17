@@ -8,14 +8,14 @@ and at the southern end of the basin (at the interface to the channel).
 The parameters chosen here follow more or less the "control" experiment of Nikurashin
 and Vallis (2012, JPO).
 '''
-from pymoc import Model
+from pymoc import model
 from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
-import cProfile
 
+print(model.Model)
 # boundary conditions:
 bs = 0.03
 bs_north = 0.005
@@ -83,7 +83,7 @@ north = Column(
     z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bmin
 )
 
-model = Model()
+model = model.Model()
 model.add_module(SO, 'Psi SO')
 model.add_module(basin, 'Atlantic Basin', south_key='psi_so')
 model.add_module(AMOC, 'AMOC', south_key='atlantic_basin')
