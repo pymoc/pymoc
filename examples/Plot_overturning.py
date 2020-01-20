@@ -120,7 +120,6 @@ ax1.set_title('Isopycnal Overturning',fontsize=12)
 fig.colorbar(CS, ticks=plevs[0::5], orientation='vertical')
 fig.tight_layout()  
 #fig.savefig('psi_b_2D_iso.png', format='png', dpi=600)
-
        
 
 # Plot profiles:
@@ -142,6 +141,6 @@ h2, l2 = ax2.get_legend_handles_labels()
 ax1.legend(h1+h2, l1+l2, loc=4, frameon=False)
 ax1.plot(0.*z, z,linewidth=0.5,color='k',linestyle=':')
 fig.tight_layout()
-fig.savefig('profiles.png', format='png', dpi=600)
+#fig.savefig('profiles.png', format='png', dpi=600)
 
-
+plt.show()
