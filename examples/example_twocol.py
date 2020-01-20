@@ -9,7 +9,6 @@ the model is effectively isopycnal, with the vertical coordinate representing
 the mean depth of the respective isopycnal in the column.
 '''
 
-import sys
 from pymoc.modules import Psi_Thermwind, Column
 import numpy as np
 from matplotlib import pyplot as plt

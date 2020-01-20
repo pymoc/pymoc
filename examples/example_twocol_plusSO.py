@@ -55,7 +55,7 @@ z = np.asarray(np.linspace(-4000, 0, 80))
 def b_basin(z):
   return bs * np.exp(z / 300.)
 def b_north(z):
-  return 1e-3*bs * np.exp(z / 300.)
+  return bs_north * np.exp(z / 300.)
 
 
 # create N.A. overturning model instance
@@ -76,7 +76,7 @@ SO = Psi_SO(
     L=5e6,
     KGM=1000.,
     c=0.1,
-    bvp_with_Ek=False
+    bvp_with_Ek=True
 )
 SO.solve()
 
