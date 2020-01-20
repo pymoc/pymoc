@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 # boundary conditions:
 bs = 0.03
-bs_north = 0.005
+bs_north = 0.004
 bmin = 0.0
 
 # S.O. surface boundary conditions and grid:
