@@ -78,6 +78,7 @@ SO = Psi_SO(
     c=0.1,
     bvp_with_Ek=False
 )
+SO.solve()
 
 # create adv-diff column model instance for basin
 basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)
