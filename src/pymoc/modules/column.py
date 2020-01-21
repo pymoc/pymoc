@@ -207,7 +207,7 @@ class Column(object):
     self.b = res.sol(self.z)[0, :]
     self.bz = res.sol(self.z)[1, :]
 
-  def vertadvdiff(self, wA, dt, do_conv):
+  def vertadvdiff(self, wA, dt, do_conv=False):
     r"""
     Calculate and apply the forcing from advection and diffusion on the vertical buoyancy
     profile, for the timestepping solution. This function implements an upwind advection
@@ -265,7 +265,7 @@ class Column(object):
     if ind.any():
       # z_conv is top-most non-convetive layer (set to bottom of the ocean if all convecting):
       zconv= np.max(self.z[np.invert(ind)]) if np.invert(ind).any() else self.z[0]
-      self.b[ind]=self.bs+self.N2min*(self.z[ind]-zconv)  
+      self.b[ind]=self.bs+self.N2min*(self.z[ind]-zconv)
     else:
       # if no convection simply set bs as upper BC  
       self.b[-1]=self.bs  
@@ -346,6 +346,3 @@ class Column(object):
         self.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
       else:
         raise TypeError('b_in is needed if vdx_in is provided')
-    if do_conv:
-      # do convection: (optional)
-      self.convect()
