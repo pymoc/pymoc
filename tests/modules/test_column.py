@@ -4,7 +4,6 @@ import funcsigs
 import numpy as np
 from scipy import integrate
 import pytest
-import sys
 from pymoc.utils import make_func, make_array
 sys.path.append('/pymoc/src/pymoc/modules')
 from column import Column
@@ -273,10 +272,10 @@ class TestColumn(object):
   def test_convect(self):
     N2min = 1.5e-7
     z = np.asarray([-4000.0, -1000.0, -100.0, 0.0])
-    b = np.asarray([-0.03, 0.01, -0.0025, -0.002])
+    b = np.asarray([-0.03, -0.02, 0.01, 0.0])
 
-    column = Column(z=z, b=b.copy(), N2min=N2min, kappa=2e-5, Area=6e13)
-    b[1] = b[-1] + N2min * z[1]
+    column = Column(z=z, b=b.copy(), bs=b[-1], N2min=N2min, kappa=2e-5, Area=6e13)
+    b[2] = b[-1] + N2min * (z[2]-z[1])
 
     column.convect()
     assert (all(column.b == b))
