@@ -262,10 +262,14 @@ class Column(object):
     # from the top down which is the only case we really encounter here...
     # The BC is applied such that we are fixing b at bottom of the convective layer
     ind=self.b>self.bs
-    # z_conv is top-most non-convetive layer - set to bottom of the ocean if all convecting:
-    zconv= np.max(self.z[np.invert(ind)]) if np.invert(ind).any() else self.z[0]
-    self.b[ind]=self.bs+self.N2min*(self.z[ind]-zconv)  
-    
+    if ind.any():
+      # z_conv is top-most non-convetive layer (set to bottom of the ocean if all convecting):
+      zconv= np.max(self.z[np.invert(ind)]) if np.invert(ind).any() else self.z[0]
+      self.b[ind]=self.bs+self.N2min*(self.z[ind]-zconv)  
+    else:
+      # if no convection simply set bs as upper BC  
+      self.b[-1]=self.bs  
+        
     # in a previous version we instead fixed the actual surface buoyancy;
     # the code for that approach is here:
     #ind = self.b > self.bs + self.N2min * self.z
