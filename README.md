@@ -5,8 +5,8 @@
 [![Documentation](https://img.shields.io/badge/docs-PyMOC-informational)](https://pymoc.github.io)
 [![License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 
-PyMOC is a simple, modular suite of python ocean column models for
-use in studying the Meridional Overturning Circulation (MOC). 
+PyMOC is a suite of python modules to build simple "toy" models for ocean's
+Meridional Overturning Circulation (MOC). 
 
 The model suite consists of several independent modules representing
 various ocean regions and dynamics. Specifically, there are modules
@@ -34,4 +34,4 @@ software libraries pre-installed.
 Anybody is more than welcome to contibute to the development of PyMOC,
 but is asked to adhere to the goal of keeping PyMOC well tested, stable,
 maintainable, and documented. Further details on installation, configuration,
-contribution, and issue reporting is available in the documentation.
+contribution, and issue reporting is available in the [documentation](https://pymoc.github.io).
