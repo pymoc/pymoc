@@ -28,10 +28,10 @@ Configuration and execution of the PyMOC suite requires relatively little techni
 
 Anybody is more than welcome to contibute to the development of PyMOC, but is asked to adhere to the goal of keeping PyMOC well tested, stable, maintainable, and documented. Further details on installation, configuration, contribution, and issue reporting are provided in this documentation.
 
-MOC plays a critical role in the uptake and redistribution of heat
-and carbon by the ocean, and as such both mediates and is governed
-by shifts in the climate regime. As such, understanding of the MOC
-is crucial to understanding of climate change.
+.. MOC plays a critical role in the uptake and redistribution of heat
+.. and carbon by the ocean, and as such both mediates and is governed
+.. by shifts in the climate regime. As such, understanding of the MOC
+.. is crucial to understanding of climate change.
 
 .. include:: contents.rst
 
