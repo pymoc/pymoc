@@ -42,7 +42,7 @@ Once these dependencies are installed, PyMOC can be installed via
 
   $ pip install py-moc
 
-If you do not have Python3 or pip configured on your system,
+If you do not have Python or pip configured on your system,
 instructions can be found on `Real Python`_ and in the PyPa_
 documentation.
 
@@ -57,11 +57,11 @@ can follow analagous steps to those required to install via pip
   $ conda install -c anaconda py-moc
 
 
-The Hard(er) Way: Building from Source
+The Recommended Way: Building from Source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To install PyMOC from source, you will need to ensure that you have
-Python3, and the proper versions of numpy_ and scipy_ installed on
+Python 2.7 or 3, and the proper versions of numpy_ and scipy_ installed on
 your system, as for the above managed installation instructions.
 
 Rather than installing PyMoc via pip or conda, however, you will
@@ -96,18 +96,18 @@ The Zero Configuration Way: Running in Docker
 
 If you are just getting started with Python, and have not (or don't
 want to) configure your system to run PyMOC by hand, a containerized
-Docker_ environment is available to uses. A Docker container is a pre-
+Docker_ environment is available to users. A Docker container is a pre-
 packaged software execution environment, with all software dependencies
 installed and ready to go, meaning that end users are not required to
 go through tedious system configuration to get up and running. For those
 familiar with Git & GitHub, Docker serves a similar purpose, but for full
 software environments rather than code. Our automated testing suite runs
-in the same Docker container provided here,so for beginners containerization
-is a great alternative to avoid issues surrounding package version and
+in the same Docker container provided here, so for beginners containerization
+is an easy alternative to avoid issues surrounding package version and
 configuration.
 
 To get started with Docker_, sign up for a free account on `Docker Hub`_,
-download and install the desktop software for your operating system
+and download and install the desktop software for your operating system
 (available for Windows, MacOS, and Linux). Once you have installed the
 desktop software, open your preferred terminal and download the latest
 version of the PyMOC image:
@@ -141,7 +141,7 @@ From there, you can start a bash session inside of the container via:
   $ docker exec -it pymoc bash
 
 And proceed with the instructions for installing and running the model outlined in
-`The Hard(er) Way`, following the dependency and system configuration steps.
+`The Recommended Way`, following the dependency and system configuration steps.
 
 .. _numpy:  http://www.numpy.org/
 .. _scipy:  http://www.scipy.org/
