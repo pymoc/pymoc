@@ -11,7 +11,7 @@ class Model(object):
 
   def keys(self):
     keys = []
-    module = self.south_module
+    module_wrapper = self.south_module
     while module:
       keys.append(module.key)
       module = module.north
@@ -19,7 +19,7 @@ class Model(object):
 
   def modules(self):
     modules = []
-    module = self.south_module
+    module_wrapper = self.south_module
     while module:
       modules.append(module)
       module = module.north
@@ -42,24 +42,24 @@ class Model(object):
   ):
     north = self.get_module(north_key)
     south = self.get_module(south_key)
-    module = ModuleWrapper(
+    module_wrapper = ModuleWrapper(
         module,
         name,
         north=north,
         south=south,
         do_conv=do_conv,
     )
-    self._modules[module.key] = module
+    self._modules[module_wrapper.key] = module_wrapper
 
     if north == self.south_module:
-      self.south_module = module
+      self.south_module = module_wrapper
     if south == self.north_module:
-      self.north_module = module
+      self.north_module = module_wrapper
 
-    if module.module_type == 'basin':
-      self.basins.append(module)
-    elif module.module_type == 'coupler':
-      self.couplers.append(module)
+    if module_wrapper.module_type == 'basin':
+      self.basins.append(module_wrapper)
+    elif module_wrapper.module_type == 'coupler':
+      self.couplers.append(module_wrapper)
 
   def new_module(
       self,
@@ -80,11 +80,11 @@ class Model(object):
 
   def get_modules_by_type(self, module_type):
     modules = []
-    module = self.south_module
-    while module:
-      if module.module_type == module_type:
-        modules.append(module)
-      module = module.north
+    module_wrapper = self.south_module
+    while module_wrapper:
+      if module_wrapper.module_type == module_type:
+        modules.append(module_wrapper)
+      module_wrapper = module.north
     return modules
 
   def run(
