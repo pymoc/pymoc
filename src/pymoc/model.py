@@ -1,4 +1,4 @@
-from pymoc.modules import Module
+from pymoc.modules import ModuleWrapper
 
 
 class Model(object):
@@ -42,7 +42,7 @@ class Model(object):
   ):
     north = self.get_module(north_key)
     south = self.get_module(south_key)
-    module = Module(
+    module = ModuleWrapper(
         module,
         name,
         north=north,
@@ -60,6 +60,23 @@ class Model(object):
       self.basins.append(module)
     elif module.module_type == 'coupler':
       self.couplers.append(module)
+
+  def new_module(
+      self,
+      module_class,
+      module_args,
+      module_name,
+      north_key=None,
+      south_key=None,
+      do_conv=False
+  ):
+    self.add_module(
+        module_class(**module_args),
+        module_name,
+        north_key=north_key,
+        south_key=south_key,
+        do_conv=do_conv
+    )
 
   def get_modules_by_type(self, module_type):
     modules = []

@@ -61,32 +61,59 @@ def b_north(z):
   return 1e-3 * bs * np.exp(z / 300.)
 
 
-# create N.A. overturning model instance
-AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north, f=1e-4)
-SO = Psi_SO(
-    z=z,
-    y=y,
-    b=b_basin(z),
-    bs=bs_SO,
-    tau=tau,
-    f=1e-4,
-    L=5e6,
-    KGM=1000.,
-    c=0.1,
-    bvp_with_Ek=False
-)
-# create adv-diff column model instance for basin
-basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)
-# create adv-diff column model instance for basin
-north = Column(
-    z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bmin
-)
-
 model = model.Model()
-model.add_module(SO, 'Psi SO')
-model.add_module(basin, 'Atlantic Basin', south_key='psi_so')
-model.add_module(AMOC, 'AMOC', south_key='atlantic_basin')
-model.add_module(north, 'North Atlantic', south_key='amoc', do_conv=True)
+model.new_module(
+    Psi_SO, {
+        'z': z,
+        'y': y,
+        'b': b_basin(z),
+        'bs': bs_SO,
+        'tau': tau,
+        'f': 1e-4,
+        'L': 5e6,
+        'KGM': 1000.,
+        'c': 0.1,
+        'bvp_with_Ek': False
+    }, 'Psi SO'
+)
+# create adv-diff column model instance for basin
+model.new_module(
+    Column, {
+        'z': z,
+        'kappa': kappa,
+        'Area': A_basin,
+        'b': b_basin,
+        'bs': bs,
+        'bbot': bmin
+    },
+    'Atlantic Basin',
+    south_key='psi_so'
+)
+# create N.A. overturning model instance
+model.new_module(
+    Psi_Thermwind, {
+        'z': z,
+        'b1': b_basin,
+        'b2': b_north,
+        'f': 1e-4
+    },
+    'AMOC',
+    south_key='atlantic_basin'
+)
+# create adv-diff column model instance for basin
+model.new_module(
+    Column, {
+        'z': z,
+        'kappa': kappa,
+        'Area': A_north,
+        'b': b_north,
+        'bs': bs_north,
+        'bbot': bmin
+    },
+    'North Atlantic',
+    south_key='amoc',
+    do_conv=True
+)
 
 fig = plt.figure(figsize=(6, 10))
 ax1 = fig.add_subplot(111)

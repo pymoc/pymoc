@@ -2,7 +2,7 @@ from datetime import datetime
 from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column
 
 
-class Module(object):
+class ModuleWrapper(object):
   def __init__(
       self,
       module,
