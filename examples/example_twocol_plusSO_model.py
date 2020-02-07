@@ -15,7 +15,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
-print(model.Model)
 # boundary conditions:
 bs = 0.03
 bs_north = 0.005

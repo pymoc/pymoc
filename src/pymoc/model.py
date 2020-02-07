@@ -79,7 +79,6 @@ class Model(object):
       snapshot_interval=None
   ):
     for i in range(0, steps):
-      print(str(i) + '/' + str(steps))
       self.timestep(i, basin_dt, coupler_dt=coupler_dt)
       if self.snapshot(i, snapshot_start, snapshot_interval):
         yield i
@@ -87,10 +86,10 @@ class Model(object):
 
   def timestep(self, step, basin_dt, coupler_dt=0):
     for basin in self.basins:
-      basin.timestep(dt=basin_dt)
+      basin.timestep_basin(dt=basin_dt)
     if step % coupler_dt == 0:
       for coupler in self.couplers:
-        coupler.timestep()
+        coupler.update_coupler()
 
   def snapshot(self, step, snapshot_start, snapshot_interval):
     return snapshot_start is not None and snapshot_interval is not None and step >= snapshot_start and (

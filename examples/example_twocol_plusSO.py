@@ -13,7 +13,6 @@ from pymoc.plotting import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
-from datetime import datetime
 
 # boundary conditions:
 bs = 0.03
@@ -106,8 +105,6 @@ for ii in range(0, total_iters):
   #wAb=(AMOC.Psi-SO.Psi)*1e6
   #wAN=-AMOC.Psi*1e6
   # using isopycnal overturning:
-  print(str(ii) + '/' + str(total_iters))
-  print(datetime.now())
   wAb = (Psi_iso_b - SO.Psi) * 1e6
   wAN = -Psi_iso_n * 1e6
   basin.timestep(wA=wAb, dt=dt)
@@ -128,7 +125,6 @@ for ii in range(0, total_iters):
     ax2.plot(basin.b, basin.z, linewidth=0.5, color='b')
     ax2.plot(north.b, north.z, linewidth=0.5, color='c')
     plt.pause(0.01)
-  print(datetime.now())
 
 # Plot final results over time-iteration plot:
 ax1.plot(AMOC.Psi, AMOC.z, linewidth=2, color='r')
