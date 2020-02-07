@@ -49,6 +49,13 @@ class Model(object):
         south=south,
         do_conv=do_conv,
     )
+
+    if hasattr(self, module_wrapper.key):
+      raise NameError(
+          'Cannot use module name ' + name +
+          ' because it would overwrite an existing key.'
+      )
+
     self._modules[module_wrapper.key] = module_wrapper
 
     if north == self.south_module:
@@ -60,6 +67,8 @@ class Model(object):
       self.basins.append(module_wrapper)
     elif module_wrapper.module_type == 'coupler':
       self.couplers.append(module_wrapper)
+
+    setattr(self, module_wrapper.key, module_wrapper.module)
 
   def new_module(
       self,

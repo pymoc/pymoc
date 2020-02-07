@@ -124,10 +124,10 @@ ax2.set_xlim((-0.02, 0.03))
 ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
-AMOC = model.get_module('amoc').module
-SO = model.get_module('psi_so').module
-basin = model.get_module('atlantic_basin').module
-north = model.get_module('north_atlantic').module
+# AMOC = model.get_module('amoc').module
+# model.psi_so = model.get_module('psi_so').module
+# basin = model.get_module('atlantic_basin').module
+# north = model.get_module('north_atlantic').module
 
 for snapshot in model.run(
     basin_dt=dt,
@@ -138,42 +138,59 @@ for snapshot in model.run(
 ):
   ax1.cla()
   ax2.cla()
-  ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5, color='r')
-  ax1.plot(SO.Psi, SO.z, linewidth=0.5, color='m')
-  ax2.plot(basin.b, basin.z, linewidth=0.5, color='b')
-  ax2.plot(north.b, north.z, linewidth=0.5, color='c')
+  ax1.plot(model.amoc.Psi, model.amoc.z, linewidth=0.5, color='r')
+  ax1.plot(model.psi_so.Psi, model.psi_so.z, linewidth=0.5, color='m')
+  ax2.plot(
+      model.atlantic_basin.b, model.atlantic_basin.z, linewidth=0.5, color='b'
+  )
+  ax2.plot(
+      model.north_atlantic.b, model.north_atlantic.z, linewidth=0.5, color='c'
+  )
   plt.pause(0.01)
 
 plt.show()
 # AMOC = model.get_module('amoc').module
-# SO = model.get_module('psi_so').module
+# model.psi_so = model.get_module('psi_so').module
 # basin = model.get_module('atlantic_basin').module
 # north = model.get_module('north_atlantic').module
 # # Plot final results over time-iteration plot:
-ax1.plot(AMOC.Psi, AMOC.z, linewidth=2, color='r')
-ax1.plot(SO.Psi, SO.z, linewidth=2, color='m')
-ax1.plot(SO.Psi_Ek, SO.z, linewidth=1, color='m', linestyle='--')
-ax1.plot(SO.Psi_GM, SO.z, linewidth=1, color='m', linestyle=':')
-ax2.plot(basin.b, basin.z, linewidth=2, color='b')
-ax2.plot(north.b, basin.z, linewidth=2, color='c')
-ax1.plot(0. * AMOC.z, AMOC.z, linewidth=0.5, color='k')
+ax1.plot(model.amoc.Psi, model.amoc.z, linewidth=2, color='r')
+ax1.plot(model.psi_so.Psi, model.psi_so.z, linewidth=2, color='m')
+ax1.plot(
+    model.psi_so.Psi_Ek,
+    model.psi_so.z,
+    linewidth=1,
+    color='m',
+    linestyle='--'
+)
+ax1.plot(
+    model.psi_so.Psi_GM, model.psi_so.z, linewidth=1, color='m', linestyle=':'
+)
+ax2.plot(
+    model.atlantic_basin.b, model.atlantic_basin.z, linewidth=2, color='b'
+)
+ax2.plot(
+    model.north_atlantic.b, model.atlantic_basin.z, linewidth=2, color='c'
+)
+ax1.plot(0. * model.amoc.z, model.amoc.z, linewidth=0.5, color='k')
 
 # #==============================================================================
 # # Everything below is just to make fancy 2D plots:
 # # This is mostly an exercise in interpolation, but useful to visualize solutions
 
 # # first interpolate buoyancy in channel along constant-slope isopycnals:
-bint = Interpolate_channel(y=y, z=z, bs=bs_SO, bn=basin.b)
+bint = Interpolate_channel(y=y, z=z, bs=bs_SO, bn=model.atlantic_basin.b)
 bsouth = bint.gridit()
 # buoyancy in the basin is all the same:
 ybasin = np.linspace(200., 12000., 60)
-bbasin = np.tile(basin.b, (len(ybasin), 1))
+bbasin = np.tile(model.atlantic_basin.b, (len(ybasin), 1))
 # finally, interpolate buoyancy in the north:
 ynorth = np.linspace(12100., 13000., 10)
 bnorth = np.zeros((len(ynorth), len(z)))
 for iz in range(len(z)):
   bnorth[:, iz] = interp1d([11900., 12000., 12900., 13000.], [
-      basin.b[iz], basin.b[iz], north.b[iz], north.b[iz]
+      model.atlantic_basin.b[iz], model.atlantic_basin.b[iz],
+      model.north_atlantic.b[iz], model.north_atlantic.b[iz]
   ],
                            kind='quadratic')(ynorth)
 # now stick it all together:
@@ -184,20 +201,25 @@ bnew = np.concatenate((bsouth, bbasin, bnorth))
 psiarray_iso = np.zeros((len(ynew), len(z)))
 psiarray_z = np.zeros((len(ynew), len(z)))
 for iy in range(1, len(y)):
-  # in the channel, interpolate SO.Psi onto local isopycnal depth:
-  psiarray_iso[iy, :] = np.interp(bnew[iy, :], basin.b, SO.Psi)
+  # in the channel, interpolate model.psi_so.Psi onto local isopycnal depth:
+  psiarray_iso[iy, :] = np.interp(
+      bnew[iy, :], model.atlantic_basin.b, model.psi_so.Psi
+  )
   psiarray_z[iy, :] = psiarray_iso[iy, :]
 for iy in range(len(y), len(y) + len(ybasin)):
   # in the basin, linearly interpolate between Psi_SO and Psi_AMOC:
   psiarray_iso[iy, :] = (
-      ynew[iy] * AMOC.Psibz()[0] + (10000. - ynew[iy]) * SO.Psi
+      ynew[iy] * model.amoc.Psibz()[0] + (10000. - ynew[iy]) * model.psi_so.Psi
   ) / 10000.
-  psiarray_z[iy, :
-             ] = (ynew[iy] * AMOC.Psi + (10000. - ynew[iy]) * SO.Psi) / 10000.
+  psiarray_z[iy, :] = (
+      ynew[iy] * model.amoc.Psi + (10000. - ynew[iy]) * model.psi_so.Psi
+  ) / 10000.
 for iy in range(len(y) + len(ybasin), len(ynew)):
   # in the north, interpolate AMOC.psib to local isopycnal depth:
-  psiarray_iso[iy, :] = np.interp(bnew[iy, :], AMOC.bgrid, AMOC.Psib())
-  psiarray_z[iy, :] = ((13000. - ynew[iy]) * AMOC.Psi) / 1000.
+  psiarray_iso[iy, :] = np.interp(
+      bnew[iy, :], model.amoc.bgrid, model.amoc.Psib()
+  )
+  psiarray_z[iy, :] = ((13000. - ynew[iy]) * model.amoc.Psi) / 1000.
 psiarray_iso[-1, :] = 0.
 
 blevs = np.arange(0.001, 0.03, 0.002)
