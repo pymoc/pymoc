@@ -37,9 +37,7 @@ class Model(object):
     #   return module
     # return None
 
-  def add_module(
-      self, module, name, north_key=None, south_key=None, do_conv=False
-  ):
+  def add_module(self, module, name, north_key=None, south_key=None):
     north = self.get_module(north_key)
     south = self.get_module(south_key)
     module_wrapper = ModuleWrapper(
@@ -47,7 +45,6 @@ class Model(object):
         name,
         north=north,
         south=south,
-        do_conv=do_conv,
     )
 
     if hasattr(self, module_wrapper.key):
@@ -77,14 +74,12 @@ class Model(object):
       module_name,
       north_key=None,
       south_key=None,
-      do_conv=False
   ):
     self.add_module(
         module_class(**module_args),
         module_name,
         north_key=north_key,
         south_key=south_key,
-        do_conv=do_conv
     )
 
   def get_modules_by_type(self, module_type):

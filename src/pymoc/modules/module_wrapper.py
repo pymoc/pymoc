@@ -9,7 +9,6 @@ class ModuleWrapper(object):
       name,
       north=None,
       south=None,
-      do_conv=False,
   ):
     if north:
       north.south = self
@@ -19,7 +18,6 @@ class ModuleWrapper(object):
     self.name = name
     self.north = north
     self.south = south
-    self.do_conv = do_conv
     self.key = name.replace(' ', '_').lower().strip('_')
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
     self.b_type = 'b' if isinstance(self.module, Column) or isinstance(
@@ -39,7 +37,7 @@ class ModuleWrapper(object):
       wA += self.north.psi[0] * 1e6
     if self.south:
       wA -= self.south.psi[-1] * 1e6
-    module.timestep(wA=wA, dt=dt, do_conv=self.do_conv)
+    module.timestep(wA=wA, dt=dt)
 
   def update_coupler(self, dt=None):
     module = self.module

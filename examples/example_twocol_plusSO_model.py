@@ -102,17 +102,18 @@ model.new_module(
 )
 # create adv-diff column model instance for basin
 model.new_module(
-    Column, {
+    Column,
+    {
         'z': z,
         'kappa': kappa,
         'Area': A_north,
         'b': b_north,
         'bs': bs_north,
-        'bbot': bmin
+        'bbot': bmin,
+        'do_conv': True
     },
     'North Atlantic',
     south_key='amoc',
-    do_conv=True
 )
 
 fig = plt.figure(figsize=(6, 10))

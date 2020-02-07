@@ -25,7 +25,8 @@ class Column(object):
       bzbot=None,    # bottom strat. as alternative boundary condition (input) 
       b=0.0,    # Buoyancy profile (input, output)
       Area=None,    # Horizontal area (can be function of depth)
-      N2min=1e-7    # Minimum strat. for conv adjustment
+      N2min=1e-7,    # Minimum strat. for conv adjustment
+      do_conv=False    # Whether to do convective adjustment
   ):
     r"""
     Parameters
@@ -63,6 +64,7 @@ class Column(object):
     self.bzbot = bzbot
 
     self.N2min = N2min
+    self.do_conv = do_conv
 
     self.b = make_array(b, self.z, 'b')
 
@@ -302,7 +304,7 @@ class Column(object):
     self.b[adv_idx] = self.b[adv_idx] + dt * vdx_in[adv_idx] * db[
         adv_idx] / self.Area(self.z[adv_idx])
 
-  def timestep(self, wA=0., dt=1., do_conv=False, vdx_in=None, b_in=None):
+  def timestep(self, wA=0., dt=1., do_conv=None, vdx_in=None, b_in=None):
     r"""
     Carry out one timestep integration for the buoyancy profile, accounting
     for advective, diffusive, and convective effects.
@@ -331,6 +333,6 @@ class Column(object):
         self.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
       else:
         raise TypeError('b_in is needed if vdx_in is provided')
-    if do_conv:
+    if do_conv if do_conv is not None else self.do_conv:
       # do convection: (optional)
       self.convect()
