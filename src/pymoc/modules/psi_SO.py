@@ -349,11 +349,9 @@ class Psi_SO(object):
     self.Psi_Ek = self.calc_Ekman() / 1e6
     self.Psi_GM = self.calc_GM() / 1e6
     self.Psi = self.Psi_Ek + self.Psi_GM
-    if not self.bvp_with_Ek:
-      # Notice that the bottom boundary is somewhat poorly defined, as it is
-      # only used for BC. To avoid random fluctuation in bottom Psi, we here simply
-      # set it to value of last gridpoint above
-      self.Psi[0] = self.Psi[1]
+    # Notice that the Psi at the bottom boundary is somewhat poorly defined,
+    # and only used foir plotting purposes, for which it makes sense to simply set it to zero:
+    self.Psi[0] = 0.
 
   def update(self, b=None, bs=None):
     r"""
