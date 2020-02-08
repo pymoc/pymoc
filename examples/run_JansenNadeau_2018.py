@@ -268,5 +268,5 @@ if __name__ == '__main__':
   if diagfile is not None:
     np.savez(
         diagfile, AMOC_save, AMOC_b_save, b_basin_save, b_north_save,
-        bs_SO_save, z, bgrid_save, y, Psi_SO_save
+        bs_SO_save, z, bgrid_save, y, Psi_SO_save, tau, kapGM
     )

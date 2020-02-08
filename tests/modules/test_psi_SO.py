@@ -407,7 +407,7 @@ class TestPsi_SO(object):
     psi_so_1.Psi_Ek = Psi_Ek
     Psi_GM = psi_so_1.calc_GM() / 1e6
     Psi = Psi_Ek + Psi_GM
-    Psi[0] = Psi[1]
+    Psi[0] = 0.
     psi_so_2.solve()
     assert (all(psi_so_2.Psi == Psi))
 

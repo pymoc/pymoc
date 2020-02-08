@@ -211,7 +211,7 @@ class Column(object):
     self.b = res.sol(self.z)[0, :]
     self.bz = res.sol(self.z)[1, :]
 
-  def vertadvdiff(self, wA, dt):
+  def vertadvdiff(self, wA, dt, do_conv=False):
     r"""
     Calculate and apply the forcing from advection and diffusion on the vertical buoyancy
     profile, for the timestepping solution. This function implements an upwind advection
@@ -231,9 +231,12 @@ class Column(object):
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
-    self.b[-1] = self.bs
-    self.b[0] = self.bbot if self.bzbot is None else self.b[
-        1] - self.bzbot * dz[0]
+    # TODO: Make this check the module level do_conv as well
+    if not do_conv:    # if we use convection, upper BC is already applied there
+      self.b[-1] = self.bs
+    self.b[0] = (
+        self.bbot if self.bzbot is None else self.b[1] - self.bzbot * dz[0]
+    )
 
     bz = (self.b[1:] - self.b[:-1]) / dz
     bz_up = bz[1:]
@@ -254,23 +257,35 @@ class Column(object):
   def convect(self):
     r"""
     Carry out downward convective adustment of the vertical buoyancy profile to
-    the minimum stratification, :math:`N^2_{m\!i\!n}`. This adjustment assumes a fixed surface 
-    buoyancy boundary condition.
+    the minimum stratification, :math:`N^2_{m\!i\!n}`. The current implimentation 
+    assumes a fixed buoyancy at the bottom of the convective region (to be interpreted
+    as the minimum surfcae buoyancy).
 
     """
+
     # do convective adjustment to minimum strat N2min
-    # notice that this parameterization currently only handles convection
+    # Notice that this parameterization currently only handles convection
     # from the top down which is the only case we really encounter here...
-    # it also assumes a fixed surface buoyancy BC, and hence any
-    # surface heat flux that's required to adjust the buoyancy of the
-    # convecting column:
-    ind = self.b > self.b[-1] + self.N2min * self.z
-    self.b[ind] = self.b[-1] + self.N2min * self.z[ind]
+    # The BC is applied such that we are fixing b at bottom of the convective layer
+    ind = self.b > self.bs
+    if ind.any():
+      # z_conv is top-most non-convetive layer (set to bottom of the ocean if all convecting):
+      zconv = np.max(self.z[np.invert(ind)]
+                     ) if np.invert(ind).any() else self.z[0]
+      self.b[ind] = self.bs + self.N2min * (self.z[ind] - zconv)
+    else:
+      # if no convection simply set bs as upper BC
+      self.b[-1] = self.bs
+
+    # in a previous version we instead fixed the actual surface buoyancy;
+    # the code for that approach is here:
+    #ind = self.b > self.bs + self.N2min * self.z
+    #self.b[ind] = self.bs + self.N2min * self.z[ind]
     # Below is an energy conserving version that could be used
     # for model formulations without fixed surface b. But for fixed surface
     # b, the simpler version above is preferable as it deals better with long time steps
     # (for infinitesimal time-step and fixed surface b, the two are equivalent)
-    # this version does currently also not include adjustment to finite strat.
+    # Moreover, this version does not currently include adjustment to finite strat.
     # dz=self.z[1:]-self.z[:-1];
     # dz=np.append(dz,dz[-1]);dz=np.insert(dz,0,dz[0])
     # dz=0.5*(dz[1:]+dz[0:-1]);
@@ -325,14 +340,17 @@ class Column(object):
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
 
     """
+    #TODO: Remove backwards compatibility for method level do_conv from module and examples. Adds unnecesarry complexity.
+    if (do_conv is None and self.do_conv) or do_conv:
+      # do convection: (optional)
+      self.convect()
 
-    self.vertadvdiff(wA=wA, dt=dt)
+    # do vertical advection and diffusion
+    self.vertadvdiff(wA=wA, dt=dt, do_conv=do_conv)
+
     if vdx_in is not None:
       # do horizontal advection: (optional)
       if b_in is not None:
         self.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
       else:
         raise TypeError('b_in is needed if vdx_in is provided')
-    if do_conv if do_conv is not None else self.do_conv:
-      # do convection: (optional)
-      self.convect()

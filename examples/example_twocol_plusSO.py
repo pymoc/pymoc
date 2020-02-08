@@ -16,7 +16,7 @@ from scipy.interpolate import interp1d
 
 # boundary conditions:
 bs = 0.03
-bs_north = 0.005
+bs_north = 0.004
 bmin = 0.0
 
 # S.O. surface boundary conditions and grid:
@@ -57,7 +57,7 @@ def b_basin(z):
 
 
 def b_north(z):
-  return 1e-3 * bs * np.exp(z / 300.)
+  return bs_north * np.exp(z / 300.)
 
 
 # create N.A. overturning model instance
@@ -78,8 +78,9 @@ SO = Psi_SO(
     L=5e6,
     KGM=1000.,
     c=0.1,
-    bvp_with_Ek=False
+    bvp_with_Ek=True
 )
+SO.solve()
 
 # create adv-diff column model instance for basin
 basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin)

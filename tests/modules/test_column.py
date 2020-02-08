@@ -4,7 +4,6 @@ import funcsigs
 import numpy as np
 from scipy import integrate
 import pytest
-import sys
 from pymoc.utils import make_func, make_array
 sys.path.append('/pymoc/src/pymoc/modules')
 from column import Column
@@ -263,7 +262,7 @@ class TestColumn(object):
               Area) * (-wA + Area*dkappa_dz + kappa*dArea_dz) + kappa*d2b_dz2
 
     column = Column(z=z, Area=Area, kappa=kappa, b=b.copy(), bbot=bbot, bs=bs)
-    column.vertadvdiff(wA, dt)
+    column.vertadvdiff(wA, dt, do_conv=False)
 
     assert all(
         np.around(column.b[2:-2], decimals=3) ==
@@ -273,10 +272,11 @@ class TestColumn(object):
   def test_convect(self):
     N2min = 1.5e-7
     z = np.asarray([-4000.0, -1000.0, -100.0, 0.0])
-    b = np.asarray([-0.03, 0.01, -0.0025, -0.002])
+    b = np.asarray([-0.03, -0.02, 0.01, 0.01])
+    bs = 0.0
 
-    column = Column(z=z, b=b.copy(), N2min=N2min, kappa=2e-5, Area=6e13)
-    b[1] = b[-1] + N2min * z[1]
+    column = Column(z=z, b=b.copy(), bs=bs, N2min=N2min, kappa=2e-5, Area=6e13)
+    b[2:] = bs + N2min * (z[2:] - z[1])
 
     column.convect()
     assert (all(column.b == b))
@@ -298,14 +298,18 @@ class TestColumn(object):
   def test_timestep(self):
     Area = 6e13
     z = np.asarray(np.linspace(-4000, 0, 80))
-    b = np.linspace(0.03, -0.002, 80)
-    vdx_in = np.asarray([2e8 for n in z])
+    b = np.linspace(-np.sqrt(0.04), 0.0, 80)**2.
+    vdx_in = np.asarray([2e4 for n in z])
     b_in = np.asarray([-0.02 for n in z])
-    wA = Area * np.sin(z)
-    dt = 60 * 86400
+    wA = np.sin(z) / Area
+    dt = 30 * 86400
 
-    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt)
     column2.vertadvdiff(wA=wA, dt=dt)
     assert (all(column1.b == column2.b))
@@ -313,8 +317,12 @@ class TestColumn(object):
     column2.convect()
     assert (any(column1.b != column2.b))
 
-    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in)
     column2.vertadvdiff(wA=wA, dt=dt)
     column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
@@ -322,15 +330,21 @@ class TestColumn(object):
     column2.convect()
     assert (any(column1.b != column2.b))
 
-    column1 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in, do_conv=True)
+    column2.convect()
     column2.vertadvdiff(wA=wA, dt=dt)
     column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
-    column2.convect()
     assert (all(column1.b == column2.b))
 
-    column = Column(z=z, b=b.copy(), kappa=2e-5, Area=Area)
+    column = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     with pytest.raises(TypeError) as binfo:
       column.timestep(wA=wA, dt=dt, vdx_in=vdx_in)
     assert (str(binfo.value) == "b_in is needed if vdx_in is provided")

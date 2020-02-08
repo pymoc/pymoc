@@ -9,7 +9,6 @@ the model is effectively isopycnal, with the vertical coordinate representing
 the mean depth of the respective isopycnal in the column.
 '''
 
-import sys
 from pymoc.modules import Psi_Thermwind, Column
 import numpy as np
 from matplotlib import pyplot as plt
@@ -51,9 +50,10 @@ z = np.asarray(np.linspace(-4000, 0, 80))
 # Initial conditions for buoyancy profile in the basin:
 def b_basin(z):
   return bs * np.exp(z / 300.)
-def b_north(z):
-  return 1e-3*bs * np.exp(z / 300.)
 
+
+def b_north(z):
+  return 1e-3 * bs * np.exp(z / 300.)
 
 
 # create overturning model instance
@@ -74,9 +74,7 @@ ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
 # create adv-diff column model instance for basin
-basin = Column(
-    z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot
-)
+basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot)
 # create adv-diff column model instance for basin
 north = Column(
     z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bbot
