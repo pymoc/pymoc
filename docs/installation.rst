@@ -21,40 +21,10 @@ on your system. As PyMOC is intended primarily as an educational
 instrument, we highly encourage you to download the source from
 GitHub_ and either install the model locally or utilize our
 pre-build Docker container. Regardless, instructions are provided
-for installing a packaged version of PyMOC from pip for those
-who are not interested in what's going on under the hood.
-
-The Easy Way: Managed Installing with pip or conda
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-PyMOC is available on the Python Package Index (PyPi), and can be
-installed via pip in a terminal window. First, make sure you have
-numpy_ and scipy_ installed:
-
-.. code-block:: bash
-
-  $ pip install numpy>=1.13 
-  $ pip install scipy>=1.3 
-
-Once these dependencies are installed, PyMOC can be installed via
-
-.. code-block:: bash
-
-  $ pip install py-moc
-
-If you do not have Python or pip configured on your system,
-instructions can be found on `Real Python`_ and in the PyPa_
-documentation.
-
-Alternatively, you may want to manage your Python environment using
-the Anaconda_ distribution. Once you have installed Anaconda, you 
-can follow analagous steps to those required to install via pip
-
-.. code-block:: bash
-
-  $ conda install -c anaconda numpy=1.13 
-  $ conda install -c anaconda scipy=1.3 
-  $ conda install -c anaconda py-moc
+for installing a packaged version of the PyMOC modules from pip
+for those who are not interested in what's going on under the hood.
+Notice however, that the pip installation will not include the code 
+directory or examples.
 
 
 The Recommended Way: Building from Source
@@ -91,7 +61,41 @@ regarding system privileges, you will need to either install as root (via
 ``sudo``), or if you do not have root privileges install for only your user
 by passing the ``--user`` flag to the setup script.
 
-The Zero Configuration Way: Running in Docker
+
+The Easy Way to get the PyMOC Modules: Installing with pip or conda
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+PyMOC is available on the Python Package Index (PyPi), and can be
+installed via pip in a terminal window. First, make sure you have
+numpy_ and scipy_ installed:
+
+.. code-block:: bash
+
+  $ pip install numpy>=1.13 
+  $ pip install scipy>=1.3 
+
+Once these dependencies are installed, PyMOC can be installed via
+
+.. code-block:: bash
+
+  $ pip install py-moc
+
+If you do not have Python or pip configured on your system,
+instructions can be found on `Real Python`_ and in the PyPa_
+documentation.
+
+Alternatively, you may want to manage your Python environment using
+the Anaconda_ distribution. Once you have installed Anaconda, you 
+can follow analagous steps to those required to install via pip
+
+.. code-block:: bash
+
+  $ conda install -c anaconda numpy=1.13 
+  $ conda install -c anaconda scipy=1.3 
+  $ conda install -c anaconda py-moc
+
+
+Getting a Working Environment the Zero Configuration Way: Running in Docker
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are just getting started with Python, and have not (or don't
@@ -108,9 +112,9 @@ configuration.
 
 To get started with Docker_, sign up for a free account on `Docker Hub`_,
 and download and install the desktop software for your operating system
-(available for Windows, MacOS, and Linux). Once you have installed the
-desktop software, open your preferred terminal and download the latest
-version of the PyMOC image:
+(available for Windows, MacOS, and Linux). Once you have installed  and
+logged in to desktop software, open your preferred terminal and download
+the latest version of the PyMOC image:
 
 .. code-block:: bash
 
