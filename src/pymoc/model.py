@@ -29,8 +29,14 @@ class Model(object):
       return None
     return self._modules[key]
 
-  def add_module(self, module, name, neighbors=[]):
-    # neighbors = np.unique(neighbors).tolist()
+  def add_module(self, module, name, neighbors=None):
+    neighbors = neighbors or []
+    if len(np.unique([n.key
+                      for n in neighbors])) < len([n.key for n in neighbors]):
+      raise ValueError(
+          'Cannot link basins multiple times. Please check your configuration.'
+      )
+
     for n in neighbors:
       neighbor = self.get_module(n.key)
       if not neighbor:
@@ -38,6 +44,16 @@ class Model(object):
       n.module_wrapper = neighbor
 
     module_wrapper = ModuleWrapper(module, name, neighbors)
+    if module_wrapper.module_type == 'coupler':
+      if len(neighbors) > 2:
+        raise ValueError(
+            'Streamfunctions cannot connect more than two basins. Please check your configuration.'
+        )
+      if sum(n.direction == 'left' for n in neighbors
+             ) > 1 or sum(n.direction == 'right' for n in neighbors) > 1:
+        raise ValueError(
+            'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
+        )
 
     for neighbor in neighbors:
       if module_wrapper.key in [
@@ -56,11 +72,31 @@ class Model(object):
               module_wrapper=module_wrapper
           )
       )
+      if neighbor.module_wrapper.module_type == 'coupler':
+        if len(neighbor.module_wrapper.neighbors) > 2:
+          raise ValueError(
+              'Streamfunctions cannot connect more than two basins. Please check your configuration.'
+          )
+        if sum(
+            n.direction == 'left' for n in neighbor.module_wrapper.neighbors
+        ) > 1 or sum(
+            n.direction == 'right' for n in neighbor.module_wrapper.neighbors
+        ) > 1:
+          raise ValueError(
+              'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
+          )
 
     if hasattr(self, module_wrapper.key):
       raise NameError(
           'Cannot use module name ' + name +
           ' because it would overwrite an existing key.'
+      )
+
+    if module_wrapper.module_type == 'coupler' and len(
+        module_wrapper.neighbors
+    ) > 2:
+      raise ValueError(
+          'Streamfunctions cannot connect more than two basins. Please check your configuration.'
       )
 
     self._modules[module_wrapper.key] = module_wrapper
