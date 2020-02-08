@@ -161,11 +161,6 @@ nb=500;
 b_basin=(A_Atl*Atl.b+A_Pac*Pac.b)/(A_Atl+A_Pac);
 b_north=north.b;
 
-# Set bottom streamfunction to zero for prettier plots
-#(notice that value of psi at the bottom is meaningless/arbitrary in the model)
-SO_Atl.Psi[0]=0.;
-SO_Pac.Psi[0]=0.;
-
 # Compute total SO residual overturning by first interpolating circulation 
 # in both sectors to mean buoyancy profile values and then summing (at constant b).
 PsiSO=(np.interp(b_basin,Atl.b,SO_Atl.Psi)

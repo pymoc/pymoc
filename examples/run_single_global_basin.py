@@ -90,8 +90,7 @@ if __name__ == '__main__':
   )    # total number of timesteps
   Diag_iters = 10 * MOC_up_iters    # multiplier for Diags - needs to be multiple of MOC_up_iters
 
-  # diffusivity profile from GCM simulations:
- 
+  
   # generate functions for full and effective diffusivity profile:
   def kappa(z):
     return kapfac*9e-6*np.exp(-z/1200) + 7e-5*np.exp(z/50)

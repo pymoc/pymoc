@@ -16,8 +16,10 @@ plt.close('all')
 
 Diag=np.load('diags.npz')
 
+# Notice that some of these variables may need to be adjusted to match the
+# simulations to be plotted:
 L=2e7
-l=2.e6;
+l=2e6;
 nb=500
 b_basin=1.0*Diag['arr_2'][:,-1];
 b_north=1.0*Diag['arr_3'][:,-1];
