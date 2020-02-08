@@ -139,8 +139,14 @@ for ii in range(0, total_iters):
   # update buoyancy profile
   # using isopycnal overturning:
   wA_Atl = (Psi_iso_Atl + Psi_zonal_Atl - SO_Atl.Psi) * 1e6
+  #   print('wA_Atl')
+  #   print(wA_Atl)
   wAN = -Psi_iso_N * 1e6
+  #   print('wAN')
+  #   print(wAN)
   wA_Pac = (-Psi_zonal_Pac - SO_Pac.Psi) * 1e6
+  #   print('wA_Pac')
+  #   print(wA_Pac)
   Atl.timestep(wA=wA_Atl, dt=dt)
   north.timestep(wA=wAN, dt=dt, do_conv=True)
   Pac.timestep(wA=wA_Pac, dt=dt)
@@ -169,7 +175,7 @@ for ii in range(0, total_iters):
     ax2.plot(Pac.b, Pac.z, '-g', linewidth=0.5)
     ax2.plot(north.b, north.z, '-r', linewidth=0.5)
     plt.pause(0.01)
-    print "t=", round(ii * dt / 86400 / 360), "years"
+    print("t=" + str(round(ii * dt / 86400 / 360)) + " years")
 
 ax1.plot(AMOC.Psi, AMOC.z, '--r', linewidth=1.5)
 ax1.plot(ZOC.Psi, ZOC.z, ':c', linewidth=1.5)
@@ -180,6 +186,7 @@ ax2.plot(Atl.b, Atl.z, '-b', linewidth=1.5)
 ax2.plot(Pac.b, Pac.z, '-g', linewidth=1.5)
 ax2.plot(north.b, north.z, '-r', linewidth=1.5)
 
+plt.show()
 # Write out diagnostics (if diag file name is provided):
 if diag_file is not None:
   np.savez(

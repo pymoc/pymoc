@@ -30,7 +30,7 @@ class Model(object):
     return self._modules[key]
 
   def add_module(self, module, name, neighbors=[]):
-    neighbors = np.unique(neighbors).tolist()
+    # neighbors = np.unique(neighbors).tolist()
     for n in neighbors:
       neighbor = self.get_module(n.key)
       if not neighbor:
@@ -52,7 +52,7 @@ class Model(object):
       neighbor.module_wrapper.neighbors.append(
           Neighbor(
               module_wrapper.key,
-              'left' if n.direction == 'right' else 'right',
+              'left' if neighbor.direction == 'right' else 'right',
               module_wrapper=module_wrapper
           )
       )
@@ -102,6 +102,9 @@ class Model(object):
       snapshot_start=None,
       snapshot_interval=None
   ):
+    for coupler in self.couplers:
+      coupler.update_coupler()
+
     for i in range(0, steps):
       self.timestep(i, basin_dt, coupler_dt=coupler_dt)
       if self.snapshot(i, snapshot_start, snapshot_interval):

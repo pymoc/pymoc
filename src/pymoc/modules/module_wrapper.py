@@ -3,10 +3,10 @@ from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column, Nei
 
 
 class ModuleWrapper(object):
-  def __init__(self, module, name, neighbors=[]):
+  def __init__(self, module, name, neighbors=None):
     self.module = module
     self.name = name
-    self.neighbors = neighbors
+    self.neighbors = neighbors or []
 
     self.key = name.replace(' ', '_').lower().strip('_')
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
@@ -30,7 +30,7 @@ class ModuleWrapper(object):
 
     module.timestep(wA=wA, dt=dt)
 
-  def update_coupler(self, dt=None):
+  def update_coupler(self):
     module = self.module
     b1 = None
     b2 = None

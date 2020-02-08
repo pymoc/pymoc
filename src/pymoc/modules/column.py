@@ -232,7 +232,7 @@ class Column(object):
 
     # apply boundary conditions:
     # TODO: Make this check the module level do_conv as well
-    if not do_conv:    # if we use convection, upper BC is already applied there
+    if not self.do_conv:    # if we use convection, upper BC is already applied there
       self.b[-1] = self.bs
     self.b[0] = (
         self.bbot if self.bzbot is None else self.b[1] - self.bzbot * dz[0]
@@ -341,7 +341,8 @@ class Column(object):
 
     """
     #TODO: Remove backwards compatibility for method level do_conv from module and examples. Adds unnecesarry complexity.
-    if (do_conv is None and self.do_conv) or do_conv:
+    if self.do_conv:
+      # if (do_conv is None and self.do_conv) or do_conv:
       # do convection: (optional)
       self.convect()
 

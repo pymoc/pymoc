@@ -32,7 +32,7 @@ class Psi_Thermwind(object):
       f=1.2e-4,    # Coriolis parameter (input)
       z=None,    # grid (input)
       sol_init=None,    # Initial conditions for ODE solver (input)
-      b1=None,    # Buoyancy in the basin (input, output)
+      b1=0.,    # Buoyancy in the basin (input, output)
       b2=0.,    # Buoyancy in the deep water formation region (input, output)
   ):
     r"""
@@ -62,7 +62,6 @@ class Psi_Thermwind(object):
 
     self.b1 = make_func(b1, self.z, 'b1')
     self.b2 = make_func(b2, self.z, 'b2')
-
     # Set initial conditions for BVP solver
     if sol_init is None:
       self.sol_init = np.zeros((2, nz))
