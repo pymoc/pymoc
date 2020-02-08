@@ -1,10 +1,8 @@
-from pymoc.modules import ModuleWrapper
+from pymoc.modules import ModuleWrapper, Neighbor
 
 
 class Model(object):
   def __init__(self):
-    self.south_module = None
-    self.north_module = None
     self.basins = []
     self.couplers = []
     self._modules = {}
@@ -28,24 +26,25 @@ class Model(object):
   def get_module(self, key):
     if not key:
       return None
-
     return self._modules[key]
-    # module = self.south_module
-    # while module and module.key != key:
-    #   module = module.north
-    # if module and module.key == key:
-    #   return module
-    # return None
 
-  def add_module(self, module, name, north_key=None, south_key=None):
-    north = self.get_module(north_key)
-    south = self.get_module(south_key)
-    module_wrapper = ModuleWrapper(
-        module,
-        name,
-        north=north,
-        south=south,
-    )
+  def add_module(self, module, name, neighbors=[]):
+    for n in neighbors:
+      neighbor = self.get_module(n.key)
+      if not neighbor:
+        raise KeyError('No module present with key ' + n.key)
+      n.module_wrapper = neighbor
+
+    module_wrapper = ModuleWrapper(module, name, neighbors)
+
+    for neighbor in neighbors:
+      neighbor.module_wrapper.neighbors.append(
+          Neighbor(
+              module_wrapper.key,
+              'left' if n.direction == 'right' else 'right',
+              module_wrapper=module_wrapper
+          )
+      )
 
     if hasattr(self, module_wrapper.key):
       raise NameError(
@@ -54,11 +53,6 @@ class Model(object):
       )
 
     self._modules[module_wrapper.key] = module_wrapper
-
-    if north == self.south_module:
-      self.south_module = module_wrapper
-    if south == self.north_module:
-      self.north_module = module_wrapper
 
     if module_wrapper.module_type == 'basin':
       self.basins.append(module_wrapper)
@@ -72,14 +66,12 @@ class Model(object):
       module_class,
       module_args,
       module_name,
-      north_key=None,
-      south_key=None,
+      neighbors=[],
   ):
     self.add_module(
         module_class(**module_args),
         module_name,
-        north_key=north_key,
-        south_key=south_key,
+        neighbors,
     )
 
   def get_modules_by_type(self, module_type):
