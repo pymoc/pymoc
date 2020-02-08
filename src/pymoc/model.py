@@ -1,3 +1,4 @@
+import numpy as np
 from pymoc.modules import ModuleWrapper, Neighbor
 
 
@@ -29,6 +30,7 @@ class Model(object):
     return self._modules[key]
 
   def add_module(self, module, name, neighbors=[]):
+    neighbors = np.unique(neighbors).tolist()
     for n in neighbors:
       neighbor = self.get_module(n.key)
       if not neighbor:
@@ -36,6 +38,15 @@ class Model(object):
       n.module_wrapper = neighbor
 
     module_wrapper = ModuleWrapper(module, name, neighbors)
+
+    for neighbor in neighbors:
+      if module_wrapper.key in [
+          n.key for n in neighbor.module_wrapper.neighbors
+      ]:
+        raise KeyError(
+            'Cannot add module ' + module_wrapper.name + ' as a neighbor of ' +
+            neighbor.module_wrapper.name + ' because they are already coupled.'
+        )
 
     for neighbor in neighbors:
       neighbor.module_wrapper.neighbors.append(

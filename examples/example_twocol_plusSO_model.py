@@ -100,6 +100,7 @@ model.new_module(
     'AMOC',
     neighbors=[Neighbor('atlantic_basin', 'left')]
 )
+
 # create adv-diff column model instance for basin
 model.new_module(
     Column, {
