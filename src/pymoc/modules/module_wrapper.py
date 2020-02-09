@@ -50,3 +50,38 @@ class ModuleWrapper(object):
   @property
   def b(self):
     return getattr(self.module, self.b_type)
+
+  def validate_neighbors(self, backlink=False):
+    if not backlink:
+      for neighbor in self.neighbors:
+        linked_neighbor_keys = [
+            n.key for n in neighbor.module_wrapper.neighbors
+        ]
+        if self.key in linked_neighbor_keys:
+          raise KeyError(
+              'Cannot add module ' + self.name + ' as a neighbor of ' +
+              neighbor.module_wrapper.name +
+              ' because they are already coupled.'
+          )
+
+    if self.module_type == 'coupler':
+      # We don't need to explicitly check that a coupler has two or fewer neighbors, as the enforcement of only one left, only one right, and only being able to point left or right implicitly enforces that condition.
+      left_neighbor_count = sum(n.direction == 'left' for n in self.neighbors)
+      right_neighbor_count = sum(
+          n.direction == 'right' for n in self.neighbors
+      )
+      if left_neighbor_count > 1 or right_neighbor_count > 1:
+        raise ValueError(
+            'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
+        )
+
+  def backlink_neighbor_links(self):
+    for neighbor in self.neighbors:
+      neighbor.module_wrapper.neighbors.append(
+          Neighbor(
+              self.key,
+              'left' if neighbor.direction == 'right' else 'right',
+              module_wrapper=self
+          )
+      )
+      neighbor.module_wrapper.validate_neighbors(backlink=True)

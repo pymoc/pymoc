@@ -9,30 +9,17 @@ class Model(object):
     self._modules = {}
 
   def keys(self):
-    keys = []
-    module_wrapper = self.south_module
-    while module:
-      keys.append(module.key)
-      module = module.north
-    return keys
-
-  def modules(self):
-    modules = []
-    module_wrapper = self.south_module
-    while module:
-      modules.append(module)
-      module = module.north
-    return modules
+    return self._modules.keys()
 
   def get_module(self, key):
     if not key:
       return None
     return self._modules[key]
 
-  def add_module(self, module, name, neighbors=None):
-    neighbors = neighbors or []
-    if len(np.unique([n.key
-                      for n in neighbors])) < len([n.key for n in neighbors]):
+  def validate_neighbors_input(self, neighbors):
+    neighbor_keys = [n.key for n in neighbors]
+    distinct_neighbor_keys = np.unique(neighbor_keys)
+    if len(neighbor_keys) > len(distinct_neighbor_keys):
       raise ValueError(
           'Cannot link basins multiple times. Please check your configuration.'
       )
@@ -40,60 +27,26 @@ class Model(object):
     for n in neighbors:
       neighbor = self.get_module(n.key)
       if not neighbor:
-        raise KeyError('No module present with key ' + n.key)
+        raise KeyError(
+            'No module present with key ' + n.key +
+            ', cannot set as neighbor of ' + name
+        )
       n.module_wrapper = neighbor
 
+  def add_module(self, module, name, neighbors=None):
+    neighbors = neighbors or []
+    self.validate_neighbors_input(neighbors)
     module_wrapper = ModuleWrapper(module, name, neighbors)
-    if module_wrapper.module_type == 'coupler':
-      # We don't need to explicitly check that a coupler has two or fewer neighbors, as the enforcement of only one left, only one right, and only being able to point left or right implicitly enforces that condition.
-      if sum(n.direction == 'left' for n in neighbors
-             ) > 1 or sum(n.direction == 'right' for n in neighbors) > 1:
-        raise ValueError(
-            'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
-        )
-
-    for neighbor in neighbors:
-      if module_wrapper.key in [
-          n.key for n in neighbor.module_wrapper.neighbors
-      ]:
-        raise KeyError(
-            'Cannot add module ' + module_wrapper.name + ' as a neighbor of ' +
-            neighbor.module_wrapper.name + ' because they are already coupled.'
-        )
-
-    for neighbor in neighbors:
-      neighbor.module_wrapper.neighbors.append(
-          Neighbor(
-              module_wrapper.key,
-              'left' if neighbor.direction == 'right' else 'right',
-              module_wrapper=module_wrapper
-          )
-      )
-      if neighbor.module_wrapper.module_type == 'coupler':
-        if sum(
-            n.direction == 'left' for n in neighbor.module_wrapper.neighbors
-        ) > 1 or sum(
-            n.direction == 'right' for n in neighbor.module_wrapper.neighbors
-        ) > 1:
-          raise ValueError(
-              'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
-          )
+    module_wrapper.validate_neighbor_links()
+    module_wrapper.backlink_neighbors()
 
     if hasattr(self, module_wrapper.key):
       raise NameError(
           'Cannot use module name ' + name +
-          ' because it would overwrite an existing key.'
-      )
-
-    if module_wrapper.module_type == 'coupler' and len(
-        module_wrapper.neighbors
-    ) > 2:
-      raise ValueError(
-          'Streamfunctions cannot connect more than two basins. Please check your configuration.'
+          ' because it would overwrite an existing key or model property.'
       )
 
     self._modules[module_wrapper.key] = module_wrapper
-
     if module_wrapper.module_type == 'basin':
       self.basins.append(module_wrapper)
     elif module_wrapper.module_type == 'coupler':
@@ -116,11 +69,9 @@ class Model(object):
 
   def get_modules_by_type(self, module_type):
     modules = []
-    module_wrapper = self.south_module
-    while module_wrapper:
+    for module_wrapper in self._modules.values():
       if module_wrapper.module_type == module_type:
         modules.append(module_wrapper)
-      module_wrapper = module.north
     return modules
 
   def run(
