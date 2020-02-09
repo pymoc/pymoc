@@ -45,10 +45,7 @@ class Model(object):
 
     module_wrapper = ModuleWrapper(module, name, neighbors)
     if module_wrapper.module_type == 'coupler':
-      if len(neighbors) > 2:
-        raise ValueError(
-            'Streamfunctions cannot connect more than two basins. Please check your configuration.'
-        )
+      # We don't need to explicitly check that a coupler has two or fewer neighbors, as the enforcement of only one left, only one right, and only being able to point left or right implicitly enforces that condition.
       if sum(n.direction == 'left' for n in neighbors
              ) > 1 or sum(n.direction == 'right' for n in neighbors) > 1:
         raise ValueError(
@@ -73,10 +70,6 @@ class Model(object):
           )
       )
       if neighbor.module_wrapper.module_type == 'coupler':
-        if len(neighbor.module_wrapper.neighbors) > 2:
-          raise ValueError(
-              'Streamfunctions cannot connect more than two basins. Please check your configuration.'
-          )
         if sum(
             n.direction == 'left' for n in neighbor.module_wrapper.neighbors
         ) > 1 or sum(
