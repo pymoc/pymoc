@@ -67,13 +67,6 @@ class Model(object):
         neighbors,
     )
 
-  def get_modules_by_type(self, module_type):
-    modules = []
-    for module_wrapper in self._modules.values():
-      if module_wrapper.module_type == module_type:
-        modules.append(module_wrapper)
-    return modules
-
   def run(
       self,
       steps,
