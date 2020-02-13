@@ -14,7 +14,7 @@ WORKDIR ${HOME}
 
 RUN apt-get update -y && \
     apt-get install -y python3.6-dev python3-pip git curl
-RUN pip3 install --no-cache --upgrade pip3 && \
+RUN pip3 install --no-cache --upgrade pip && \
     pip3 install numpy==1.13 && \
     pip3 install scipy==1.3 && \
     pip3 install matplotlib && \
