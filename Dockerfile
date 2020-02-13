@@ -1,15 +1,17 @@
 FROM ubuntu:18.04
 
 # ADD . /pymoc
-ARG NB_USER
-ARG NB_UID
+
+ARG NB_USER=nbuser
+ARG NB_UID=1000
 ENV USER ${NB_USER}
+ENV NB_UID ${NB_UID}
 ENV HOME /home/${NB_USER}
+
 RUN adduser --disabled-password \
     --gecos "Default user" \
     --uid ${NB_UID} \
     ${NB_USER}
-WORKDIR ${HOME}
 # WORKDIR /pymoc
 
 RUN apt-get update -y && \
@@ -31,5 +33,9 @@ RUN pip3 install --no-cache --upgrade pip && \
     pip3 install jupyter && \
     pip3 install --no-cache notebook
 RUN ln -s /usr/bin/python3.6 /usr/bin/python
+
+USER root
+RUN chown -R ${NB_UID} ${HOME}
+USER ${NB_USER}
 
 CMD bash
