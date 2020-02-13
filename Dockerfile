@@ -40,6 +40,6 @@ USER root
 RUN chown -R ${NB_UID} ${HOME}
 USER ${NB_USER}
 
-RUN python setup.py install
+RUN python setup.py install --user
 
 CMD bash
