@@ -1,11 +1,21 @@
 FROM ubuntu:18.04
 
 # ADD . /pymoc
-WORKDIR /pymoc
+ARG NB_USER
+ARG NB_UID
+ENV USER ${NB_USER}
+ENV HOME /home/${NB_USER}
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
+WORKDIR ${HOME}
+# WORKDIR /pymoc
 
 RUN apt-get update -y && \
     apt-get install -y python3.6-dev python3-pip git curl
-RUN pip3 install numpy==1.13 && \
+RUN pip3 install --no-cache --upgrade pip3 && \
+    pip3 install numpy==1.13 && \
     pip3 install scipy==1.3 && \
     pip3 install matplotlib && \
     pip3 install pytest==5.1.1 && \
@@ -19,7 +29,7 @@ RUN pip3 install numpy==1.13 && \
     pip3 install jupyter-sphinx-theme && \
     pip3 install funcsigs && \
     pip3 install jupyter && \
-    pip3 install notebook
+    pip3 install --no-cache notebook
 RUN ln -s /usr/bin/python3.6 /usr/bin/python
 
 CMD bash
