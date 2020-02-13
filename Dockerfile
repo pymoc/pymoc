@@ -13,6 +13,7 @@ RUN adduser --disabled-password \
     --uid ${NB_UID} \
     ${NB_USER}
 WORKDIR ${HOME}
+COPY . ${HOME}
 # WORKDIR /pymoc
 
 RUN apt-get update -y && \
