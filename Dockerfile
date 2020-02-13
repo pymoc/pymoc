@@ -12,6 +12,7 @@ RUN adduser --disabled-password \
     --gecos "Default user" \
     --uid ${NB_UID} \
     ${NB_USER}
+WORKDIR ${HOME}
 # WORKDIR /pymoc
 
 RUN apt-get update -y && \
