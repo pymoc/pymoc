@@ -3,6 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/b03ff00b5c86d7afc364/maintainability)](https://codeclimate.com/github/pymoc/PyMOC/maintainability)
 [![PyPI version](https://badge.fury.io/py/py-moc.svg)](https://badge.fury.io/py/py-moc)
 [![Documentation](https://img.shields.io/badge/docs-PyMOC-informational)](https://pymoc.github.io)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pymoc/pymoc/tutorials)
 [![License](https://img.shields.io/badge/license-MIT-informational)](LICENSE)
 
 PyMOC is a suite of python modules to build simple "toy" models for ocean's
