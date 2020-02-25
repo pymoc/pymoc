@@ -46,9 +46,9 @@ class Psi_Thermwind(object):
     sol_init : ndarray; optional
                Initial guess at the solution to the thermal wind overturning streamfunction. Units: [...]
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the righthand (southward/westward) basin. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the northern basin, representing the
+         Vertical buoyancy profile from the lefthand (northward/eastward) basin, representing the
          deepwater formation region. Units: m/s\ :sup:`2`
     """
 
@@ -155,8 +155,8 @@ class Psi_Thermwind(object):
       \end{cases}
       \end{aligned}
 
-    where :math:`b_N\left(z\right)` is the density profiles in the northern region, :math:`b_B\left(z\right)` is
-    the density profile in the southern basin, and :math:`\mathcal{H}` is the Heaviside step function.
+    where :math:`b_N\left(z\right)` is the density profiles in the righthand region, :math:`b_B\left(z\right)` is
+    the density profile in the lefthand basin, and :math:`\mathcal{H}` is the Heaviside step function.
 
     Parameters
     ----------
@@ -189,7 +189,7 @@ class Psi_Thermwind(object):
   def Psibz(self, nb=500):
     r"""
     Remap the overturning streamfunction onto the native isopycnal-depth space
-    of the columns in the northern region and southern basin.
+    of the columns in the right and lefthand basins.
 
     Parameters
     ----------
@@ -199,7 +199,7 @@ class Psi_Thermwind(object):
     Returns
     -------
     psibz : ndarray
-            An array where the first element is an array representing the streamfunction at each depth level in the southern basin, and the second represents the same in the northern region.
+            An array where the first element is an array representing the streamfunction at each depth level in the lefthand basin, and the second represents the same in the righthand basin.
     """
     # map isopycnal overturning back into isopycnal-depth space of each column
     psib = self.Psib(nb)
@@ -216,15 +216,15 @@ class Psi_Thermwind(object):
 
   def update(self, b1=None, b2=None):
     r"""
-    Update the vertical buoyancy profiles from the southern basin and northern region.
+    Update the vertical buoyancy profiles from the lefthand basin and righthand basin.
 
     Parameters
     ----------
 
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the lefthand basin. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the northern basin, representing the
+         Vertical buoyancy profile from the righthand basin, representing the
          deepwater formation region. Units: m/s\ :sup:`2`
     """
     # update buoyancy profiles
