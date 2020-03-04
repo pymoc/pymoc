@@ -1,5 +1,5 @@
 import numpy as np
-from pymoc.modules import ModuleWrapper, Neighbor
+from pymoc.modules import ModuleWrapper
 
 
 class Model(object):
@@ -17,28 +17,17 @@ class Model(object):
     return self._modules[key]
 
   def validate_neighbors_input(self, neighbors):
-    neighbor_keys = [n.key for n in neighbors]
-    distinct_neighbor_keys = np.unique(neighbor_keys)
-    if len(neighbor_keys) > len(distinct_neighbor_keys):
+    neighbor_modules = [n['module'] for n in neighbors]
+    distinct_neighbor_moduless = np.unique(neighbor_modules)
+    if len(neighbor_modules) > len(distinct_neighbor_moduless):
       raise ValueError(
           'Cannot link basins multiple times. Please check your configuration.'
       )
-
-    for n in neighbors:
-      neighbor = self.get_module(n.key)
-      if not neighbor:
-        raise KeyError(
-            'No module present with key ' + n.key +
-            ', cannot set as neighbor of ' + name
-        )
-      n.module_wrapper = neighbor
 
   def add_module(self, module, name, neighbors=None):
     neighbors = neighbors or []
     self.validate_neighbors_input(neighbors)
     module_wrapper = ModuleWrapper(module, name, neighbors)
-    module_wrapper.validate_neighbor_links()
-    module_wrapper.backlink_neighbors()
 
     if hasattr(self, module_wrapper.key):
       raise NameError(

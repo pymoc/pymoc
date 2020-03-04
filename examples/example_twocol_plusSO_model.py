@@ -9,7 +9,7 @@ The parameters chosen here follow more or less the "control" experiment of Nikur
 and Vallis (2012, JPO).
 '''
 from pymoc import model
-from pymoc.modules import Psi_Thermwind, Psi_SO, Column, Neighbor
+from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel
 import numpy as np
 from matplotlib import pyplot as plt
@@ -87,7 +87,10 @@ model.new_module(
         'bbot': bmin
     },
     'Atlantic Basin',
-    neighbors=[Neighbor('psi_so', 'left')]
+    neighbors=[{
+        'module': model.get_module('psi_so'),
+        'direction': 'left'
+    }]
 )
 # create N.A. overturning model instance
 model.new_module(
@@ -98,7 +101,10 @@ model.new_module(
         'f': 1e-4
     },
     'AMOC',
-    neighbors=[Neighbor('atlantic_basin', 'left')]
+    neighbors=[{
+        'module': model.get_module('atlantic_basin'),
+        'direction': 'left'
+    }]
 )
 
 # create adv-diff column model instance for basin
@@ -113,7 +119,10 @@ model.new_module(
         'do_conv': True
     },
     'North Atlantic',
-    neighbors=[Neighbor('amoc', 'left')]
+    neighbors=[{
+        'module': model.get_module('amoc'),
+        'direction': 'left'
+    }]
 )
 
 fig = plt.figure(figsize=(6, 10))

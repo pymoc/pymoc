@@ -1,12 +1,13 @@
 import numpy as np
-from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column, Neighbor
+from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column
 
 
 class ModuleWrapper(object):
   def __init__(self, module, name, neighbors=None):
     self.module = module
     self.name = name
-    self.neighbors = neighbors or []
+    self.left_neighbors = []
+    self.right_neighbors = []
 
     self.key = name.replace(' ', '_').lower().strip('_')
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
@@ -15,6 +16,9 @@ class ModuleWrapper(object):
     ) else 'bs'
     self.psi = [0, 0]
 
+    if neighbors:
+      self.add_neighbors(neighbors)
+
   @property
   def module_type(self):
     return self.module.module_type
@@ -22,11 +26,10 @@ class ModuleWrapper(object):
   def timestep_basin(self, dt=None):
     module = self.module
     wA = 0.0
-    for neighbor in self.neighbors:
-      if neighbor.direction == 'right':
-        wA += neighbor.module_wrapper.psi[0] * 1e6
-      else:
-        wA -= neighbor.module_wrapper.psi[-1] * 1e6
+    for neighbor in self.right_neighbors:
+      wA += neighbor.psi[0] * 1e6
+    for neighbor in self.left_neighbors:
+      wA -= neighbor.psi[-1] * 1e6
 
     module.timestep(wA=wA, dt=dt)
 
@@ -34,11 +37,10 @@ class ModuleWrapper(object):
     module = self.module
     b1 = None
     b2 = None
-    for neighbor in self.neighbors:
-      if neighbor.direction == 'left':
-        b1 = neighbor.module_wrapper and neighbor.module_wrapper.b
-      else:
-        b2 = neighbor.module_wrapper and neighbor.module_wrapper.b
+    for neighbor in self.left_neighbors:
+      b1 = neighbor.b
+    for neighbor in self.right_neighbors:
+      b2 = neighbor.b
 
     if self.do_psi_bz:
       module.update(b1=b1, b2=b2)
@@ -51,37 +53,42 @@ class ModuleWrapper(object):
   def b(self):
     return getattr(self.module, self.b_type)
 
-  def validate_neighbors(self, backlink=False):
-    if not backlink:
-      for neighbor in self.neighbors:
-        linked_neighbor_keys = [
-            n.key for n in neighbor.module_wrapper.neighbors
-        ]
-        if self.key in linked_neighbor_keys:
-          raise KeyError(
-              'Cannot add module ' + self.name + ' as a neighbor of ' +
-              neighbor.module_wrapper.name +
-              ' because they are already coupled.'
-          )
+  @property
+  def neighbors(self):
+    return self.left_neighbors + self.right_neighbors
+
+  def add_neighbor(self, new_neighbor, direction, backlink=False):
+    if not direction in ['left', 'right']:
+      raise ValueError(
+          "Direction of a neighbor must be either 'left' or 'right'."
+      )
+
+    if new_neighbor in self.neighbors:
+      raise KeyError(
+          'Cannot add module ' + new_neighbor.name + ' as a neighbor of ' +
+          self.name + ' because they are already coupled.'
+      )
 
     if self.module_type == 'coupler':
       # We don't need to explicitly check that a coupler has two or fewer neighbors, as the enforcement of only one left, only one right, and only being able to point left or right implicitly enforces that condition.
-      left_neighbor_count = sum(n.direction == 'left' for n in self.neighbors)
-      right_neighbor_count = sum(
-          n.direction == 'right' for n in self.neighbors
-      )
-      if left_neighbor_count > 1 or right_neighbor_count > 1:
+      if len(self.left_neighbors) > 1 or len(self.right_neighbors) > 1:
         raise ValueError(
             'Cannot have a coupler linked in the same direction more than once. Please check your configuration.'
         )
 
-  def backlink_neighbor_links(self):
-    for neighbor in self.neighbors:
-      neighbor.module_wrapper.neighbors.append(
-          Neighbor(
-              self.key,
-              'left' if neighbor.direction == 'right' else 'right',
-              module_wrapper=self
-          )
-      )
-      neighbor.module_wrapper.validate_neighbors(backlink=True)
+    if direction == 'left':
+      self.left_neighbors.append(new_neighbor)
+    else:
+      self.right_neighbors.append(new_neighbor)
+
+    if not backlink:
+      self.backlink_neighbor(new_neighbor)
+
+  def add_neighbors(self, neighbors):
+    if len(neighbors) > 0:
+      for neighbor in neighbors:
+        self.add_neighbor(neighbor['module'], neighbor['direction'])
+
+  def backlink_neighbor(self, neighbor):
+    direction = 'left' if neighbor in self.right_neighbors else 'right'
+    neighbor.add_neighbor(self, direction, backlink=True)
