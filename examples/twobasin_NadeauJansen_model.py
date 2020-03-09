@@ -13,7 +13,7 @@ Adiabatic mapping is used for the overturning between the differn columns
 '''
 
 from pymoc import model
-from pymoc.modules import Psi_Thermwind, Psi_SO, Column, Neighbor
+from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel, Interpolate_twocol
 import numpy as np
 from matplotlib import pyplot as plt
@@ -133,11 +133,14 @@ m.new_module(
         'N2min': N2min
     },
     'Atl',
-    neighbors=[
-        Neighbor('amoc', 'right'),
-        Neighbor('so_atl', 'left'),
-        Neighbor('zoc', 'right')
-    ]
+    neighbors=[{
+        'module': m.get_module('amoc'),
+        'direction': 'right',
+        'module': m.get_module('so_atl'),
+        'direction': 'left',
+        'module': m.get_module('zoc'),
+        'direction': 'right'
+    }]
 )
 
 # create adv-diff column model instance for northern sinking region
@@ -153,7 +156,10 @@ m.new_module(
         'do_conv': True
     },
     'North',
-    neighbors=[Neighbor('amoc', 'left')]
+    neighbors=[{
+        'module': m.get_module('amoc'),
+        'direction': 'left'
+    }]
 )
 
 # create adv-diff column model instance for Pac
@@ -168,8 +174,12 @@ m.new_module(
         'N2min': N2min
     },
     'Pac',
-    neighbors=[Neighbor('zoc', 'left'),
-               Neighbor('so_pac', 'left')]
+    neighbors=[{
+        'module': m.get_module('zoc'),
+        'direction': 'left',
+        'module': m.get_module('so_pac'),
+        'direction': 'left'
+    }]
 )
 
 # Create figure:

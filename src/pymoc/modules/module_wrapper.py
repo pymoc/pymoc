@@ -56,7 +56,7 @@ class ModuleWrapper(object):
   def b1(self):
     if self.module_type != 'coupler':
       raise TypeError('Cannot access b1 for non-coupler modules.')
-    if len(left_neighbors) > 0:
+    if len(self.left_neighbors) > 0:
       return self.left_neighbors[0].b
     return None
 
@@ -64,7 +64,7 @@ class ModuleWrapper(object):
   def b2(self):
     if self.module_type != 'coupler':
       raise TypeError('Cannot access b2 for non-coupler modules.')
-    if len(right_neighbors) > 0:
+    if len(self.right_neighbors) > 0:
       return self.right_neighbors[0].b
     return None
 
@@ -78,7 +78,7 @@ class ModuleWrapper(object):
     else:
       self.right_neighbors.append(new_neighbor)
 
-    if not backlinklinking:
+    if not backlinking:
       self.backlink_neighbor(new_neighbor)
 
   def add_neighbors(self, neighbors):
