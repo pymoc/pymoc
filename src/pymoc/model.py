@@ -8,6 +8,9 @@ class Model(object):
     self.couplers = []
     self._modules = {}
 
+  def __getitem__(self, key):
+    return self._modules[key]
+
   def keys(self):
     return self._modules.keys()
 
@@ -17,17 +20,21 @@ class Model(object):
     return self._modules[key]
 
   def validate_neighbors_input(self, neighbors):
-    neighbor_modules = [n['module'] for n in neighbors]
-    distinct_neighbor_moduless = np.unique(neighbor_modules)
-    if len(neighbor_modules) > len(distinct_neighbor_moduless):
+    neighbor_modules = [['module'] for n in neighbors]
+    distinct_neighbor_modules = np.unique(neighbor_modules)
+    if len(neighbor_modules) > len(distinct_neighbor_modules):
       raise ValueError(
           'Cannot link basins multiple times. Please check your configuration.'
       )
 
-  def add_module(self, module, name, neighbors=None):
-    neighbors = neighbors or []
-    self.validate_neighbors_input(neighbors)
-    module_wrapper = ModuleWrapper(module, name, neighbors)
+  def add_module(self, module, name, left_neighbors=[], right_neighbors=[]):
+    self.validate_neighbors_input(left_neighbors + right_neighbors)
+    module_wrapper = ModuleWrapper(
+        module,
+        name,
+        left_neighbors=left_neighbors,
+        right_neighbors=right_neighbors
+    )
 
     if hasattr(self, module_wrapper.key):
       raise NameError(
@@ -48,12 +55,14 @@ class Model(object):
       module_class,
       module_args,
       module_name,
-      neighbors=[],
+      left_neighbors=[],
+      right_neighbors=[]
   ):
     self.add_module(
         module_class(**module_args),
         module_name,
-        neighbors,
+        left_neighbors=left_neighbors,
+        right_neighbors=right_neighbors
     )
 
   def run(

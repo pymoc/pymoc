@@ -3,7 +3,7 @@ from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column
 
 
 class ModuleWrapper(object):
-  def __init__(self, module, name, neighbors=None):
+  def __init__(self, module, name, left_neighbors=None, right_neighbors=None):
     self.module = module
     self.name = name
     self.left_neighbors = []
@@ -16,8 +16,10 @@ class ModuleWrapper(object):
     ) else 'bs'
     self.psi = [0, 0]
 
-    if neighbors:
-      self.add_neighbors(neighbors)
+    if left_neighbors or right_neighbors:
+      self.add_neighbors(
+          left_neighbors=left_neighbors, right_neighbors=right_neighbors
+      )
 
   @property
   def module_type(self):
@@ -34,12 +36,17 @@ class ModuleWrapper(object):
     module.timestep(wA=wA, dt=dt)
 
   def update_coupler(self):
+    if self.module_type != 'coupler':
+      raise TypeError('Cannot use update_coupler on non-coupler modules.')
+
     module = self.module
+    b1 = self.left_neighbors[0].b if len(self.left_neighbors) > 0 else None
+    b2 = self.right_neighbors[0].b if len(self.right_neighbors) > 0 else None
 
     if self.do_psi_bz:
-      module.update(b1=self.b1, b2=self.b2)
+      module.update(b1=b1, b2=b2)
     else:
-      module.update(b=self.b2)
+      module.update(b=b2)
 
     module.solve()
     self.psi = module.Psibz() if self.do_psi_bz else [module.Psi]
@@ -52,45 +59,28 @@ class ModuleWrapper(object):
   def neighbors(self):
     return self.left_neighbors + self.right_neighbors
 
-  @property
-  def b1(self):
-    if self.module_type != 'coupler':
-      raise TypeError('Cannot access b1 for non-coupler modules.')
-    if len(self.left_neighbors) > 0:
-      return self.left_neighbors[0].b
-    return None
-
-  @property
-  def b2(self):
-    if self.module_type != 'coupler':
-      raise TypeError('Cannot access b2 for non-coupler modules.')
-    if len(self.right_neighbors) > 0:
-      return self.right_neighbors[0].b
-    return None
-
-  def add_neighbor(self, new_neighbor, direction, backlinking=False):
-    self.validate_neighbor_direction(direction)
+  def add_left_neighbor(self, new_neighbor, backlinking=False):
     self.validate_neighbor_uniqueness(new_neighbor)
-    self.validate_coupler_neighbor_direction(direction)
-
-    if direction == 'left':
-      self.left_neighbors.append(new_neighbor)
-    else:
-      self.right_neighbors.append(new_neighbor)
-
+    self.validate_coupler_neighbor_direction('left')
+    self.left_neighbors.append(new_neighbor)
     if not backlinking:
       self.backlink_neighbor(new_neighbor)
 
-  def add_neighbors(self, neighbors):
-    if len(neighbors) > 0:
-      for neighbor in neighbors:
-        self.add_neighbor(neighbor['module'], neighbor['direction'])
+  def add_right_neighbor(self, new_neighbor, backlinking=False):
+    self.validate_neighbor_uniqueness(new_neighbor)
+    self.validate_coupler_neighbor_direction('right')
+    self.right_neighbors.append(new_neighbor)
+    if not backlinking:
+      self.backlink_neighbor(new_neighbor)
 
-  def validate_neighbor_direction(self, direction):
-    if not direction in ['left', 'right']:
-      raise ValueError(
-          "Direction of a neighbor must be either 'left' or 'right'."
-      )
+  def add_neighbors(self, left_neighbors=None, right_neighbors=None):
+    if len(left_neighbors) > 0:
+      for neighbor in left_neighbors:
+        self.add_left_neighbor(neighbor)
+
+    if len(right_neighbors) > 0:
+      for neighbor in right_neighbors:
+        self.add_right_neighbor(neighbor)
 
   def validate_neighbor_uniqueness(self, neighbor):
     if neighbor in self.neighbors:
@@ -110,5 +100,7 @@ class ModuleWrapper(object):
         )
 
   def backlink_neighbor(self, neighbor):
-    direction = 'left' if neighbor in self.right_neighbors else 'right'
-    neighbor.add_neighbor(self, direction, backlinking=True)
+    if neighbor in self.right_neighbors:
+      neighbor.add_left_neighbor(self, backlinking=True)
+    else:
+      neighbor.add_right_neighbor(self, backlinking=True)

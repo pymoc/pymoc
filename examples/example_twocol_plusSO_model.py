@@ -78,7 +78,8 @@ model.new_module(
 )
 # create adv-diff column model instance for basin
 model.new_module(
-    Column, {
+    Column,
+    {
         'z': z,
         'kappa': kappa,
         'Area': A_basin,
@@ -87,29 +88,25 @@ model.new_module(
         'bbot': bmin
     },
     'Atlantic Basin',
-    neighbors=[{
-        'module': model.get_module('psi_so'),
-        'direction': 'left'
-    }]
+    left_neighbors=[model.get_module('psi_so')],
 )
 # create N.A. overturning model instance
 model.new_module(
-    Psi_Thermwind, {
+    Psi_Thermwind,
+    {
         'z': z,
         'b1': b_basin,
         'b2': b_north,
         'f': 1e-4
     },
     'AMOC',
-    neighbors=[{
-        'module': model.get_module('atlantic_basin'),
-        'direction': 'left'
-    }]
+    left_neighbors=[model.get_module('atlantic_basin')],
 )
 
 # create adv-diff column model instance for basin
 model.new_module(
-    Column, {
+    Column,
+    {
         'z': z,
         'kappa': kappa,
         'Area': A_north,
@@ -119,10 +116,7 @@ model.new_module(
         'do_conv': True
     },
     'North Atlantic',
-    neighbors=[{
-        'module': model.get_module('amoc'),
-        'direction': 'left'
-    }]
+    left_neighbors=[model.get_module('amoc')],
 )
 
 fig = plt.figure(figsize=(6, 10))
