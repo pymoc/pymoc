@@ -1,9 +1,46 @@
 import numpy as np
-from pymoc.modules import Psi_SO, Psi_Thermwind, SO_ML, Column, Equi_Column
+from pymoc.modules import Column, Equi_Column
 
 
 class ModuleWrapper(object):
-  def __init__(self, module, name, left_neighbors=None, right_neighbors=None):
+  r"""
+  Module Wrapper
+
+  Instances of this class wrap individual phsyical modules 
+  (e.g. advective-diffusive columns, thermal wind streamfunctions)
+  for use in the model driver. The module wrapper is responsible for 
+  timestepping & updating modules, & communication between neighboring
+  modules.
+  
+  By convention geographic north & east are defined as 
+  being to the "right" or "rightward", while geographic south & west 
+  are defined as being the the "left" or "leftward". Modules are categorized
+  as "basins" with time evolving density profiles (e.g. columns, mixed layers),
+  or "couplers" with streamfunctions that maintain the dynamical balance between
+  neighboring basins (e.g. thermal wind streamfunction, SO transport).
+  """
+  def __init__(
+      self,
+      module,
+      name,
+      left_neighbors=None,
+      right_neighbors=None,
+  ):
+    r"""
+    Parameters
+    ----------
+
+    module : module class instance
+             Physics module being wrapped
+    name : string
+           Name of the module being wrapped (e.g. Atlantic Basin, AMOC)
+    left_neighbors : list; optional
+                     List of modules to the "left" of the module being wrapped.
+                     Couplers may have at most one left neighbor.
+    right_neighbors : list; optional
+                      List of modules to the "right" of the module being wrapped.
+                      Couplers may have at most one right neighbor.
+    """
     self.module = module
     self.name = name
     self.left_neighbors = []
