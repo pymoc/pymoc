@@ -60,9 +60,28 @@ class ModuleWrapper(object):
 
   @property
   def module_type(self):
+    r"""
+    Return whether the wrapped module is a basin or coupler.
+
+    Returns
+    -------
+
+    module_type : string
+        The type of the wrapped module.
+    """
     return self.module.module_type
 
   def timestep_basin(self, dt=None):
+    r"""
+    Invoke the timestep method of the wrapped basin module.
+
+    Parameters
+    ----------
+
+    dt : int
+         Numerical timestep over which solution are iterated. Units: s
+
+    """
     module = self.module
     wA = 0.0
     for neighbor in self.right_neighbors:
@@ -73,6 +92,10 @@ class ModuleWrapper(object):
     module.timestep(wA=wA, dt=dt)
 
   def update_coupler(self):
+    r"""
+    Invoke the update method of the wrapped coupler.
+
+    """
     if self.module_type != 'coupler':
       raise TypeError('Cannot use update_coupler on non-coupler modules.')
 
@@ -90,13 +113,52 @@ class ModuleWrapper(object):
 
   @property
   def b(self):
+    r"""
+    Return the buoyancy profile of the wrapped module. This is the
+    vertical buoyancy profile for columns, and the surface buoyancy
+    for channels and couplers
+
+    Returns
+    -------
+
+    module_type : func or ndarray
+                  The buoyancy profile of the wrapped module, with type consistent
+                  with the module.
+    """
     return getattr(self.module, self.b_type)
 
   @property
   def neighbors(self):
+    r"""
+    Return a list of all of the module's neighbors.
+
+    Returns
+    -------
+
+    neighbors : ndarray
+                Array pointing to the wrappers for each
+                neighboring module.
+    
+    """
     return self.left_neighbors + self.right_neighbors
 
   def add_left_neighbor(self, new_neighbor, backlinking=False):
+    r"""
+    Add a neighbor to the "left" of the current module. This method validates
+    that the neighbor is unique, can occupy the left neighbor position, and
+    optionally backlinks to the current module (i.e. sets the current module 
+    as the new neighbor's right neighbor).
+
+
+    Parameters
+    ----------
+
+    new_neighbor: module_wrapper
+                  A wrapper pointing to the module being added as a lefthand neighbor.
+    backlinking: boolean; optional
+                 Whether to backlink the new neighbor to the current module. Defaults false.
+                 
+    """
     self.validate_neighbor_uniqueness(new_neighbor)
     self.validate_coupler_neighbor_direction('left')
     self.left_neighbors.append(new_neighbor)
@@ -104,6 +166,22 @@ class ModuleWrapper(object):
       self.backlink_neighbor(new_neighbor)
 
   def add_right_neighbor(self, new_neighbor, backlinking=False):
+    r"""
+    Add a neighbor to the "right" of the current module. This method validates
+    that the neighbor is unique, can occupy the right neighbor position, and
+    optionally backlinks to the current module (i.e. sets the current module 
+    as the new neighbor's left neighbor).
+
+
+    Parameters
+    ----------
+
+    new_neighbor: module_wrapper
+                  A wrapper pointing to the module being added as a righthand neighbor.
+    backlinking: boolean; optional
+                 Whether to backlink the new neighbor to the current module. Defaults false.
+                 
+    """
     self.validate_neighbor_uniqueness(new_neighbor)
     self.validate_coupler_neighbor_direction('right')
     self.right_neighbors.append(new_neighbor)
@@ -111,15 +189,38 @@ class ModuleWrapper(object):
       self.backlink_neighbor(new_neighbor)
 
   def add_neighbors(self, left_neighbors=None, right_neighbors=None):
-    if len(left_neighbors) > 0:
+    r"""
+    Add multiple neighbors to the current module.
+
+    Parameters
+    ----------
+
+    left_neighbors: ndarray; optional
+                    A list of modules to be added to the left of the current module
+    right_neighbors: ndarray; optional
+                     A list of modules to be added to the right of the current module
+
+    """
+    if left_neighbors is not None and len(left_neighbors) > 0:
       for neighbor in left_neighbors:
         self.add_left_neighbor(neighbor)
 
-    if len(right_neighbors) > 0:
+    if right_neighbors is not None and len(right_neighbors) > 0:
       for neighbor in right_neighbors:
         self.add_right_neighbor(neighbor)
 
   def validate_neighbor_uniqueness(self, neighbor):
+    r"""
+    Validate that the current module does not already have the specified module as a neighbor.
+    If already a neighbor, raises a KeyError exception.
+
+    Parameters
+    ----------
+
+    neighbor: module_wrapper
+              The module being checked against for uniqueness
+
+    """
     if neighbor in self.neighbors:
       raise KeyError(
           'Cannot add module ' + neighbor.name + ' as a neighbor of ' +
@@ -127,6 +228,17 @@ class ModuleWrapper(object):
       )
 
   def validate_coupler_neighbor_direction(self, direction):
+    r"""
+    Validate that the current module does not already have a neighbor in the specified direction
+    if a coupler. If the current module is a coupler, and direction is occupied, raises a ValueError exception.
+
+    Parameters
+    ----------
+
+    direction: string
+               The direction being checked against for availability
+
+    """
     if self.module_type == 'coupler':
       # We don't need to explicitly check that a coupler has two or fewer neighbors, as the enforcement of only one left, only one right, and only being able to point left or right implicitly enforces that condition.
       if len(self.left_neighbors) > 0 and direction == 'left' or len(
@@ -137,6 +249,17 @@ class ModuleWrapper(object):
         )
 
   def backlink_neighbor(self, neighbor):
+    r"""
+    Point the specified neighbor back at the current module. If a right neighbor, the current module becomes
+    its left neighbor. Otherwise, the current module becomes its right neighbor.
+
+    Parameters
+    ----------
+
+    neighbor: module_wrapper
+              Wrapper pointing to the module being backlinked from
+
+    """
     if neighbor in self.right_neighbors:
       neighbor.add_left_neighbor(self, backlinking=True)
     else:
