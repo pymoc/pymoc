@@ -1,10 +1,11 @@
 '''
 This script shows an example of how to use the equilibrium column model
-It solves for the diffusive overturning circulation with prescribed bottom
-depth and urface and bottom buoyancies.     
+It solves for the diffusive overturning circulation with prescribed
+depth as well as prescribed surface and bottom buoyancies. Notice that
+all buoyancies are given relative to the buoyancy in the northern deep
+water formation region (b_n=0).     
 '''
 
-import sys
 from pymoc.modules import Equi_Column
 from matplotlib import pyplot as plt
 
@@ -13,8 +14,8 @@ A = 1.0e14    # Area of the basin
 kappa = 5.0e-5    # vertical diffusivity
 f = 1e-4    # Coriolis parameter
 b_s = 0.02    # surface buoyancy
-b_bot = 0.0    # bottom buoyancy
-H = 4000.0    # depth of convection
+b_bot = 0.0    # bottom buoyancy (should be zero if set by northern deep water formation region)
+H = 4000.0    # maximum depth of convection
 
 # create column model instance
 m = Equi_Column(A=A, b_bot=b_bot, b_s=b_s, f=f, kappa=kappa, H=H, nz=200)
