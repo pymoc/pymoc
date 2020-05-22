@@ -67,7 +67,7 @@ jobs:
           command: touch docs/_build/html/.nojekyll
       - add_ssh_keys:
           fingerprints:
-            - "d4:a3:8b:5f:a9:e3:b4:ce:a1:12:d2:70:0d:3b:3b:ce"
+            - "e4:61:6b:83:c9:58:6f:9e:ae:9d:67:06:68:d9:ca:53"
       - run:
           name: Install and configure dependencies
           command: |
