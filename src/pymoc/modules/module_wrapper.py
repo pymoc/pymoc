@@ -21,8 +21,8 @@ class ModuleWrapper(object):
   """
   def __init__(
       self,
-      module,
-      name,
+      module=None,
+      name=None,
       left_neighbors=None,
       right_neighbors=None,
   ):
