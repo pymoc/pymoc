@@ -19,7 +19,8 @@ from pymoc.modules import ModuleWrapper, Column, Psi_Thermwind
       'bs': 0.05,
       'bbot': 0.02,
       'bzbot': 0.01,
-      'b': 0.03,
+      # 'b': 0.03,
+      'b': np.linspace(0.03, -0.001, 80),
       'N2min': 2e-7
     },
   ]
@@ -112,9 +113,32 @@ class TestModuleWrapper(object):
     elif module_wrapper.name == 'AMOC':
       assert module_wrapper.module_type == 'coupler'
 
-  def test_timestep_basin(self, mocker, module_wrapper):
-    print(mocker)
-    # assert True
+  def test_timestep_basin(self, mocker, module_wrapper, psi_thermwind):
+    dt = 0.1
+    if module_wrapper.name == 'Atlantic Ocean':
+      psi_wrapper = ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))
+      wrapper = copy.deepcopy(module_wrapper)
+      wrapper.add_left_neighbor(psi_wrapper)
+      psi_wrapper.update_coupler()
+      wA = -psi_wrapper.psi[-1]*1e6
+      spy = mocker.spy(wrapper.module, 'timestep')
+      wrapper.timestep_basin(dt=dt)
+
+      spy.assert_called_once()
+      assert spy.call_args[1]['dt'] == dt
+      assert all(spy.call_args[1]['wA'] == wA)
+
+      psi_wrapper = ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))
+      wrapper = copy.deepcopy(module_wrapper)
+      wrapper.add_right_neighbor(psi_wrapper)
+      psi_wrapper.update_coupler()
+      wA = psi_wrapper.psi[0]*1e6
+      spy = mocker.spy(wrapper.module, 'timestep')
+      wrapper.timestep_basin(dt=dt)
+
+      spy.assert_called_once()
+      assert spy.call_args[1]['dt'] == dt
+      assert all(spy.call_args[1]['wA'] == wA)
 
     #   def test_update_coupler(self):
 
