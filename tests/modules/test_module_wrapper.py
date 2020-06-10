@@ -1,5 +1,6 @@
 import sys
 import os
+import copy
 import funcsigs
 import numpy as np
 from scipy import integrate
@@ -61,24 +62,22 @@ def module_wrapper_config(request, column, psi_thermwind):
   param = request.param
   if param['module'] == 'column':
     param['module'] = column
-    param['left_neighbors'] = [ModuleWrapper(
-      name='AMOC',
-      module=psi_thermwind,
-    )]
   elif param['module'] == 'psi_thermwind':
     param['module'] = psi_thermwind
-    param['right_neighbors'] = [ModuleWrapper(
-      name='Atlantic Ocean',
-      module=column,
-    )]
   return param
 
+@pytest.fixture(scope='module')
 def module_wrapper(request, module_wrapper_config):
   return ModuleWrapper(**module_wrapper_config)
 
 class TestModuleWrapper(object):
-  def test_module_wrapper_init(self, module_wrapper_config):
-    print(module_wrapper_config)
+  def test_module_wrapper_init(self, module_wrapper_config, column, psi_thermwind):
+    module_wrapper_config = copy.deepcopy(module_wrapper_config)
+    if module_wrapper_config['name'] == 'Atlantic Ocean':
+      module_wrapper_config['left_neighbors'] = [ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))]
+    elif module_wrapper_config['name'] == 'AMOC':
+      module_wrapper_config['right_neighbors'] = [ModuleWrapper(name='Pacific Ocean', module=copy.deepcopy(column))]
+
     module_wrapper = ModuleWrapper(**module_wrapper_config)
     for k in ['module', 'name', 'key', 'do_psi_bz', 'b_type', 'psi', 'left_neighbors', 'right_neighbors']:
       assert hasattr(module_wrapper, k)
@@ -107,13 +106,15 @@ class TestModuleWrapper(object):
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
 
-    def test_module_type(self, module_wrapper):
-      if module_wrapper.name == 'Atlantic Ocean':
-        assert module_wrapper.module_type == 'basin'
-      elif module_wrapper.name == 'AMOC':
-        assert module_wrapper.module_type == 'coupler'
+  def test_module_type(self, module_wrapper):
+    if module_wrapper.name == 'Atlantic Ocean':
+      assert module_wrapper.module_type == 'basin'
+    elif module_wrapper.name == 'AMOC':
+      assert module_wrapper.module_type == 'coupler'
 
-    #   def test_timestep_basin(self):
+  def test_timestep_basin(self, mocker, module_wrapper):
+    print(mocker)
+    # assert True
 
     #   def test_update_coupler(self):
 
