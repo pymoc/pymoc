@@ -73,6 +73,9 @@ def module_wrapper_config(request, column, psi_thermwind):
     )]
   return param
 
+def module_wrapper(request, module_wrapper_config):
+  return ModuleWrapper(**module_wrapper_config)
+
 class TestModuleWrapper(object):
   def test_module_wrapper_init(self, module_wrapper_config):
     print(module_wrapper_config)
@@ -104,7 +107,11 @@ class TestModuleWrapper(object):
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
 
-    #   def test_module_type(self):
+    def test_module_type(self, module_wrapper):
+      if module_wrapper.name == 'Atlantic Ocean':
+        assert module_wrapper.module_type == 'basin'
+      elif module_wrapper.name == 'AMOC':
+        assert module_wrapper.module_type == 'coupler'
 
     #   def test_timestep_basin(self):
 
