@@ -256,19 +256,67 @@ class TestModuleWrapper(object):
     else:
       assert module_wrapper.b is None
     
-    def test_neighbors(self, column, psi_thermwind, psi_so):
-      amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
-      so_wrapper=ModuleWrapper(name='SO', module=psi_so)
-      wrapper = ModuleWrapper(
-        name='Atlantic Ocean',
-        module=column,
-        left_neighbors=[amoc_wrapper],
-        right_neighbors=[so_wrapper],
-      )
-      assert all(wrapper.neighbors == [amoc_wrapper, so_wrapper])
-      
-    # def test_add_left_neighbor
-    # def test_add_right_neighbor
+  def test_neighbors(self, column, psi_thermwind, psi_so):
+    amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+    so_wrapper=ModuleWrapper(name='SO', module=psi_so)
+    wrapper = ModuleWrapper(
+      name='Atlantic Ocean',
+      module=column,
+      left_neighbors=[amoc_wrapper],
+      right_neighbors=[so_wrapper],
+    )
+    assert wrapper.neighbors == [amoc_wrapper, so_wrapper]
+    
+  def test_add_left_neighbor(self, mocker, column, psi_thermwind):
+    amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+    wrapper = ModuleWrapper(name='Atlantic Ocean', module=column)
+    unique_spy = mocker.spy(wrapper, 'validate_neighbor_uniqueness')
+    direction_spy = mocker.spy(wrapper, 'validate_coupler_neighbor_direction')
+    backlink_spy = mocker.spy(wrapper, 'backlink_neighbor')
+    wrapper.add_left_neighbor(amoc_wrapper)
+    unique_spy.assert_called_once_with(amoc_wrapper)
+    direction_spy.assert_called_once_with('left')
+    backlink_spy.assert_called_once_with(amoc_wrapper)
+    assert wrapper.left_neighbors == [amoc_wrapper]
+    assert amoc_wrapper.right_neighbors == [wrapper]
+
+    amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+    wrapper = ModuleWrapper(name='Atlantic Ocean', module=column)
+    unique_spy = mocker.spy(wrapper, 'validate_neighbor_uniqueness')
+    direction_spy = mocker.spy(wrapper, 'validate_coupler_neighbor_direction')
+    backlink_spy = mocker.spy(wrapper, 'backlink_neighbor')
+    wrapper.add_left_neighbor(amoc_wrapper, backlinking=True)
+    unique_spy.assert_called_once_with(amoc_wrapper)
+    direction_spy.assert_called_once_with('left')
+    backlink_spy.assert_not_called()
+    assert wrapper.left_neighbors == [amoc_wrapper]
+    assert amoc_wrapper.right_neighbors == []
+
+  def test_add_right_neighbor(self, mocker, column, psi_thermwind):
+    amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+    wrapper = ModuleWrapper(name='Atlantic Ocean', module=column)
+    unique_spy = mocker.spy(wrapper, 'validate_neighbor_uniqueness')
+    direction_spy = mocker.spy(wrapper, 'validate_coupler_neighbor_direction')
+    backlink_spy = mocker.spy(wrapper, 'backlink_neighbor')
+    wrapper.add_right_neighbor(amoc_wrapper)
+    unique_spy.assert_called_once_with(amoc_wrapper)
+    direction_spy.assert_called_once_with('right')
+    backlink_spy.assert_called_once_with(amoc_wrapper)
+    assert wrapper.right_neighbors == [amoc_wrapper]
+    assert amoc_wrapper.left_neighbors == [wrapper]
+
+    amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+    wrapper = ModuleWrapper(name='Atlantic Ocean', module=column)
+    unique_spy = mocker.spy(wrapper, 'validate_neighbor_uniqueness')
+    direction_spy = mocker.spy(wrapper, 'validate_coupler_neighbor_direction')
+    backlink_spy = mocker.spy(wrapper, 'backlink_neighbor')
+    wrapper.add_right_neighbor(amoc_wrapper, backlinking=True)
+    unique_spy.assert_called_once_with(amoc_wrapper)
+    direction_spy.assert_called_once_with('right')
+    backlink_spy.assert_not_called()
+    assert wrapper.right_neighbors == [amoc_wrapper]
+    assert amoc_wrapper.left_neighbors == []
+
     # def test_add_neighbors
     # def test_validate_neighbor_uniqueness
     # def test_validate_coupler_neighbor_direction
