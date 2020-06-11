@@ -255,7 +255,21 @@ class TestModuleWrapper(object):
       assert module_wrapper.b == module_wrapper.module.bs
     else:
       assert module_wrapper.b is None
-
-    #   def test_validate_neighbors(self):
-
-    #   def test_backlink_neighbor_lins(self):
+    
+    def test_neighbors(self, column, psi_thermwind, psi_so):
+      amoc_wrapper=ModuleWrapper(name='AMOC', module=psi_thermwind)
+      so_wrapper=ModuleWrapper(name='SO', module=psi_so)
+      wrapper = ModuleWrapper(
+        name='Atlantic Ocean',
+        module=column,
+        left_neighbors=[amoc_wrapper],
+        right_neighbors=[so_wrapper],
+      )
+      assert all(wrapper.neighbors == [amoc_wrapper, so_wrapper])
+      
+    # def test_add_left_neighbor
+    # def test_add_right_neighbor
+    # def test_add_neighbors
+    # def test_validate_neighbor_uniqueness
+    # def test_validate_coupler_neighbor_direction
+    # def test_backlink_neighbor
