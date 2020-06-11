@@ -82,6 +82,9 @@ class ModuleWrapper(object):
          Numerical timestep over which solution are iterated. Units: s
 
     """
+    if self.module_type != 'basin':
+      raise TypeError('Cannot use timestep_basin on non-basin modules.')
+
     module = self.module
     wA = 0.0
     for neighbor in self.right_neighbors:
