@@ -128,7 +128,7 @@ class TestModuleWrapper(object):
     elif module_wrapper.name == 'AMOC':
       assert module_wrapper.key == 'amoc'
       assert module_wrapper.do_psi_bz == True
-      assert module_wrapper.b_type == 'bs'
+      assert module_wrapper.b_type is None
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
     elif module_wrapper.name == 'Southern Ocean':
@@ -246,9 +246,15 @@ class TestModuleWrapper(object):
         assert all(wrapper.psi[0] == wrapper.module.Psibz()[0])
       elif wrapper.name == 'Southern Ocean':
         assert all(update_spy.call_args[1]['b'] == col_wrapper.b)
-        assert wrapper.psi == [wrapper.module.Psi]
+        assert wrapper.psi == [wrapper.module.Psi] 
 
-    #   def test_b(self):
+  def test_b(self, module_wrapper):
+    if module_wrapper.name == "Atlantic Ocean":
+      assert all(module_wrapper.b == module_wrapper.module.b)
+    elif module_wrapper.name == "Southern Ocean":
+      assert module_wrapper.b == module_wrapper.module.bs
+    else:
+      assert module_wrapper.b is None
 
     #   def test_validate_neighbors(self):
 

@@ -1,5 +1,5 @@
 import numpy as np
-from pymoc.modules import Column, Equi_Column
+from pymoc.modules import Column, Equi_Column, Psi_SO
 
 
 class ModuleWrapper(object):
@@ -48,10 +48,15 @@ class ModuleWrapper(object):
 
     self.key = name.replace(' ', '_').lower().strip('_')
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
-    self.b_type = 'b' if isinstance(self.module, Column) or isinstance(
-        self.module, Equi_Column
-    ) else 'bs'
     self.psi = [0, 0]
+
+    if isinstance(self.module, Column) or isinstance(self.module, Equi_Column):
+      self.b_type = 'b'
+    elif isinstance(self.module, Psi_SO):
+      self.b_type = 'bs'
+    else:
+      self.b_type = None
+
 
     if left_neighbors or right_neighbors:
       self.add_neighbors(
@@ -128,7 +133,8 @@ class ModuleWrapper(object):
                   The buoyancy profile of the wrapped module, with type consistent
                   with the module.
     """
-    return getattr(self.module, self.b_type)
+
+    return getattr(self.module, self.b_type) if self.b_type else None
 
   @property
   def neighbors(self):
