@@ -19,7 +19,6 @@ from pymoc.modules import ModuleWrapper, Column, Psi_Thermwind, Psi_SO
       'bs': 0.05,
       'bbot': 0.02,
       'bzbot': 0.01,
-      # 'b': 0.03,
       'b': np.linspace(0.03, -0.001, 80),
       'N2min': 2e-7
     },
@@ -348,6 +347,21 @@ class TestModuleWrapper(object):
     assert left_spy.call_count == 3
     assert right_spy.call_count == 2
 
-    # def test_validate_neighbor_uniqueness
-    # def test_validate_coupler_neighbor_direction
-    # def test_backlink_neighbor
+  def test_validate_neighbor_uniqueness(self, mocker, module_wrapper, column):
+    col_wrapper = ModuleWrapper(name="Pacific Ocean", module=column)
+    spy = mocker.spy(module_wrapper, 'validate_neighbor_uniqueness')
+    module_wrapper.validate_neighbor_uniqueness(col_wrapper)
+    assert spy.spy_exception is None
+
+    module_wrapper.add_left_neighbor(col_wrapper)
+    dup_wrapper = ModuleWrapper(name="Indian Ocean", module=column)
+    module_wrapper.validate_neighbor_uniqueness(dup_wrapper)
+    assert spy.spy_exception is None
+
+    with pytest.raises(KeyError) as valinfo:
+      module_wrapper.validate_neighbor_uniqueness(col_wrapper)
+    assert (
+        str(
+            valinfo.value
+        ) == "'Cannot add module " + col_wrapper.name + " as a neighbor of " + module_wrapper.name + " because they are already coupled.'"
+    )
