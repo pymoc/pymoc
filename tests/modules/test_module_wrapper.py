@@ -317,7 +317,37 @@ class TestModuleWrapper(object):
     assert wrapper.right_neighbors == [amoc_wrapper]
     assert amoc_wrapper.left_neighbors == []
 
-    # def test_add_neighbors
+  def test_add_neighbors(self, mocker, column, psi_thermwind):
+    wrapper = ModuleWrapper(name="Atlantic Ocean", module=column)
+    left_spy = mocker.spy(wrapper, 'add_left_neighbor')
+    right_spy = mocker.spy(wrapper, 'add_right_neighbor')
+    wrapper.add_neighbors()
+    left_spy.assert_not_called()
+    right_spy.assert_not_called()
+
+    wrapper = ModuleWrapper(name="Atlantic Ocean", module=column)
+    left_spy = mocker.spy(wrapper, 'add_left_neighbor')
+    right_spy = mocker.spy(wrapper, 'add_right_neighbor')
+    wrapper.add_neighbors(right_neighbors=[], left_neighbors=[])
+    left_spy.assert_not_called()
+    right_spy.assert_not_called()
+
+    wrapper = ModuleWrapper(name="Atlantic Ocean", module=column)
+    left_spy = mocker.spy(wrapper, 'add_left_neighbor')
+    right_spy = mocker.spy(wrapper, 'add_right_neighbor')
+    left_neighbors=[
+      ModuleWrapper(name="MOC1", module=psi_thermwind),
+      ModuleWrapper(name="MOC2", module=psi_thermwind),
+      ModuleWrapper(name="MOC3", module=psi_thermwind),
+    ]
+    right_neighbors=[
+      ModuleWrapper(name="ZMOCO1", module=psi_thermwind),
+      ModuleWrapper(name="ZMOCO2", module=psi_thermwind),
+    ]
+    wrapper.add_neighbors(right_neighbors=right_neighbors, left_neighbors=left_neighbors)
+    assert left_spy.call_count == 3
+    assert right_spy.call_count == 2
+
     # def test_validate_neighbor_uniqueness
     # def test_validate_coupler_neighbor_direction
     # def test_backlink_neighbor
