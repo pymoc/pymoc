@@ -9,14 +9,14 @@ Ekman transport and the eddy transport (following `Marshall & Radko, 2003`_
 and `Marshall & Zanna, 2014`_):
 
 .. math::
-  \Psi_{SO}=-\frac{\tau L_x}{\rho_of}+KL_x s
+  \Psi_{SO}=-\frac{\tau L_x}{\rho_of}+L_x K s
 
 where :math:`\tau` is the wind stress magnitude, :math:`L_x` is the zonal extent
 of the channel, :math:`\rho_o` is the reference density, and :math:`f` is the
 Coriolis frequency. :math:`K` is an eddy "diffusivity",
 following the `Gent & McWilliams (1990)`_ (GM) parameterization.
 
-:math:`s=s(b)` is the isopycnal slope in the Southern Ocean for buoyancy class :math:`b`
+:math:`s=s(b)` is the isopycnal slope in the Southern Ocean:
 
 .. math::
 
