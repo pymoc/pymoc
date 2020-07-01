@@ -403,4 +403,16 @@ class TestModuleWrapper(object):
       module_wrapper.validate_coupler_neighbor_direction('right')
       assert spy.spy_exception is None
 
-# def test_backlink_neighbor
+  def test_backlink_neighbor(self, mocker, module_wrapper, column):
+    module_wrapper.left_neighbors = []
+    module_wrapper.right_neighbors = []
+    col_wrapper1 = ModuleWrapper(name="Pacific Ocean 1", module=column)
+    col_wrapper2 = ModuleWrapper(name="Pacific Ocean 2", module=column)
+    right_spy = mocker.spy(col_wrapper1, 'add_right_neighbor')
+    left_spy = mocker.spy(col_wrapper2, 'add_left_neighbor')
+    module_wrapper.add_left_neighbor(col_wrapper1, backlinking=True)
+    module_wrapper.add_right_neighbor(col_wrapper2, backlinking=True)
+    module_wrapper.backlink_neighbor(col_wrapper1)
+    right_spy.assert_called_once_with(module_wrapper, backlinking=True)
+    module_wrapper.backlink_neighbor(col_wrapper2)
+    left_spy.assert_called_once_with(module_wrapper, backlinking=True)
