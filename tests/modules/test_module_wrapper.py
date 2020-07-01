@@ -365,3 +365,42 @@ class TestModuleWrapper(object):
             valinfo.value
         ) == "'Cannot add module " + col_wrapper.name + " as a neighbor of " + module_wrapper.name + " because they are already coupled.'"
     )
+
+  def test_validate_coupler_neighbor_direction(self, mocker, module_wrapper, column):
+    module_wrapper.left_neighbors = []
+    module_wrapper.right_neighbors = []
+    col_wrapper1 = ModuleWrapper(name="Pacific Ocean 1", module=column)
+    col_wrapper2 = ModuleWrapper(name="Pacific Ocean 2", module=column)
+    spy = mocker.spy(module_wrapper, 'validate_coupler_neighbor_direction')
+    module_wrapper.validate_coupler_neighbor_direction('left')
+    assert spy.spy_exception is None
+    module_wrapper.validate_coupler_neighbor_direction('right')
+    assert spy.spy_exception is None
+    module_wrapper.add_left_neighbor(col_wrapper1)
+    module_wrapper.add_right_neighbor(col_wrapper2)
+
+    if module_wrapper.module_type == 'coupler':
+      with pytest.raises(ValueError) as valinfo:
+        module_wrapper.validate_coupler_neighbor_direction('left')
+      assert (
+          str(
+              valinfo.value
+          ) == "Cannot have a coupler linked in the same direction more than once. Please check your configuration."
+      )
+    else:
+      module_wrapper.validate_coupler_neighbor_direction('left')
+      assert spy.spy_exception is None
+
+    if module_wrapper.module_type == 'coupler':
+      with pytest.raises(ValueError) as valinfo:
+        module_wrapper.validate_coupler_neighbor_direction('right')
+      assert (
+          str(
+              valinfo.value
+          ) == "Cannot have a coupler linked in the same direction more than once. Please check your configuration."
+      )
+    else:
+      module_wrapper.validate_coupler_neighbor_direction('right')
+      assert spy.spy_exception is None
+
+# def test_backlink_neighbor
