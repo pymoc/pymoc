@@ -46,7 +46,7 @@ class Model(object):
     Returns
     -------
 
-    module : ModuleWrapperr
+    module : ModuleWrapper
              ModuleWrapper instance associated with the specified key
     """
     if not key:
@@ -62,7 +62,7 @@ class Model(object):
     ----------
 
     neighbors : list
-                A list of ModuleWrappers pointing a the modules to be validated
+                A list of ModuleWrappers pointing at the modules to be validated
     """
 
     neighbor_names = [n.module for n in neighbors]
@@ -70,6 +70,23 @@ class Model(object):
     if len(neighbor_names) > len(distinct_neighbor_names):
       raise ValueError(
           'Cannot link basins multiple times. Please check your configuration.'
+      )
+
+  def validate_new_module_key(self, module):
+    r"""
+    Ensure that a new module is valid, specifically that no module with the same
+    key already exists in the model.
+
+    Parameters
+    ----------
+
+    module: ModuleWrapper
+            A ModuleWrappers pointing at the module to be validated
+    """
+    if hasattr(self, module.key):
+      raise NameError(
+          'Cannot use module name ' + module.name +
+          ' because it would overwrite an existing key or model property.'
       )
 
   def add_module(self, module, name, left_neighbors=[], right_neighbors=[]):
@@ -100,12 +117,7 @@ class Model(object):
         left_neighbors=left_neighbors,
         right_neighbors=right_neighbors
     )
-
-    if hasattr(self, module_wrapper.key):
-      raise NameError(
-          'Cannot use module name ' + name +
-          ' because it would overwrite an existing key or model property.'
-      )
+    self.validate_new_module_key(module_wrapper)
 
     self._modules[module_wrapper.key] = module_wrapper
     if module_wrapper.module_type == 'basin':
