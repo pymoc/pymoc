@@ -20,6 +20,7 @@ class Model(object):
   def __getitem__(self, key):
     return self._modules[key]
 
+  @property
   def keys(self):
     r"""
     Get a list of all module keys for the model configuration.
@@ -64,9 +65,9 @@ class Model(object):
                 A list of ModuleWrappers pointing a the modules to be validated
     """
 
-    neighbor_modules = [n['module'] for n in neighbors]
-    distinct_neighbor_modules = np.unique(neighbor_modules)
-    if len(neighbor_modules) > len(distinct_neighbor_modules):
+    neighbor_names = [n.module for n in neighbors]
+    distinct_neighbor_names = np.unique([n.name for n in neighbors])
+    if len(neighbor_names) > len(distinct_neighbor_names):
       raise ValueError(
           'Cannot link basins multiple times. Please check your configuration.'
       )
