@@ -1,6 +1,7 @@
 import sys
 import os
 import funcsigs
+import collections
 import numpy as np
 from numpy import testing
 from scipy import integrate
@@ -10,10 +11,7 @@ sys.path.append('/pymoc/src/pymoc')
 from pymoc.model import Model
 from pymoc.modules import Column, Psi_Thermwind, ModuleWrapper
 
-@pytest.fixture(
-  scope="module",
-  params=[
-    {
+COLUMN_PARAMS = {
       'Area': 6e13,
       'z': np.asarray(np.linspace(-4000, 0, 80)),
       'kappa': 2e-5,
@@ -22,22 +20,24 @@ from pymoc.modules import Column, Psi_Thermwind, ModuleWrapper
       'bzbot': 0.01,
       'b': np.linspace(0.03, -0.001, 80),
       'N2min': 2e-7
-    },
-  ]
+    }
+PSI_PARAMS = {
+      'z': np.asarray(np.linspace(-4000, 0, 80)),
+      'b1': np.linspace(0.03, -0.001, 80),
+      'b2': np.linspace(0.02, 0.0, 80),
+      'sol_init': np.ones((2, 80))
+    }
+
+@pytest.fixture(
+  scope="module",
+  params=[COLUMN_PARAMS,]
 )
 def column(request):
   return Column(**request.param)
 
 @pytest.fixture(
   scope="module",
-  params=[
-    {
-      'z': np.asarray(np.linspace(-4000, 0, 80)),
-      'b1': np.linspace(0.03, -0.001, 80),
-      'b2': np.linspace(0.02, 0.0, 80),
-      'sol_init': np.ones((2, 80))
-    },
-  ]
+  params=[PSI_PARAMS,]
 )
 def psi_thermwind(request):
   return Psi_Thermwind(**request.param)
@@ -138,7 +138,50 @@ class TestModel(object):
     assert amoc.module in [c.module for c in model.couplers]
 
 
-    # def test_new_module(self):
+  def test_new_module(self, mocker, column, psi_thermwind):
+    atlantic = ModuleWrapper(module=column, name='Atlantic')
+    pacific = ModuleWrapper(module=column, name='Pacific')
+    amoc = ModuleWrapper(module=psi_thermwind, name='AMOC')
+    zoc = ModuleWrapper(module=psi_thermwind, name='ZOC')
+
+    model = Model()
+    add_module_spy = mocker.spy(model, 'add_module')
+    model.new_module(Column, COLUMN_PARAMS, 'Atlantic', left_neighbors=[amoc], right_neighbors=[zoc])
+    add_module_spy.assert_called_once() 
+    assert isinstance(add_module_spy.call_args[0][0], Column)
+    for key in add_module_spy.call_args[0][0].__dict__.keys():
+      if callable(getattr(add_module_spy.call_args[0][0], key)):
+        test = getattr(add_module_spy.call_args[0][0], key)(1) == getattr(atlantic.module, key)(1)
+      else:
+        test = getattr(add_module_spy.call_args[0][0], key) == getattr(atlantic.module, key)
+      if isinstance(test, collections.Iterable):
+        assert all(test)
+      else:
+        assert test
+    assert add_module_spy.call_args[1]['left_neighbors'] ==  [amoc]
+    assert add_module_spy.call_args[1]['right_neighbors'] == [zoc]
+
+    model = Model()
+    add_module_spy = mocker.spy(model, 'add_module')
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'AMOC', left_neighbors=[atlantic], right_neighbors=[pacific])
+    add_module_spy.assert_called_once() 
+    assert isinstance(add_module_spy.call_args[0][0], Psi_Thermwind)
+    for key in add_module_spy.call_args[0][0].__dict__.keys():
+      if callable(getattr(add_module_spy.call_args[0][0], key)):
+        test = getattr(add_module_spy.call_args[0][0], key)(1) == getattr(amoc.module, key)(1)
+      else:
+        test = getattr(add_module_spy.call_args[0][0], key) == getattr(amoc.module, key)
+      while isinstance(test, collections.Iterable) and len(np.shape(test)) > 1:
+        test = [t for subtest in test for t in subtest]
+      if isinstance(test, collections.Iterable):
+        assert all(test)
+      else:
+        assert test
+    assert add_module_spy.call_args[1]['left_neighbors'] ==  [atlantic]
+    assert add_module_spy.call_args[1]['right_neighbors'] == [pacific]
+    # new_module_key_spy = mocker.spy(model, 'validate_new_module_key')
+    # model.add_module(column, 'Atlantic', left_neighbors=[amoc], right_neighbors=[zoc]) 
+    # neighbor_input_spy.assert_called_once()
 
     # def test_run(self):
 
