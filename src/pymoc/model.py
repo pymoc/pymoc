@@ -168,7 +168,39 @@ class Model(object):
       self,
       steps,
       basin_dt,
-      coupler_dt=0,
+      coupler_dt=1,
+  ):
+    r"""
+    Integrate the model forward in time. This method will timestep all basin modules at the
+    basin timestep, and update all coupler modules at the coupling timestep. This method will
+    optionally yield, allowing diagnosis of the model's temporal evolution.
+
+    Parameters
+    ----------
+
+    steps: int
+           The number of model integration timesteps 
+    basin_dt : int
+               The timestep length (in seconds) for basin modules
+    coupler_dt : int, optional
+                 The duration (in seconds) between coupler module updates. If unspecified,
+                 coupling takes place at every timestep
+    snapsot_start : int, optional
+                    The model step at which to begin yielding for model snapshotting
+    snapshot_interval : int, optional
+                        The number of steps between yields for model snapshotting
+    """
+    for coupler in self.couplers:
+      coupler.update_coupler()
+
+    for i in range(0, steps):
+      self.timestep(i, basin_dt, coupler_dt=coupler_dt)
+
+  def run_with_snapshot(
+      self,
+      steps,
+      basin_dt,
+      coupler_dt=1,
       snapshot_start=None,
       snapshot_interval=None
   ):
@@ -192,15 +224,13 @@ class Model(object):
     snapshot_interval : int, optional
                         The number of steps between yields for model snapshotting
     """
-
     for coupler in self.couplers:
       coupler.update_coupler()
-
+    
     for i in range(0, steps):
       self.timestep(i, basin_dt, coupler_dt=coupler_dt)
       if self.snapshot(i, snapshot_start, snapshot_interval):
         yield i
-    return
 
   def timestep(self, step, basin_dt, coupler_dt=0):
     r"""

@@ -1,6 +1,5 @@
 import sys
 import os
-import funcsigs
 import collections
 import numpy as np
 from numpy import testing
@@ -179,12 +178,29 @@ class TestModel(object):
         assert test
     assert add_module_spy.call_args[1]['left_neighbors'] ==  [atlantic]
     assert add_module_spy.call_args[1]['right_neighbors'] == [pacific]
-    # new_module_key_spy = mocker.spy(model, 'validate_new_module_key')
-    # model.add_module(column, 'Atlantic', left_neighbors=[amoc], right_neighbors=[zoc]) 
-    # neighbor_input_spy.assert_called_once()
 
-    # def test_run(self):
+  def test_run(self, mocker, column, psi_thermwind):
+    model = Model()
+    steps = 100
+    dt = 1
+    coupler_dt = 10
 
-    # def test_timestep(self):
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'AMOC')
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'ZOC')
+    model.add_module(column, 'Atlantic', left_neighbors=[model.get_module('amoc')], right_neighbors=[model.get_module('zoc')]) 
 
-    # def test_snapshot(self):
+    timestep_spy = mocker.spy(model, 'timestep')
+    amoc_update_spy = mocker.spy(model.amoc, 'update')
+    zoc_update_spy = mocker.spy(model.zoc, 'update')
+
+    model.run(steps, dt, coupler_dt=coupler_dt)
+
+    assert timestep_spy.call_count == steps
+    assert amoc_update_spy.call_count == steps * dt / coupler_dt + 1
+    assert zoc_update_spy.call_count == steps * dt / coupler_dt + 1
+
+  # def test_run_with_snapshots(self, mocker, column, psi_thermwind):
+    
+  # def test_timestep(self):
+
+  # def test_snapshot(self):
