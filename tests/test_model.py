@@ -2,7 +2,6 @@ import sys
 import os
 import collections
 import numpy as np
-from numpy import testing
 from scipy import integrate
 import pytest
 from pymoc.utils import make_func, make_array
