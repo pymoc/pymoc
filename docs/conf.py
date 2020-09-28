@@ -27,8 +27,8 @@ sys.path.insert(0, os.path.abspath('../pymoc/'))
 
 master_doc = 'index'
 project = 'pymoc'
-copyright = '2019, Michael Bueti'
-author = 'Michael Bueti'
+copyright = '2020, PyMOC Team'
+author = 'Michael Bueti, Malte Jansen'
 
 # -- General configuration ---------------------------------------------------
 
