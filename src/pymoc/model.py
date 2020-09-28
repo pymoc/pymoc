@@ -229,7 +229,7 @@ class Model(object):
     """
     next(self.run_with_snapshots(steps, basin_dt, coupler_dt=coupler_dt))
 
-  def timestep(self, step, basin_dt, coupler_dt=0):
+  def timestep(self, step, basin_dt, coupler_dt=1):
     r"""
     Execute a single model integration step, which timesteps all basins and updates
     all couplers at the coupling timestep

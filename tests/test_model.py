@@ -225,6 +225,37 @@ class TestModel(object):
     assert amoc_update_spy.call_count == steps * dt / coupler_dt + 1
     assert zoc_update_spy.call_count == steps * dt / coupler_dt + 1
     
-  # def test_timestep(self):
+  def test_timestep(self, mocker, column):
+    model = Model()
+    steps = 100
+    dt = 1
+    coupler_dt = 10
 
-  # def test_snapshot(self):
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'AMOC')
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'ZOC')
+    model.add_module(column, 'Atlantic', left_neighbors=[model.get_module('amoc')], right_neighbors=[model.get_module('zoc')]) 
+
+    amoc_update_spy = mocker.spy(model.get_module('amoc'), 'update_coupler')
+    zoc_update_spy = mocker.spy(model.get_module('zoc'), 'update_coupler')
+    atlantic_timestep_spy = mocker.spy(model.get_module('atlantic'), 'timestep_basin')
+
+    model.timestep(5, dt, coupler_dt=coupler_dt)
+
+    assert atlantic_timestep_spy.call_count == 1
+    assert amoc_update_spy.call_count == 0
+    assert zoc_update_spy.call_count == 0
+
+    model.timestep(20, dt, coupler_dt=coupler_dt)
+
+    assert atlantic_timestep_spy.call_count == 2
+    assert amoc_update_spy.call_count == 1
+    assert zoc_update_spy.call_count == 1
+
+  def test_snapshot(self):
+    model = Model()
+
+    assert not model.snapshot(10, None, None)
+    assert not model.snapshot(10, 1, None)
+    assert not model.snapshot(1, 10, 10)
+    assert model.snapshot(10, 10, 10)
+    assert model.snapshot(50, 10, 10)
