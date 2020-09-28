@@ -199,7 +199,31 @@ class TestModel(object):
     assert amoc_update_spy.call_count == steps * dt / coupler_dt + 1
     assert zoc_update_spy.call_count == steps * dt / coupler_dt + 1
 
-  # def test_run_with_snapshots(self, mocker, column, psi_thermwind):
+  def test_run_with_snapshots(self, mocker, column, psi_thermwind):
+    model = Model()
+    steps = 100
+    dt = 1
+    coupler_dt = 10
+    snapshot_start = 5
+    snapshot_interval = 5
+
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'AMOC')
+    model.new_module(Psi_Thermwind, PSI_PARAMS, 'ZOC')
+    model.add_module(column, 'Atlantic', left_neighbors=[model.get_module('amoc')], right_neighbors=[model.get_module('zoc')]) 
+
+    timestep_spy = mocker.spy(model, 'timestep')
+    amoc_update_spy = mocker.spy(model.amoc, 'update')
+    zoc_update_spy = mocker.spy(model.zoc, 'update')
+
+    snapshots = [s for s in model.run_with_snapshots(steps, dt, coupler_dt=coupler_dt, snapshot_start=snapshot_start, snapshot_interval=snapshot_interval)]
+    snapshot_test = list(np.arange(snapshot_start, steps, snapshot_interval))
+    if not snapshot_test[-1] == steps - 1:
+      snapshot_test.append(steps - 1)
+
+    assert snapshots == snapshot_test
+    assert timestep_spy.call_count == steps
+    assert amoc_update_spy.call_count == steps * dt / coupler_dt + 1
+    assert zoc_update_spy.call_count == steps * dt / coupler_dt + 1
     
   # def test_timestep(self):
 

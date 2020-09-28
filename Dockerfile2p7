@@ -6,7 +6,7 @@ WORKDIR /pymoc
 RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
 RUN apt-get update -y && \
     apt-get install -y python2.7-dev python-pip git curl python-tk
-RUN pip install numpy==1.13 && \
+RUN pip install numpy==1.15.1 && \
     pip install scipy==1.2.2 && \
     pip install matplotlib && \
     pip install pytest==4.6.5 && \
