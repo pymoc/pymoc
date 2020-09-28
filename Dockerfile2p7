@@ -17,7 +17,7 @@ RUN pip install numpy==1.15.1 && \
     pip install futures && \
     pip install recommonmark && \
     pip install sphinx-rtd-theme && \
-    pip install jupyter-sphinx-theme && \
-    pip install funcsigs
+    pip3 install funcsigs && \
+    pip install pytest-mock
 
 CMD bash
