@@ -50,18 +50,21 @@ class ModuleWrapper(object):
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
     self.psi = [0, 0]
 
-    if isinstance(self.module, Column) or isinstance(self.module, Equi_Column):
-      self.b_type = 'b'
-    elif isinstance(self.module, Psi_SO):
-      self.b_type = 'bs'
-    else:
-      self.b_type = None
-
+    self.b_type = self.__get_btype(self.module)
 
     if left_neighbors or right_neighbors:
       self.add_neighbors(
           left_neighbors=left_neighbors, right_neighbors=right_neighbors
       )
+
+  def __get_btype(self, module):
+    if isinstance(module, Column) or isinstance(module, Equi_Column):
+      return 'b'
+    elif isinstance(module, Psi_SO):
+      return 'bs'
+    else:
+      return None
+
 
   @property
   def module_type(self):
@@ -108,8 +111,9 @@ class ModuleWrapper(object):
       raise TypeError('Cannot use update_coupler on non-coupler modules.')
 
     module = self.module
-    b1 = self.left_neighbors[0].b if len(self.left_neighbors) > 0 else None
-    b2 = self.right_neighbors[0].b if len(self.right_neighbors) > 0 else None
+    get_b = lambda neighbors: neighbors[0].b if len(neighbors) > 0 else None
+    b1 = get_b(self.left_neighbors)
+    b2 = get_b(self.right_neighbors)
 
     if self.do_psi_bz:
       module.update(b1=b1, b2=b2)

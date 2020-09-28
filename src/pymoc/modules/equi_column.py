@@ -341,6 +341,8 @@ class Equi_Column(object):
          and each subsequent row moves up an index.
 
     """
+
+    scaled_bc = lambda yl, bc, d: yl[2] - bc / d
     try:
       bbot_set = getattr(self, 'b_bot', None) is not None
       y = np.array([ya[0], yb[0]])
@@ -348,10 +350,10 @@ class Equi_Column(object):
         y = np.append(y, ya[1])
       d = p[0] if self.H is None else self.H
       if bbot_set:
-        y = np.append(y, ya[2] - self.b_bot / d)
+        y = np.append(y, scaled_bc(ya, self.b_bot, d))
       else:
         y = np.append(y, ya[3] + self.bz(d))
-      y = np.append(y, yb[2] - self.bs / d)
+      y = np.append(y, scaled_bc(yb, self.bs, d))
 
       return y
     except TypeError:
