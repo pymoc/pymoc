@@ -21,13 +21,18 @@ jobs:
           command: ./cc-test-reporter before-build
       - run:
           name: run tests
+          command: pytest --cov=src/pymoc/ -v --cov-config=.coveragerc
           command: py.test -v --cov=src/pymoc --cov-report=xml --cov-config=.coveragerc
       - run:
           name: codeclimate post-build hooks
           command:  ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
+          when: always
       - store_artifacts:
           path: test-reports
           destination: test-reports
+          when: always
+      - store_test_results:
+          path: rest-results
   test-python-2.7:
     docker:
       - image: pymoc/pymoc:2.7
