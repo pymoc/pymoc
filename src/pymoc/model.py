@@ -136,7 +136,7 @@ class Model(object):
       right_neighbors=[]
   ):
     r"""
-    Create a new physical module and add itto the model configuration, with its
+    Create a new physical module and add it to the model configuration, with its
     location determined by the specified neighbors.
 
     Parameters
@@ -175,7 +175,7 @@ class Model(object):
     r"""
     Integrate the model forward in time. This method will timestep all basin modules at the
     basin timestep, and update all coupler modules at the coupling timestep. This method will
-    yield, allowing diagnosis of the model's temporal evolution.
+    yield at specified snaphot intervals, allowing diagnosis of the model's temporal evolution.
 
     Parameters
     ----------
@@ -187,7 +187,7 @@ class Model(object):
     coupler_dt : int, optional
                  The duration (in seconds) between coupler module updates. If unspecified,
                  coupling takes place at every timestep
-    snapsot_start : int, optional
+    snapshot_start : int, optional
                     The model step at which to begin yielding for model snapshotting
     snapshot_interval : int, optional
                         The number of steps between yields for model snapshotting
@@ -268,6 +268,8 @@ class Model(object):
                the current timestep
     """
 
-    return snapshot_start is not None and snapshot_interval is not None and step >= snapshot_start and (
-        step-snapshot_start
-    ) % snapshot_interval == 0
+    return ( snapshot_start is not None
+            and snapshot_interval is not None
+            and step >= snapshot_start
+            and (step-snapshot_start ) % snapshot_interval == 0
+           )
