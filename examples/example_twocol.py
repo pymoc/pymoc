@@ -68,8 +68,10 @@ ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
 # create adv-diff column model instance for basin
-basin = Column(z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot)
-# create adv-diff column model instance for basin
+basin = Column(
+    z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot
+)
+# create adv-diff column model instance for northern column
 north = Column(
     z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bbot
 )
