@@ -1,12 +1,9 @@
 '''
 This script shows an example of a "two column" model for the 
 overturning circulation in a basin connected to a channel in the south.
-The first column represents the basin, while the second column represents
-the northern sinking region. The overtunning circulation is computed at
-the northern end of the basin (at the interface to the northern sinking region)
-and at the southern end of the basin (at the interface to the channel).
-The parameters chosen here follow more or less the "control" experiment of Nikurashin
-and Vallis (2012, JPO).
+The example is the same as "example_twocol_plusSO" but we are here
+using the "model" class to patch together the different components
+of the setup.
 '''
 from pymoc import model
 from pymoc.modules import Psi_Thermwind, Psi_SO, Column
@@ -51,17 +48,16 @@ kappa = 2e-5
 # create vertical grid:
 z = np.asarray(np.linspace(-4000, 0, 80))
 
-
-# Initial conditions for buoyancy profile in the basin
+# Initial conditions for buoyancy profile in the basin and north
 def b_basin(z):
   return bs * np.exp(z / 300.)
-
-
 def b_north(z):
   return 1e-3 * bs * np.exp(z / 300.)
 
-
+# Here we are creating the model object, to which we then add the
+# various components ("modules")
 model = model.Model()
+# Add module for SO overturning streamfunction:
 model.new_module(
     Psi_SO, {
         'z': z,
@@ -76,7 +72,7 @@ model.new_module(
         'bvp_with_Ek': False
     }, 'Psi SO'
 )
-# create adv-diff column model instance for basin
+# Add column module for adv-diff "Atlantic basin"
 model.new_module(
     Column,
     {
@@ -90,7 +86,7 @@ model.new_module(
     'Atlantic Basin',
     left_neighbors=[model.get_module('psi_so')],
 )
-# create N.A. overturning model instance
+# Add module for N.A. overturning
 model.new_module(
     Psi_Thermwind,
     {
@@ -103,7 +99,7 @@ model.new_module(
     left_neighbors=[model.get_module('atlantic_basin')],
 )
 
-# create adv-diff column model instance for basin
+# Add column module for northern deep water formation region
 model.new_module(
     Column,
     {
@@ -128,11 +124,6 @@ ax2.set_xlim((-0.02, 0.03))
 ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
-# AMOC = model.get_module('amoc').module
-# model.psi_so = model.get_module('psi_so').module
-# basin = model.get_module('atlantic_basin').module
-# north = model.get_module('north_atlantic').module
-
 for snapshot in model.run(
     basin_dt=dt,
     coupler_dt=MOC_up_iters,
@@ -153,11 +144,6 @@ for snapshot in model.run(
   plt.pause(0.01)
 
 plt.show()
-# AMOC = model.get_module('amoc').module
-# model.psi_so = model.get_module('psi_so').module
-# basin = model.get_module('atlantic_basin').module
-# north = model.get_module('north_atlantic').module
-# # Plot final results over time-iteration plot:
 ax1.plot(model.amoc.Psi, model.amoc.z, linewidth=2, color='r')
 ax1.plot(model.psi_so.Psi, model.psi_so.z, linewidth=2, color='m')
 ax1.plot(
