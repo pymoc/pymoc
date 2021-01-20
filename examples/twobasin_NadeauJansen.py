@@ -134,19 +134,13 @@ plt.ylim((-4e3, 0))
 ax1.set_xlim((-20, 30))
 ax2.set_xlim((-0.02, 0.030))
 
-# loop to iteratively find equilibrium solution
+# time stepping loop:
 for ii in range(0, total_iters):
   # update buoyancy profile
   # using isopycnal overturning:
   wA_Atl = (Psi_iso_Atl + Psi_zonal_Atl - SO_Atl.Psi) * 1e6
-  #   print('wA_Atl')
-  #   print(wA_Atl)
   wAN = -Psi_iso_N * 1e6
-  #   print('wAN')
-  #   print(wAN)
   wA_Pac = (-Psi_zonal_Pac - SO_Pac.Psi) * 1e6
-  #   print('wA_Pac')
-  #   print(wA_Pac)
   Atl.timestep(wA=wA_Atl, dt=dt)
   north.timestep(wA=wAN, dt=dt, do_conv=True)
   Pac.timestep(wA=wA_Pac, dt=dt)
