@@ -32,8 +32,8 @@ class Psi_Thermwind(object):
       f=1.2e-4,    # Coriolis parameter (input)
       z=None,    # grid (input)
       sol_init=None,    # Initial conditions for ODE solver (input)
-      b1=0.,    # Buoyancy in the basin (input, output)
-      b2=0.,    # Buoyancy in the deep water formation region (input, output)
+      b1=0.,    # Buoyancy in the left basin or column (input, output)
+      b2=0.,    # Buoyancy in the right basin or column (input, output)
   ):
     r"""
     Parameters
@@ -46,10 +46,9 @@ class Psi_Thermwind(object):
     sol_init : ndarray; optional
                Initial guess at the solution to the thermal wind overturning streamfunction. Units: [...]
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the righthand (southward/westward) basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the righthand (southward/westward) basin or column. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the lefthand (northward/eastward) basin, representing the
-         deepwater formation region. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the lefthand (northward/eastward) basin or column. Units: m/s\ :sup:`2`
     """
 
     self.f = f
@@ -155,8 +154,8 @@ class Psi_Thermwind(object):
       \end{cases}
       \end{aligned}
 
-    where :math:`b_N\left(z\right)` is the density profiles in the righthand region, :math:`b_B\left(z\right)` is
-    the density profile in the lefthand basin, and :math:`\mathcal{H}` is the Heaviside step function.
+    where :math:`b_N\left(z\right)` is the density profiles in the righthand basin or column, :math:`b_B\left(z\right)` is
+    the density profile in the lefthand basin or column, and :math:`\mathcal{H}` is the Heaviside step function.
 
     Parameters
     ----------
@@ -189,7 +188,7 @@ class Psi_Thermwind(object):
   def Psibz(self, nb=500):
     r"""
     Remap the overturning streamfunction onto the native isopycnal-depth space
-    of the columns in the right and lefthand basins.
+    of the columns in the right and lefthand basins/columns.
 
     Parameters
     ----------
