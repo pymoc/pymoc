@@ -199,7 +199,7 @@ class Psi_Thermwind(object):
     Returns
     -------
     psibz : ndarray
-            An array where the first element is an array representing the streamfunction at each depth level in the lefthand basin, and the second represents the same in the righthand basin.
+            An array where the first element is an array representing the streamfunction at each depth level in the lefthand baisn or column, and the second represents the same in the righthand basin or column.
     """
     # map isopycnal overturning back into isopycnal-depth space of each column
     psib = self.Psib(nb)
@@ -216,16 +216,15 @@ class Psi_Thermwind(object):
 
   def update(self, b1=None, b2=None):
     r"""
-    Update the vertical buoyancy profiles from the lefthand basin and righthand basin.
+    Update the vertical buoyancy profiles from the lefthand basin or column and righthand basin or column.
 
     Parameters
     ----------
 
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the lefthand basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the lefthand basin or column. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the righthand basin, representing the
-         deepwater formation region. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the righthand basin or column. Units: m/s\ :sup:`2`
     """
     # update buoyancy profiles
     if b1 is not None:
