@@ -103,7 +103,7 @@ class Psi_SO(object):
     self.Htaperbot = Htaperbot
     self.smax = smax
 
-    self.Psi = np.zeros(len(self.z))
+    self.Psi = None
     self.module_type = 'coupler'
 
   def ys(self, b):
