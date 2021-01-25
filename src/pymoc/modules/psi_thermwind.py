@@ -68,7 +68,7 @@ class Psi_Thermwind(object):
     else:
       self.sol_init = sol_init
 
-    self.Psi = np.zeros(len(self.z))
+    self.Psi = None
     self.module_type = 'coupler'
 
   def bc(self, ya, yb):
