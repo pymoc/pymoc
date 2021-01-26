@@ -221,7 +221,8 @@ class Model(object):
                  The duration (in seconds) between coupler module updates. If unspecified,
                  coupling takes place at every timestep
     """
-    next(self.run_with_snapshots(steps, basin_dt, coupler_dt=coupler_dt))
+    [None for _ in self.run_with_snapshots(steps, basin_dt, coupler_dt=coupler_dt, snapshot_start=0, snapshot_interval=steps)]
+    #next(self.run_with_snapshots(steps, basin_dt, coupler_dt=coupler_dt))
 
   def timestep(self, step, basin_dt, coupler_dt=1):
     r"""
