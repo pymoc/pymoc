@@ -211,7 +211,7 @@ class Column(object):
     self.b = res.sol(self.z)[0, :]
     self.bz = res.sol(self.z)[1, :]
 
-  def vertadvdiff(self, wA, dt, do_conv=False):
+  def vertadvdiff(self, wA, dt, do_conv=None):
     r"""
     Calculate and apply the forcing from advection and diffusion on the vertical buoyancy
     profile, for the timestepping solution. This function implements an upwind advection
@@ -231,7 +231,7 @@ class Column(object):
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
-    if do_conv is None and not self.do_conv or not do_conv:
+    if (do_conv is None and not self.do_conv) or not do_conv:
       self.b[-1] = self.bs
     self.b[0] = (
         self.bbot if self.bzbot is None else self.b[1] - self.bzbot * dz[0]
