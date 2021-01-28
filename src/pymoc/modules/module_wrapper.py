@@ -50,21 +50,10 @@ class ModuleWrapper(object):
     self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
     self.psi = [0, 0]
 
-    self.b_type = self.__get_btype(self.module)
-
     if left_neighbors or right_neighbors:
       self.add_neighbors(
           left_neighbors=left_neighbors, right_neighbors=right_neighbors
       )
-
-  def __get_btype(self, module):
-    if isinstance(module, Column) or isinstance(module, Equi_Column):
-      return 'b'
-    elif isinstance(module, Psi_SO):
-      return 'bs'
-    else:
-      return None
-
 
   @property
   def module_type(self):
@@ -138,7 +127,9 @@ class ModuleWrapper(object):
                   with the module.
     """
 
-    return getattr(self.module, self.b_type) if self.b_type else None
+    if isinstance(self.module, Column) or isinstance(self.module, Equi_Column):
+      return self.module.b
+    return None
 
   @property
   def neighbors(self):

@@ -104,7 +104,7 @@ class TestModuleWrapper(object):
       module_wrapper_config['right_neighbors'] = [ModuleWrapper(name='Pacific Ocean', module=copy.deepcopy(column))]
 
     module_wrapper = ModuleWrapper(**module_wrapper_config)
-    for k in ['module', 'name', 'key', 'do_psi_bz', 'b_type', 'psi', 'left_neighbors', 'right_neighbors']:
+    for k in ['module', 'name', 'key', 'do_psi_bz', 'psi', 'left_neighbors', 'right_neighbors']:
       assert hasattr(module_wrapper, k)
 
     module_wrapper_signature = funcsigs.signature(ModuleWrapper)
@@ -121,19 +121,16 @@ class TestModuleWrapper(object):
     if module_wrapper.name == 'Atlantic Ocean':
       assert module_wrapper.key == 'atlantic_ocean'
       assert module_wrapper.do_psi_bz == False
-      assert module_wrapper.b_type == 'b'
       assert len(module_wrapper.left_neighbors) == 1
       assert len(module_wrapper.right_neighbors) == 0
     elif module_wrapper.name == 'AMOC':
       assert module_wrapper.key == 'amoc'
       assert module_wrapper.do_psi_bz == True
-      assert module_wrapper.b_type is None
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
     elif module_wrapper.name == 'Southern Ocean':
       assert module_wrapper.key == 'southern_ocean'
       assert module_wrapper.do_psi_bz == False
-      assert module_wrapper.b_type == 'bs'
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
 
@@ -250,8 +247,6 @@ class TestModuleWrapper(object):
   def test_b(self, module_wrapper):
     if module_wrapper.name == "Atlantic Ocean":
       assert all(module_wrapper.b == module_wrapper.module.b)
-    elif module_wrapper.name == "Southern Ocean":
-      assert module_wrapper.b == module_wrapper.module.bs
     else:
       assert module_wrapper.b is None
     
