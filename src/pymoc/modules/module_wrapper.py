@@ -155,7 +155,7 @@ class ModuleWrapper(object):
     """
     return self.left_neighbors + self.right_neighbors
 
-  def add_left_neighbor(self, new_neighbor, backlinking=False):
+  def add_left_neighbor(self, new_neighbor, is_backlinking=False):
     r"""
     Add a neighbor to the "left" of the current module. This method validates
     that the neighbor is unique, can occupy the left neighbor position, and
@@ -168,17 +168,17 @@ class ModuleWrapper(object):
 
     new_neighbor: module_wrapper
                   A wrapper pointing to the module being added as a lefthand neighbor.
-    backlinking: boolean; optional
-                 Whether to backlink the new neighbor to the current module. Defaults false.
+    is_backlinking: boolean; optional
+                 Whether this neighbor is being added as part of the backlinking process. Prevents circular backlinking.
                  
     """
     self.validate_neighbor_uniqueness(new_neighbor)
     self.validate_coupler_neighbor_direction('left')
     self.left_neighbors.append(new_neighbor)
-    if not backlinking:
+    if not is_backlinking:
       self.backlink_neighbor(new_neighbor)
 
-  def add_right_neighbor(self, new_neighbor, backlinking=False):
+  def add_right_neighbor(self, new_neighbor, is_backlinking=False):
     r"""
     Add a neighbor to the "right" of the current module. This method validates
     that the neighbor is unique, can occupy the right neighbor position, and
@@ -191,14 +191,14 @@ class ModuleWrapper(object):
 
     new_neighbor: module_wrapper
                   A wrapper pointing to the module being added as a righthand neighbor.
-    backlinking: boolean; optional
-                 Whether to backlink the new neighbor to the current module. Defaults false.
+    is_backlinking: boolean; optional
+                 Whether this neighbor is being added as part of the backlinking process. Prevents circular backlinking.
                  
     """
     self.validate_neighbor_uniqueness(new_neighbor)
     self.validate_coupler_neighbor_direction('right')
     self.right_neighbors.append(new_neighbor)
-    if not backlinking:
+    if not is_backlinking:
       self.backlink_neighbor(new_neighbor)
 
   def add_neighbors(self, left_neighbors=None, right_neighbors=None):
@@ -274,6 +274,6 @@ class ModuleWrapper(object):
 
     """
     if neighbor in self.right_neighbors:
-      neighbor.add_left_neighbor(self, backlinking=True)
+      neighbor.add_left_neighbor(self, is_backlinking=True)
     else:
-      neighbor.add_right_neighbor(self, backlinking=True)
+      neighbor.add_right_neighbor(self, is_backlinking=True)
