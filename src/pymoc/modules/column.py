@@ -231,7 +231,7 @@ class Column(object):
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
-    if (do_conv is None and not self.do_conv) or not do_conv:
+    if (do_conv is None and not self.do_conv) or (do_conv is not None and not do_conv):
       self.b[-1] = self.bs
     self.b[0] = (
         self.bbot if self.bzbot is None else self.b[1] - self.bzbot * dz[0]
