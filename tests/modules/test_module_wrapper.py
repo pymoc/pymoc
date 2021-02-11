@@ -7,7 +7,7 @@ from scipy import integrate
 import pytest
 from pymoc.utils import make_func, make_array
 sys.path.append('/pymoc/src/pymoc/modules')
-from pymoc.modules import ModuleWrapper, Column, Psi_Thermwind, Psi_SO
+from pymoc.modules import ModuleWrapper, Column, Psi_Thermwind, Psi_SO, SO_ML
 
 @pytest.fixture(
   scope="module",
@@ -57,6 +57,27 @@ def psi_so(request):
   return Psi_SO(**request.param)
 
 @pytest.fixture(
+    scope="module",
+    params=[{
+        'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+        'Ks': 100,
+        'h': 50,
+        'L': 4e6,
+        'surflux': 5.9e3,
+        'rest_mask': 0.0,
+        'b_rest': 0.0,
+        'v_pist': 2.0 / 86400.0,
+        'bs': 0.02,
+    }]
+)
+def so_ml(request):
+  return SO_ML(**request.param)
+
+
+@pytest.fixture(scope="module")
+def so_ml(request):
+  return SO_ML(y=np.asarray(np.linspace(0, 2.0e6, 51)))
+@pytest.fixture(
   scope="module",
   params=[
     {
@@ -77,9 +98,15 @@ def psi_so(request):
       'left_neighbors': None,
       'right_neighbors': None,
     },
+    {
+      'module': 'so_ml',
+      'name': 'Southern Ocean ML',
+      'left_neighbors': None,
+      'right_neighbors': None,
+    },
   ]
 )
-def module_wrapper_config(request, column, psi_thermwind, psi_so):
+def module_wrapper_config(request, column, psi_thermwind, psi_so, so_ml):
   param = request.param
   if param['module'] == 'column':
     param['module'] = column
@@ -87,6 +114,8 @@ def module_wrapper_config(request, column, psi_thermwind, psi_so):
     param['module'] = psi_thermwind
   elif param['module'] == 'psi_so':
     param['module'] = psi_so
+  elif param['module'] == 'so_ml':
+    param['module'] = so_ml
   return param
 
 @pytest.fixture(scope='module')
@@ -94,7 +123,7 @@ def module_wrapper(request, module_wrapper_config):
   return ModuleWrapper(**module_wrapper_config)
 
 class TestModuleWrapper(object):
-  def test_module_wrapper_init(self, module_wrapper_config, column, psi_thermwind):
+  def test_module_wrapper_init(self, module_wrapper_config, column, psi_thermwind, psi_so, so_ml):
     module_wrapper_config = copy.deepcopy(module_wrapper_config)
     if module_wrapper_config['name'] == 'Atlantic Ocean':
       module_wrapper_config['left_neighbors'] = [ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))]
@@ -102,9 +131,12 @@ class TestModuleWrapper(object):
       module_wrapper_config['right_neighbors'] = [ModuleWrapper(name='Pacific Ocean', module=copy.deepcopy(column))]
     elif module_wrapper_config['name'] == 'Southern Ocean':
       module_wrapper_config['right_neighbors'] = [ModuleWrapper(name='Pacific Ocean', module=copy.deepcopy(column))]
+      module_wrapper_config['left_neighbors'] = [ModuleWrapper(name='Southern Ocean ML', module=copy.deepcopy(so_ml))]
+    elif module_wrapper_config['name'] == 'Southern Ocean ML':
+      module_wrapper_config['left_neighbors'] = [ModuleWrapper(name='ACC', module=copy.deepcopy(psi_so))]
 
     module_wrapper = ModuleWrapper(**module_wrapper_config)
-    for k in ['module', 'name', 'key', 'do_psi_bz', 'psi', 'left_neighbors', 'right_neighbors']:
+    for k in ['module', 'name', 'key', 'psi', 'left_neighbors', 'right_neighbors']:
       assert hasattr(module_wrapper, k)
 
     module_wrapper_signature = funcsigs.signature(ModuleWrapper)
@@ -120,19 +152,20 @@ class TestModuleWrapper(object):
 
     if module_wrapper.name == 'Atlantic Ocean':
       assert module_wrapper.key == 'atlantic_ocean'
-      assert module_wrapper.do_psi_bz == False
       assert len(module_wrapper.left_neighbors) == 1
       assert len(module_wrapper.right_neighbors) == 0
     elif module_wrapper.name == 'AMOC':
       assert module_wrapper.key == 'amoc'
-      assert module_wrapper.do_psi_bz == True
       assert len(module_wrapper.left_neighbors) == 0
       assert len(module_wrapper.right_neighbors) == 1
     elif module_wrapper.name == 'Southern Ocean':
       assert module_wrapper.key == 'southern_ocean'
-      assert module_wrapper.do_psi_bz == False
-      assert len(module_wrapper.left_neighbors) == 0
+      assert len(module_wrapper.left_neighbors) == 1
       assert len(module_wrapper.right_neighbors) == 1
+    elif module_wrapper.name == 'Southern Ocean ML':
+      assert module_wrapper.key == 'southern_ocean_ml'
+      assert len(module_wrapper.left_neighbors) == 1
+      assert len(module_wrapper.right_neighbors) == 0
 
   def test_module_type(self, module_wrapper):
     if module_wrapper.name == 'Atlantic Ocean':
@@ -140,7 +173,7 @@ class TestModuleWrapper(object):
     elif module_wrapper.name == 'AMOC':
       assert module_wrapper.module_type == 'coupler'
 
-  def test_timestep_basin(self, mocker, module_wrapper, psi_thermwind, psi_so):
+  def test_timestep_basin(self, mocker, module_wrapper, psi_thermwind, psi_so, column):
     dt = 0.1
     if module_wrapper.name == 'Atlantic Ocean':
       psi_wrapper = ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))
@@ -177,6 +210,23 @@ class TestModuleWrapper(object):
       spy.assert_called_once()
       assert spy.call_args[1]['dt'] == dt
       assert all(spy.call_args[1]['wA'] == wA)
+    elif module_wrapper.name == 'Southern Ocean ML':
+      # psi_wrapper = ModuleWrapper(name='MOC', module=copy.deepcopy(psi_thermwind))
+      psi_so_wrapper = ModuleWrapper(name='SO', module=copy.deepcopy(psi_so))
+      col_wrapper = ModuleWrapper(name='Atlantic', module=copy.deepcopy(column))
+      wrapper = copy.deepcopy(module_wrapper)
+      psi_so_wrapper.add_right_neighbor(col_wrapper)
+      # wrapper.add_right_neighbor(psi_wrapper)
+      wrapper.add_right_neighbor(psi_so_wrapper)
+      # psi_so_wrapper.add_left_neighbor(col_wrapper)
+      psi_so_wrapper.update_coupler()
+      wA = psi_so_wrapper.psi[0]*1e6
+      spy = mocker.spy(wrapper.module, 'timestep')
+      wrapper.timestep_basin(dt=dt)
+      spy.assert_called_once()
+      assert spy.call_args[1]['dt'] == dt
+      assert all(spy.call_args[1]['b_basin'] == col_wrapper.b)
+      assert all(spy.call_args[1]['Psi_b'] == wA)
     else:
       with pytest.raises(TypeError) as uinfo:
         module_wrapper.timestep_basin(dt=dt)
@@ -185,8 +235,8 @@ class TestModuleWrapper(object):
           "Cannot use timestep_basin on non-basin modules."
       )
 
-  def test_update_coupler(self, mocker, module_wrapper, column):
-    if module_wrapper.name == 'Atlantic Ocean':
+  def test_update_coupler(self, mocker, module_wrapper, column, so_ml):
+    if module_wrapper.name == 'Atlantic Ocean' or module_wrapper.name == 'Southern Ocean ML':
       with pytest.raises(TypeError) as uinfo:
         module_wrapper.update_coupler()
       assert (
@@ -196,18 +246,22 @@ class TestModuleWrapper(object):
     else:
       col_wrapper = ModuleWrapper(name='Atlantic Ocean', module=copy.deepcopy(column))
       wrapper = copy.deepcopy(module_wrapper)
-      wrapper.add_left_neighbor(col_wrapper)
+      if module_wrapper.name == 'Southern Ocean':
+        so_wrapper = ModuleWrapper(name='Southern Ocean ML', module=copy.deepcopy(so_ml))
+        wrapper.add_left_neighbor(so_wrapper)
+      wrapper.add_right_neighbor(col_wrapper)
       update_spy = mocker.spy(wrapper.module, 'update')
       solve_spy = mocker.spy(wrapper.module, 'solve')
       wrapper.update_coupler()
       update_spy.assert_called_once()
       solve_spy.assert_called_once()
       if wrapper.name == 'AMOC':
-        assert all(update_spy.call_args[1]['b1'] == col_wrapper.b)
-        assert update_spy.call_args[1]['b2'] == None
+        assert all(update_spy.call_args[1]['b2'] == col_wrapper.b)
+        assert update_spy.call_args[1]['b1'] == None
         assert all(wrapper.psi[0] == wrapper.module.Psibz()[0])
       elif wrapper.name == 'Southern Ocean':
-        assert update_spy.call_args[1]['b'] == None
+        assert all(update_spy.call_args[1]['b'] == column.b)
+        assert all(update_spy.call_args[1]['bs'] == so_ml.bs)
         assert wrapper.psi == [wrapper.module.Psi]
 
       col_wrapper = ModuleWrapper(name='Atlantic Ocean', module=copy.deepcopy(column))
@@ -222,11 +276,12 @@ class TestModuleWrapper(object):
         assert all(update_spy.call_args[1]['b2'] == col_wrapper.b)
         assert update_spy.call_args[1]['b1'] == None
         assert all(wrapper.psi[0] == wrapper.module.Psibz()[0])
+        col_wrapper_left = ModuleWrapper(name='Atlantic Ocean', module=copy.deepcopy(column))
       elif wrapper.name == 'Southern Ocean':
         assert all(update_spy.call_args[1]['b'] == col_wrapper.b)
         assert wrapper.psi == [wrapper.module.Psi]
+        col_wrapper_left = ModuleWrapper(name='Southern Ocean ML', module=copy.deepcopy(so_ml))
 
-      col_wrapper_left = ModuleWrapper(name='Atlantic Ocean', module=copy.deepcopy(column))
       col_wrapper_right = ModuleWrapper(name='Pacific Ocean', module=copy.deepcopy(column))
       wrapper = copy.deepcopy(module_wrapper)
       wrapper.add_left_neighbor(col_wrapper_left)
@@ -247,7 +302,10 @@ class TestModuleWrapper(object):
   def test_b(self, module_wrapper):
     if module_wrapper.name == "Atlantic Ocean":
       assert all(module_wrapper.b == module_wrapper.module.b)
+    elif module_wrapper.name == "Southern Ocean ML":
+      assert all(module_wrapper.b == module_wrapper.module.bs)
     else:
+      print(module_wrapper.name)
       assert module_wrapper.b is None
     
   def test_neighbors(self, column, psi_thermwind, psi_so):
