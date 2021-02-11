@@ -70,6 +70,7 @@ class SO_ML(object):
     self.Psi_s = Psi_s
     self.bs = make_array(bs, self.y, 'bs')
 
+    self.module_type = 'basin'
   # def solve_equi(self):
   #Solve for equilibrium solution given inputs
   # raise TypeError('This functionality is not yet implemented')

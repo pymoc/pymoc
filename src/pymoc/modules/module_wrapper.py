@@ -1,5 +1,6 @@
 import numpy as np
-from pymoc.modules import Column, Equi_Column, Psi_SO
+from pymoc.modules import Column, Equi_Column, Psi_SO, SO_ML
+from pymoc.utils import has_method
 
 
 class ModuleWrapper(object):
@@ -47,7 +48,6 @@ class ModuleWrapper(object):
     self.right_neighbors = []
 
     self.key = name.replace(' ', '_').lower().strip('_')
-    self.do_psi_bz = hasattr(module, 'Psibz') and callable(module.Psibz)
     self.psi = [0, 0]
 
     if left_neighbors or right_neighbors:
@@ -89,7 +89,11 @@ class ModuleWrapper(object):
     for neighbor in self.left_neighbors:
       wA -= neighbor.psi[-1] * 1e6
 
-    module.timestep(wA=wA, dt=dt)
+    if isinstance(module, SO_ML):
+      b_basin = self.right_neighbors[0].right_neighbors[0].b
+      module.timestep(Psi_b=self.right_neighbors[0].psi[0], dt=dt, b_basin=b_basin)
+    else:
+      module.timestep(wA=wA, dt=dt)
 
   def update_coupler(self):
     r"""
@@ -104,13 +108,13 @@ class ModuleWrapper(object):
     b1 = get_b(self.left_neighbors)
     b2 = get_b(self.right_neighbors)
 
-    if self.do_psi_bz:
-      module.update(b1=b1, b2=b2)
+    if hasattr(module, 'bs'):
+      module.update(b=b2, bs=b1)
     else:
-      module.update(b=b2)
+      module.update(b1=b1, b2=b2)
 
     module.solve()
-    self.psi = module.Psibz() if self.do_psi_bz else [module.Psi]
+    self.psi = module.Psibz() if has_method(self.module, 'Psibz') else [module.Psi]
 
   @property
   def b(self):
@@ -127,8 +131,12 @@ class ModuleWrapper(object):
                   with the module.
     """
 
-    if isinstance(self.module, Column) or isinstance(self.module, Equi_Column):
+    if self.module_type != 'basin':
+      return None
+    elif hasattr(self.module, 'b'):
       return self.module.b
+    elif hasattr(self.module, 'bs'):
+      return self.module.bs
     return None
 
   @property
