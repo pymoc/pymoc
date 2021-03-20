@@ -198,7 +198,7 @@ class SO_ML(object):
 
   def advdiff(self, b_basin, Psi_b, dt):
     r"""
-    Compute and apply advective-diffusive transport to the Souther Ocean Mixed Layer model,
+    Compute and apply advective-diffusive transport to the Southern Ocean Mixed Layer model,
     based on conditions in the adjoining basin.
 
     Parameters
