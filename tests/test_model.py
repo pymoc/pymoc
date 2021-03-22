@@ -7,7 +7,7 @@ import pytest
 from pymoc.utils import make_func, make_array
 sys.path.append('/pymoc/src/pymoc')
 from pymoc.model import Model
-from pymoc.modules import Column, Psi_Thermwind, ModuleWrapper
+from pymoc.modules import Column, Psi_Thermwind, SO_ML, ModuleWrapper
 
 COLUMN_PARAMS = {
       'Area': 6e13,
@@ -39,6 +39,23 @@ def column(request):
 )
 def psi_thermwind(request):
   return Psi_Thermwind(**request.param)
+
+@pytest.fixture(
+    scope="module",
+    params=[{
+        'y': np.asarray(np.linspace(0, 2.0e6, 51)),
+        'Ks': 100,
+        'h': 50,
+        'L': 4e6,
+        'surflux': 5.9e3,
+        'rest_mask': 0.0,
+        'b_rest': 0.0,
+        'v_pist': 2.0 / 86400.0,
+        'bs': 0.02,
+    }]
+)
+def so_ml(request):
+  return SO_ML(**request.param)
 
 class TestModel(object):
   def test_model_init(self):
@@ -74,6 +91,17 @@ class TestModel(object):
     assert (
         str(ninfo.value) ==
         'Cannot link basins multiple times. Please check your configuration.'
+    )
+  
+  def test_validate_module_type(self, so_ml):
+    model = Model()
+    model.validate_module_type(so_ml)
+    model.add_module(so_ml, 'Southern Ocean')
+    with pytest.raises(TypeError) as ninfo:
+      model.validate_module_type(so_ml)
+    assert (
+        str(ninfo.value) ==
+        'Cannot add more than one SO_ML module to a model.'
     )
 
   def test_validate_new_module_key(self, column):

@@ -1,6 +1,5 @@
 import numpy as np
-from pymoc.modules import ModuleWrapper
-
+from pymoc.modules import ModuleWrapper, SO_ML
 
 class Model(object):
   r"""
@@ -89,6 +88,22 @@ class Model(object):
           ' because it would overwrite an existing key or model property.'
       )
 
+  def validate_module_type(self, module):
+    r"""
+    Ensure that a new module has a valid type, specifically that only one
+    Southern Ocean mixed layer module is part of the model.
+
+    Parameters
+    ----------
+
+    module: ModuleWrapper
+            A ModuleWrappers pointing at the module to be validated
+    """
+    if(isinstance(module, SO_ML) and any([isinstance(m.module, SO_ML) for m in self._modules.values()])):
+      raise TypeError(
+        'Cannot add more than one SO_ML module to a model.'
+      )
+
   def add_module(self, module, name, left_neighbors=[], right_neighbors=[]):
     r"""
     Add a physical module to the model configuration, with its location determined
@@ -110,6 +125,7 @@ class Model(object):
                       newly added module
     """
 
+    self.validate_module_type(module)
     self.validate_neighbors_input(left_neighbors + right_neighbors)
     module_wrapper = ModuleWrapper(
         module,
