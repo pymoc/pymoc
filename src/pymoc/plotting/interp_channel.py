@@ -33,7 +33,7 @@ class Interpolate_channel(object):
 
   def make_func(
       self, myst, name, xin
-  ):    # Seems unecessary to define a method that already exists identically as a function, no?
+  ):    # Seems unnecessary to define a method that already exists identically as a function, no?
     return make_func(myst, xin, name)
 
   def __call__(self, y, z):
@@ -52,6 +52,9 @@ class Interpolate_channel(object):
         return self.bn(z - x * (l-y)) - self.bs(y + z/x)
 
       # first determine slope at bottom of vent. region here
+      # print(self.z[0])
+      # print(f2(self.z[0]))
+      # print(f2(0))
       sbot = -brenth(f2, self.z[0], 0.) / l
       # than set slope for stuff above and below...
       if -z > sbot * y:

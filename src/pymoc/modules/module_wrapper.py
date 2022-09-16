@@ -88,10 +88,19 @@ class ModuleWrapper(object):
       wA += neighbor.psi[0] * 1e6
     for neighbor in self.left_neighbors:
       wA -= neighbor.psi[-1] * 1e6
-
     if isinstance(module, SO_ML):
-      b_basin = self.right_neighbors[0].right_neighbors[0].b
-      module.timestep(Psi_b=self.right_neighbors[0].psi[0], dt=dt, b_basin=b_basin)
+      neighbor_b = [n.right_neighbors[0].b for n in self.right_neighbors]
+      b_min = np.min(neighbor_b)
+      b_max = np.max(neighbor_b)
+      db = np.max([np.min(np.diff(np.sort(np.unique(np.asarray(neighbor_b))))), 1e-6])
+      b_basin = np.arange(b_max, b_min, -db)
+      Psi_b = np.sum([np.interp(b_basin[::-1], n.right_neighbors[0].b[::-1], n.psi[0][::-1])[::-1] for n in self.right_neighbors], axis=0)
+    
+      # b_basin = self.right_neighbors[0].right_neighbors[0].b
+      # construct "universal" bouyancy grid
+      # add streamfunctions
+      # pass summed psi and univerral b_basin
+      module.timestep(Psi_b=Psi_b, dt=dt, b_basin=b_basin)
     else:
       module.timestep(wA=wA, dt=dt)
 

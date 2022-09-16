@@ -302,5 +302,4 @@ class SO_ML(object):
       raise TypeError(
           'Psi_b needs to be numpy array providing overturning at buoyancy levels given by b_basin'
       )
-
     self.advdiff(b_basin=b_basin, Psi_b=Psi_b, dt=dt)

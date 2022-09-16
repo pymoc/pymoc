@@ -128,14 +128,15 @@ m.new_module(
         'N2min': N2min
     },
     'Atl',
-    neighbors=[{
-        'module': m.get_module('amoc'),
-        'direction': 'right',
-        'module': m.get_module('so_atl'),
-        'direction': 'left',
-        'module': m.get_module('zoc'),
-        'direction': 'right'
-    }]
+    right_neighbors=[
+        m.get_module('amoc'),
+        m.get_module('zoc'),
+      ],
+    left_neighbors=[# 'direction': 'right',
+        m.get_module('so_atl'),
+        # 'direction': 'left',
+        # 'direction': 'right'
+    ],
 )
 
 # create and add adv-diff column module for northern sinking region
@@ -151,10 +152,10 @@ m.new_module(
         'do_conv': True
     },
     'North',
-    neighbors=[{
-        'module': m.get_module('amoc'),
-        'direction': 'left'
-    }]
+    left_neighbors=[
+        m.get_module('amoc'),
+        # 'direction': 'left'
+    ]
 )
 
 # create and add adv-diff column module for Pac. basin
@@ -169,12 +170,12 @@ m.new_module(
         'N2min': N2min
     },
     'Pac',
-    neighbors=[{
-        'module': m.get_module('zoc'),
-        'direction': 'left',
-        'module': m.get_module('so_pac'),
-        'direction': 'left'
-    }]
+    left_neighbors=[
+        m.get_module('zoc'),
+        # 'direction': 'left',
+        m.get_module('so_pac'),
+        # 'direction': 'left'
+    ]
 )
 
 # Create figure:
@@ -185,7 +186,7 @@ plt.ylim((-4e3, 0))
 ax1.set_xlim((-20, 30))
 ax2.set_xlim((-0.02, 0.030))
 
-for snapshot in m.run(
+for snapshot in m.run_with_snapshots(
     basin_dt=dt,
     coupler_dt=MOC_up_iters,
     steps=total_iters,

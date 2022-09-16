@@ -339,12 +339,14 @@ class Column(object):
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
 
     """
+    # print(do_conv)
     if do_conv is None and self.do_conv or do_conv:
       # do convection: (optional)
       self.convect()
-
+      
     # do vertical advection and diffusion
     self.vertadvdiff(wA=wA, dt=dt, do_conv=do_conv)
+    # print('vertical adv/diff done')
 
     if vdx_in is not None:
       # do horizontal advection: (optional)

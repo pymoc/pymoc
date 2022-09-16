@@ -222,8 +222,8 @@ class TestModuleWrapper(object):
       wrapper.timestep_basin(dt=dt)
       spy.assert_called_once()
       assert spy.call_args[1]['dt'] == dt
-      assert all(spy.call_args[1]['b_basin'] == col_wrapper.b)
-      assert all(spy.call_args[1]['Psi_b'] == psi)
+      assert spy.call_args[1]['b_basin'] == pytest.approx(col_wrapper.b)
+      assert spy.call_args[1]['Psi_b'] == pytest.approx(psi, abs=1e-6) 
     else:
       with pytest.raises(TypeError) as uinfo:
         module_wrapper.timestep_basin(dt=dt)

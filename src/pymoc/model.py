@@ -42,7 +42,7 @@ class Model(object):
     key : string
           Key of the module being retrieved
 
-    Returns
+    
     -------
 
     module : ModuleWrapper
@@ -262,7 +262,6 @@ class Model(object):
     if step % coupler_dt == 0:
       for coupler in self.couplers:
         coupler.update_coupler()
-
   def snapshot(self, step, snapshot_start, snapshot_interval):
     r"""
     Determine whether the current model timestep should yield to snapshotting.
