@@ -31,32 +31,37 @@ class Interpolate_channel(object):
     self.bs = self.make_func(bs, 'bs', self.y)
     self.bn = self.make_func(bn, 'bn', self.z)
 
-  def make_func(self, myst, name, xin): # Seems unecessary to define a method that already exists identically as a function, no?
+  def make_func(
+      self, myst, name, xin
+  ):    # Seems unnecessary to define a method that already exists identically as a function, no?
     return make_func(myst, xin, name)
 
   def __call__(self, y, z):
-      l=self.y[-1]
-      if y==l:
-          # slope can be ill defined at y=l, and solution is trivial, so it makes sense to treat this separately
-          return self.bn(z)
-      else:
-         def f2(x):
-             # function to help determine slope at bottom of vent. region
-             return self.bn(x)-self.bs(0)
-         
-         def f(x):
-             # function to help determine slope in vent. region
-             return self.bn(z - x * (l-y)) - self.bs(y + z/x)
-         
-         # first determine slope at bottom of vent. region here
-         sbot=-brenth(f2, self.z[0],0.)/l
-         # than set slope for stuff above and below...
-         if -z>sbot*y:
-           s=sbot
-         else:
-           s=brenth(f, 1.e-12,1.0)
-         return self.bn(z - s * (l-y))
+    l = self.y[-1]
+    if y == l:
+      # slope can be ill defined at y=l, and solution is trivial, so it makes sense to treat this separately
+      return self.bn(z)
+    else:
 
+      def f2(x):
+        # function to help determine slope at bottom of vent. region
+        return self.bn(x) - self.bs(0)
+
+      def f(x):
+        # function to help determine slope in vent. region
+        return self.bn(z - x * (l-y)) - self.bs(y + z/x)
+
+      # first determine slope at bottom of vent. region here
+      # print(self.z[0])
+      # print(f2(self.z[0]))
+      # print(f2(0))
+      sbot = -brenth(f2, self.z[0], 0.) / l
+      # than set slope for stuff above and below...
+      if -z > sbot * y:
+        s = sbot
+      else:
+        s = brenth(f, 1.e-12, 1.0)
+      return self.bn(z - s * (l-y))
 
   def gridit(self):
     return gridit(self.y, self.z, self)

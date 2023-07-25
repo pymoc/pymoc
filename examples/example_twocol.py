@@ -38,22 +38,17 @@ total_iters = int(
 kappa_back = 1e-5
 kappa_4k = 3e-4
 
-
 def kappa(z):
   return (kappa_back + kappa_4k * np.exp(-z / 1000 - 4))
-
 
 # create grid:
 z = np.asarray(np.linspace(-4000, 0, 80))
 
-
-# Initial conditions for buoyancy profile in the basin:
+# Initial conditions for buoyancy profile in the basin and north:
 def b_basin(z):
   return bs * np.exp(z / 300.)
 def b_north(z):
-  return 1e-3*bs * np.exp(z / 300.)
-
-
+  return 1e-3 * bs * np.exp(z / 300.)
 
 # create overturning model instance
 AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north)
@@ -76,7 +71,7 @@ ax2.set_xlabel('b', fontsize=14)
 basin = Column(
     z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bbot
 )
-# create adv-diff column model instance for basin
+# create adv-diff column model instance for northern column
 north = Column(
     z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bbot
 )

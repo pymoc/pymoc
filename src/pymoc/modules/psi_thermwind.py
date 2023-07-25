@@ -32,8 +32,8 @@ class Psi_Thermwind(object):
       f=1.2e-4,    # Coriolis parameter (input)
       z=None,    # grid (input)
       sol_init=None,    # Initial conditions for ODE solver (input)
-      b1=None,    # Buoyancy in the basin (input, output)
-      b2=0.,    # Buoyancy in the deep water formation region (input, output)
+      b1=0.,    # Buoyancy in the left basin or column (input, output)
+      b2=0.,    # Buoyancy in the right basin or column (input, output)
   ):
     r"""
     Parameters
@@ -46,10 +46,9 @@ class Psi_Thermwind(object):
     sol_init : ndarray; optional
                Initial guess at the solution to the thermal wind overturning streamfunction. Units: [...]
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the righthand (southward/westward) basin or column. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the northern basin, representing the
-         deepwater formation region. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the lefthand (northward/eastward) basin or column. Units: m/s\ :sup:`2`
     """
 
     self.f = f
@@ -62,12 +61,14 @@ class Psi_Thermwind(object):
 
     self.b1 = make_func(b1, self.z, 'b1')
     self.b2 = make_func(b2, self.z, 'b2')
-
     # Set initial conditions for BVP solver
     if sol_init is None:
       self.sol_init = np.zeros((2, nz))
     else:
       self.sol_init = sol_init
+
+    self.Psi = None
+    self.module_type = 'coupler'
 
   def bc(self, ya, yb):
     r"""
@@ -153,8 +154,8 @@ class Psi_Thermwind(object):
       \end{cases}
       \end{aligned}
 
-    where :math:`b_N\left(z\right)` is the density profiles in the northern region, :math:`b_B\left(z\right)` is
-    the density profile in the southern basin, and :math:`\mathcal{H}` is the Heaviside step function.
+    where :math:`b_N\left(z\right)` is the density profiles in the righthand basin or column, :math:`b_B\left(z\right)` is
+    the density profile in the lefthand basin or column, and :math:`\mathcal{H}` is the Heaviside step function.
 
     Parameters
     ----------
@@ -187,7 +188,7 @@ class Psi_Thermwind(object):
   def Psibz(self, nb=500):
     r"""
     Remap the overturning streamfunction onto the native isopycnal-depth space
-    of the columns in the northern region and southern basin.
+    of the columns in the right and lefthand basins/columns.
 
     Parameters
     ----------
@@ -197,7 +198,7 @@ class Psi_Thermwind(object):
     Returns
     -------
     psibz : ndarray
-            An array where the first element is an array representing the streamfunction at each depth level in the southern basin, and the second represents the same in the northern region.
+            An array where the first element is an array representing the streamfunction at each depth level in the lefthand baisn or column, and the second represents the same in the righthand basin or column.
     """
     # map isopycnal overturning back into isopycnal-depth space of each column
     psib = self.Psib(nb)
@@ -214,16 +215,15 @@ class Psi_Thermwind(object):
 
   def update(self, b1=None, b2=None):
     r"""
-    Update the vertical buoyancy profiles from the southern basin and northern region.
+    Update the vertical buoyancy profiles from the lefthand basin or column and righthand basin or column.
 
     Parameters
     ----------
 
     b1 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the southern basin. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the lefthand basin or column. Units: m/s\ :sup:`2`
     b2 : float, function, or ndarray; optional
-         Vertical buoyancy profile from the northern basin, representing the
-         deepwater formation region. Units: m/s\ :sup:`2`
+         Vertical buoyancy profile from the righthand basin or column. Units: m/s\ :sup:`2`
     """
     # update buoyancy profiles
     if b1 is not None:

@@ -4,6 +4,7 @@ checks:
     enabled: false
 exclude_patterns:
   - "examples/**/*.py"
+  - "tests/*.py"
   - "tests/**/*.py"
   - "src/pymoc/plotting/*"
   - "src/pymoc/utils/check_numpy_version.py"

@@ -1,13 +1,11 @@
 '''
 This script shows an example of a "two column" model for the 
 overturning circulation in a basin connected to a channel in the south.
-The first column represents the basin, while the second column represents
-the northern sinking region. The overtunning circulation is computed at
-the northern end of the basin (at the interface to the northern sinking region)
-and at the southern end of the basin (at the interface to the channel).
-The parameters chosen here follow more or less the "control" experiment of Nikurashin
-and Vallis (2012, JPO).
+The example is the same as "example_twocol_plusSO" but we are here
+using the "model" class to patch together the different components
+of the setup.
 '''
+from pymoc import model
 from pymoc.modules import Psi_Thermwind, Psi_SO, Column
 from pymoc.plotting import Interpolate_channel
 import numpy as np
@@ -50,45 +48,73 @@ kappa = 2e-5
 # create vertical grid:
 z = np.asarray(np.linspace(-4000, 0, 80))
 
-# Initial conditions for buoyancy profile in the basin
+# Initial conditions for buoyancy profile in the basin and north
 def b_basin(z):
   return bs * np.exp(z / 300.)
 def b_north(z):
-  return bs_north * np.exp(z / 300.)
+  return 1e-3 * bs * np.exp(z / 300.)
 
-
-# create N.A. overturning model instance
-AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north, f=1e-4)
-# and solve for initial overturning streamfunction:
-AMOC.solve()
-# evaluate overturning in isopycnal space:
-[Psi_iso_b, Psi_iso_n] = AMOC.Psibz()
-
-# create S.O. overturning model instance
-SO = Psi_SO(
-    z=z,
-    y=y,
-    b=b_basin(z),
-    bs=bs_SO,
-    tau=tau,
-    f=1e-4,
-    L=5e6,
-    KGM=1000.,
-    c=0.1,
-    bvp_with_Ek=True
+# Here we are creating the model object, to which we then add the
+# various components ("modules")
+model = model.Model()
+# Add module for SO overturning streamfunction:
+model.new_module(
+    Psi_SO, {
+        'z': z,
+        'y': y,
+        'b': b_basin(z),
+        'bs': bs_SO,
+        'tau': tau,
+        'f': 1e-4,
+        'L': 5e6,
+        'KGM': 1000.,
+        'c': 0.1,
+        'bvp_with_Ek': True
+    }, 'Psi SO'
 )
-SO.solve()
-
-# create adv-diff column model instance for basin
-basin = Column(
-    z=z, kappa=kappa, Area=A_basin, b=b_basin, bs=bs, bbot=bmin
+# Add column module for adv-diff "Atlantic basin"
+model.new_module(
+    Column,
+    {
+        'z': z,
+        'kappa': kappa,
+        'Area': A_basin,
+        'b': b_basin,
+        'bs': bs,
+        'bbot': bmin
+    },
+    'Atlantic Basin',
+    left_neighbors=[model.get_module('psi_so')],
 )
-# create adv-diff column model instance for basin
-north = Column(
-    z=z, kappa=kappa, Area=A_north, b=b_north, bs=bs_north, bbot=bmin
+# Add module for N.A. overturning
+model.new_module(
+    Psi_Thermwind,
+    {
+        'z': z,
+        'b1': b_basin,
+        'b2': b_north,
+        'f': 1e-4
+    },
+    'AMOC',
+    left_neighbors=[model.get_module('atlantic_basin')],
 )
 
-# Create figure:
+# Add column module for northern deep water formation region
+model.new_module(
+    Column,
+    {
+        'z': z,
+        'kappa': kappa,
+        'Area': A_north,
+        'b': b_north,
+        'bs': bs_north,
+        'bbot': bmin,
+        'do_conv': True
+    },
+    'North Atlantic',
+    left_neighbors=[model.get_module('amoc')],
+)
+
 fig = plt.figure(figsize=(6, 10))
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
@@ -98,59 +124,46 @@ ax2.set_xlim((-0.02, 0.03))
 ax1.set_xlabel('$\Psi$', fontsize=14)
 ax2.set_xlabel('b', fontsize=14)
 
-# Main time-stepping loop:
-for ii in range(0, total_iters):
-  # update buoyancy profile
-  # using z-coordinate overturning:
-  #wAb=(AMOC.Psi-SO.Psi)*1e6
-  #wAN=-AMOC.Psi*1e6
-  # using isopycnal overturning:
-  wAb = (Psi_iso_b - SO.Psi) * 1e6
-  wAN = -Psi_iso_n * 1e6
-  basin.timestep(wA=wAb, dt=dt)
-  north.timestep(wA=wAN, dt=dt, do_conv=True)
-  if ii % MOC_up_iters == 0:
-    # update overturning streamfunction (can be done less frequently)
-    AMOC.update(b1=basin.b, b2=north.b)
-    AMOC.solve()
-    [Psi_iso_b, Psi_iso_n] = AMOC.Psibz()
-    SO.update(b=basin.b)
-    SO.solve()
-  if ii % plot_iters == 0:
-    # Plot current state:
-    ax1.cla()
-    ax2.cla()
-    ax1.plot(AMOC.Psi, AMOC.z, linewidth=0.5, color='r')
-    ax1.plot(SO.Psi, SO.z, linewidth=0.5, color='m')
-    ax2.plot(basin.b, basin.z, linewidth=0.5, color='b')
-    ax2.plot(north.b, north.z, linewidth=0.5, color='c')
-    plt.pause(0.01)
+model.run(basin_dt=dt, coupler_dt=MOC_up_iters, steps=total_iters)
 
-# Plot final results over time-iteration plot:
-ax1.plot(AMOC.Psi, AMOC.z, linewidth=2, color='r')
-ax1.plot(SO.Psi, SO.z, linewidth=2, color='m')
-ax1.plot(SO.Psi_Ek, SO.z, linewidth=1, color='m', linestyle='--')
-ax1.plot(SO.Psi_GM, SO.z, linewidth=1, color='m', linestyle=':')
-ax2.plot(basin.b, basin.z, linewidth=2, color='b')
-ax2.plot(north.b, basin.z, linewidth=2, color='c')
-ax1.plot(0. * AMOC.z, AMOC.z, linewidth=0.5, color='k')
+# # Plot final results over time-iteration plot:
+ax1.plot(model.amoc.Psi, model.amoc.z, linewidth=2, color='r')
+ax1.plot(model.psi_so.Psi, model.psi_so.z, linewidth=2, color='m')
+ax1.plot(
+    model.psi_so.Psi_Ek,
+    model.psi_so.z,
+    linewidth=1,
+    color='m',
+    linestyle='--'
+)
+ax1.plot(
+    model.psi_so.Psi_GM, model.psi_so.z, linewidth=1, color='m', linestyle=':'
+)
+ax2.plot(
+    model.atlantic_basin.b, model.atlantic_basin.z, linewidth=2, color='b'
+)
+ax2.plot(
+    model.north_atlantic.b, model.atlantic_basin.z, linewidth=2, color='c'
+)
+ax1.plot(0. * model.amoc.z, model.amoc.z, linewidth=0.5, color='k')
 
-#==============================================================================
-# Everything below is just to make fancy 2D plots:
-# This is mostly an exercise in interpolation, but useful to visualize solutions
+# #==============================================================================
+# # Everything below is just to make fancy 2D plots:
+# # This is mostly an exercise in interpolation, but useful to visualize solutions
 
-# first interpolate buoyancy in channel along constant-slope isopycnals:
-bint = Interpolate_channel(y=y, z=z, bs=bs_SO, bn=basin.b)
+# # first interpolate buoyancy in channel along constant-slope isopycnals:
+bint = Interpolate_channel(y=y, z=z, bs=bs_SO, bn=model.atlantic_basin.b)
 bsouth = bint.gridit()
 # buoyancy in the basin is all the same:
 ybasin = np.linspace(200., 12000., 60)
-bbasin = np.tile(basin.b, (len(ybasin), 1))
+bbasin = np.tile(model.atlantic_basin.b, (len(ybasin), 1))
 # finally, interpolate buoyancy in the north:
 ynorth = np.linspace(12100., 13000., 10)
 bnorth = np.zeros((len(ynorth), len(z)))
 for iz in range(len(z)):
   bnorth[:, iz] = interp1d([11900., 12000., 12900., 13000.], [
-      basin.b[iz], basin.b[iz], north.b[iz], north.b[iz]
+      model.atlantic_basin.b[iz], model.atlantic_basin.b[iz],
+      model.north_atlantic.b[iz], model.north_atlantic.b[iz]
   ],
                            kind='quadratic')(ynorth)
 # now stick it all together:
@@ -161,20 +174,25 @@ bnew = np.concatenate((bsouth, bbasin, bnorth))
 psiarray_iso = np.zeros((len(ynew), len(z)))
 psiarray_z = np.zeros((len(ynew), len(z)))
 for iy in range(1, len(y)):
-  # in the channel, interpolate SO.Psi onto local isopycnal depth:
-  psiarray_iso[iy, :] = np.interp(bnew[iy, :], basin.b, SO.Psi)
+  # in the channel, interpolate model.psi_so.Psi onto local isopycnal depth:
+  psiarray_iso[iy, :] = np.interp(
+      bnew[iy, :], model.atlantic_basin.b, model.psi_so.Psi
+  )
   psiarray_z[iy, :] = psiarray_iso[iy, :]
 for iy in range(len(y), len(y) + len(ybasin)):
   # in the basin, linearly interpolate between Psi_SO and Psi_AMOC:
   psiarray_iso[iy, :] = (
-      ynew[iy] * AMOC.Psibz()[0] + (10000. - ynew[iy]) * SO.Psi
+      ynew[iy] * model.amoc.Psibz()[0] + (10000. - ynew[iy]) * model.psi_so.Psi
   ) / 10000.
-  psiarray_z[iy, :
-             ] = (ynew[iy] * AMOC.Psi + (10000. - ynew[iy]) * SO.Psi) / 10000.
+  psiarray_z[iy, :] = (
+      ynew[iy] * model.amoc.Psi + (10000. - ynew[iy]) * model.psi_so.Psi
+  ) / 10000.
 for iy in range(len(y) + len(ybasin), len(ynew)):
   # in the north, interpolate AMOC.psib to local isopycnal depth:
-  psiarray_iso[iy, :] = np.interp(bnew[iy, :], AMOC.bgrid, AMOC.Psib())
-  psiarray_z[iy, :] = ((13000. - ynew[iy]) * AMOC.Psi) / 1000.
+  psiarray_iso[iy, :] = np.interp(
+      bnew[iy, :], model.amoc.bgrid, model.amoc.Psib()
+  )
+  psiarray_z[iy, :] = ((13000. - ynew[iy]) * model.amoc.Psi) / 1000.
 psiarray_iso[-1, :] = 0.
 
 blevs = np.arange(0.001, 0.03, 0.002)

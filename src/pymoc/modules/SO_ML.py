@@ -70,6 +70,7 @@ class SO_ML(object):
     self.Psi_s = Psi_s
     self.bs = make_array(bs, self.y, 'bs')
 
+    self.module_type = 'basin'
   # def solve_equi(self):
   #Solve for equilibrium solution given inputs
   # raise TypeError('This functionality is not yet implemented')
@@ -197,7 +198,7 @@ class SO_ML(object):
 
   def advdiff(self, b_basin, Psi_b, dt):
     r"""
-    Compute and apply advective-diffusive transport to the Souther Ocean Mixed Layer model,
+    Compute and apply advective-diffusive transport to the Southern Ocean Mixed Layer model,
     based on conditions in the adjoining basin.
 
     Parameters
@@ -273,6 +274,8 @@ class SO_ML(object):
     # (preferable e.g. for computation of streamfunction)
     self.set_boundary_conditions(b_basin, Psi_b)
 
+    self.module_type = 'basin'
+
   def timestep(self, b_basin=None, Psi_b=None, dt=1.):
     r"""
     Integrate the mixed layer buoyancy profile for one timestep.
@@ -299,5 +302,4 @@ class SO_ML(object):
       raise TypeError(
           'Psi_b needs to be numpy array providing overturning at buoyancy levels given by b_basin'
       )
-
     self.advdiff(b_basin=b_basin, Psi_b=Psi_b, dt=dt)

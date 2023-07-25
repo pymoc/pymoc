@@ -25,7 +25,8 @@ class Column(object):
       bzbot=None,    # bottom strat. as alternative boundary condition (input) 
       b=0.0,    # Buoyancy profile (input, output)
       Area=None,    # Horizontal area (can be function of depth)
-      N2min=1e-7    # Minimum strat. for conv adjustment
+      N2min=1e-7,    # Minimum strat. for conv adjustment
+      do_conv=False    # Whether to do convective adjustment
   ):
     r"""
     Parameters
@@ -63,6 +64,7 @@ class Column(object):
     self.bzbot = bzbot
 
     self.N2min = N2min
+    self.do_conv = do_conv
 
     self.b = make_array(b, self.z, 'b')
 
@@ -70,6 +72,8 @@ class Column(object):
       self.bz = np.gradient(self.b, z)
     else:
       self.bz = 0. * z    # notice that this is just for initialization of ode solver
+
+    self.module_type = 'basin'
 
   def Akappa(self, z):
     r"""
@@ -207,7 +211,7 @@ class Column(object):
     self.b = res.sol(self.z)[0, :]
     self.bz = res.sol(self.z)[1, :]
 
-  def vertadvdiff(self, wA, dt, do_conv=False):
+  def vertadvdiff(self, wA, dt, do_conv=None):
     r"""
     Calculate and apply the forcing from advection and diffusion on the vertical buoyancy
     profile, for the timestepping solution. This function implements an upwind advection
@@ -227,10 +231,11 @@ class Column(object):
     dz = self.z[1:] - self.z[:-1]
 
     # apply boundary conditions:
-    if not do_conv: # if we use convection, upper BC is already applied there
-      self.b[-1]=self.bs;
-    self.b[0] = (self.bbot if self.bzbot is None
-                  else self.b[1] - self.bzbot * dz[0])
+    if (do_conv is None and not self.do_conv) or (do_conv is not None and not do_conv):
+      self.b[-1] = self.bs
+    self.b[0] = (
+        self.bbot if self.bzbot is None else self.b[1] - self.bzbot * dz[0]
+    )
 
     bz = (self.b[1:] - self.b[:-1]) / dz
     bz_up = bz[1:]
@@ -261,15 +266,16 @@ class Column(object):
     # Notice that this parameterization currently only handles convection
     # from the top down which is the only case we really encounter here...
     # The BC is applied such that we are fixing b at bottom of the convective layer
-    ind=self.b>self.bs
+    ind = self.b > self.bs
     if ind.any():
       # z_conv is top-most non-convetive layer (set to bottom of the ocean if all convecting):
-      zconv= np.max(self.z[np.invert(ind)]) if np.invert(ind).any() else self.z[0]
-      self.b[ind]=self.bs+self.N2min*(self.z[ind]-zconv)
+      zconv = np.max(self.z[np.invert(ind)]
+                     ) if np.invert(ind).any() else self.z[0]
+      self.b[ind] = self.bs + self.N2min * (self.z[ind] - zconv)
     else:
-      # if no convection simply set bs as upper BC  
-      self.b[-1]=self.bs  
-        
+      # if no convection simply set bs as upper BC
+      self.b[-1] = self.bs
+
     # in a previous version we instead fixed the actual surface buoyancy;
     # the code for that approach is here:
     #ind = self.b > self.bs + self.N2min * self.z
@@ -312,7 +318,7 @@ class Column(object):
     self.b[adv_idx] = self.b[adv_idx] + dt * vdx_in[adv_idx] * db[
         adv_idx] / self.Area(self.z[adv_idx])
 
-  def timestep(self, wA=0., dt=1., do_conv=False, vdx_in=None, b_in=None):
+  def timestep(self, wA=0., dt=1., do_conv=None, vdx_in=None, b_in=None):
     r"""
     Carry out one timestep integration for the buoyancy profile, accounting
     for advective, diffusive, and convective effects.
@@ -333,13 +339,15 @@ class Column(object):
            Buoyancy vales from the adjoining module for the timestepping solution. Units: m/s\ :sup:`2`
 
     """
-    if do_conv:
+    # print(do_conv)
+    if do_conv is None and self.do_conv or do_conv:
       # do convection: (optional)
       self.convect()
-    
+      
     # do vertical advection and diffusion
     self.vertadvdiff(wA=wA, dt=dt, do_conv=do_conv)
-    
+    # print('vertical adv/diff done')
+
     if vdx_in is not None:
       # do horizontal advection: (optional)
       if b_in is not None:

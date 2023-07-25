@@ -273,10 +273,10 @@ class TestColumn(object):
     N2min = 1.5e-7
     z = np.asarray([-4000.0, -1000.0, -100.0, 0.0])
     b = np.asarray([-0.03, -0.02, 0.01, 0.01])
-    bs=0.0
-    
+    bs = 0.0
+
     column = Column(z=z, b=b.copy(), bs=bs, N2min=N2min, kappa=2e-5, Area=6e13)
-    b[2:] = bs + N2min * (z[2:]-z[1])
+    b[2:] = bs + N2min * (z[2:] - z[1])
 
     column.convect()
     assert (all(column.b == b))
@@ -301,11 +301,15 @@ class TestColumn(object):
     b = np.linspace(-np.sqrt(0.04), 0.0, 80)**2.
     vdx_in = np.asarray([2e4 for n in z])
     b_in = np.asarray([-0.02 for n in z])
-    wA = np.sin(z)/Area
+    wA = np.sin(z) / Area
     dt = 30 * 86400
 
-    column1 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt)
     column2.vertadvdiff(wA=wA, dt=dt)
     assert (all(column1.b == column2.b))
@@ -313,8 +317,12 @@ class TestColumn(object):
     column2.convect()
     assert (any(column1.b != column2.b))
 
-    column1 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in)
     column2.vertadvdiff(wA=wA, dt=dt)
     column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
@@ -322,15 +330,21 @@ class TestColumn(object):
     column2.convect()
     assert (any(column1.b != column2.b))
 
-    column1 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
-    column2 = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
+    column1 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
+    column2 = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     column1.timestep(wA=wA, dt=dt, b_in=b_in, vdx_in=vdx_in, do_conv=True)
     column2.convect()
     column2.vertadvdiff(wA=wA, dt=dt)
     column2.horadv(vdx_in=vdx_in, b_in=b_in, dt=dt)
     assert (all(column1.b == column2.b))
 
-    column = Column(z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area)
+    column = Column(
+        z=z, b=b.copy(), bs=-0.0, bbot=-0.04, kappa=2e-5, Area=Area
+    )
     with pytest.raises(TypeError) as binfo:
       column.timestep(wA=wA, dt=dt, vdx_in=vdx_in)
     assert (str(binfo.value) == "b_in is needed if vdx_in is provided")

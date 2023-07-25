@@ -103,6 +103,9 @@ class Psi_SO(object):
     self.Htaperbot = Htaperbot
     self.smax = smax
 
+    self.Psi = None
+    self.module_type = 'coupler'
+
   def ys(self, b):
     r"""
     Inversion function of :math:`bs\left(y\right)`. This is equivalent to the outcopping

@@ -31,16 +31,15 @@ if __name__ == '__main__':
   parser.add_argument('--pickup_save_file', default=None)
   args = parser.parse_args()
 
-
   # total run time in years:
-  Nyears=args.Nyears;
+  Nyears = args.Nyears
   # Time step in days:
-  dtdays=args.dt
+  dtdays = args.dt
 
   # boundary conditions:
   bs = args.bs
-  bs_north = 0.0 
-  bminSO = 0.0 
+  bs_north = 0.0
+  bminSO = 0.0
   h = 50.    # SO ML depth. This is an important tuning parameter since it controls diffusve b exchange between fixed flux and restoring region
   L = 2e7    # zonal length of SO
   Bloss = args.B / L / 2e5    #buoyancy loss around Antarctica - notice that the argument is for the globally integrated b-loss rate
@@ -48,7 +47,7 @@ if __name__ == '__main__':
   kapGM = args.KGM    #GM diffusivity in SO (m^2/s)
   vpist = 1.5 / 86400.    # Piston Vel for SO restoring
   tau = args.tau
-  kapfac=args.kapfac
+  kapfac = args.kapfac
 
   if args.pickup is not None:
     pickup = np.load(args.pickup)
@@ -90,14 +89,13 @@ if __name__ == '__main__':
   )    # total number of timesteps
   Diag_iters = 10 * MOC_up_iters    # multiplier for Diags - needs to be multiple of MOC_up_iters
 
-  
   # generate functions for full and effective diffusivity profile:
   def kappa(z):
-    return kapfac*9e-6*np.exp(-z/1200) + 7e-5*np.exp(z/50)
+    return kapfac * 9e-6 * np.exp(-z / 1200) + 7e-5 * np.exp(z / 50)
 
   def kappaeff(z):    # effective diffusivity profile with tapering in BBL
-    return (kapfac*9e-6*np.exp(-z/1200) + 7e-5*np.exp(z/50)) * (
-        1. - np.maximum(-4500. - z + 500., 0.) / 500. )**2   
+    return (kapfac * 9e-6 * np.exp(-z / 1200) + 7e-5 * np.exp(z / 50)
+            ) * (1. - np.maximum(-4500. - z + 500., 0.) / 500.)**2
 
   # create vertical grid:
   z = np.asarray(np.linspace(-4500., 0., 46))
@@ -112,8 +110,9 @@ if __name__ == '__main__':
     bs_SO = 1.0 * pickup['arr_2']
   else:
     b_basin = bs * np.exp(z / 400.) - 0.0001 * z / z[0]
-    b_north = bs_north - 0.0001*(z / z[0])**2.
-    bs_SO = bs_SO_eq.copy(); bs_SO[:6]= -0.0001
+    b_north = bs_north - 0.0001 * (z / z[0])**2.
+    bs_SO = bs_SO_eq.copy()
+    bs_SO[:6] = -0.0001
 
   # create N.A. overturning model instance
   AMOC = Psi_Thermwind(z=z, b1=b_basin, b2=b_north, f=1.2e-4)
@@ -131,7 +130,7 @@ if __name__ == '__main__':
   # in case the latter is fixed to the pickup conditions
   bs_SO[-1] = bs
   # make sure buoyancy at northern end of channel (serves as BC for diffusion) equals surface b in basin
-  
+
   # create vert. adv-diff column model instance for basin
   basin = Column(
       z=z, kappa=kappaeff, Area=A_basin, b=b_basin, bs=bs, bbot=b_basin[0]
