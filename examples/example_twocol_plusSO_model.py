@@ -14,7 +14,7 @@ from scipy.interpolate import interp1d
 
 # boundary conditions:
 bs = 0.03
-bs_north = 0.005
+bs_north = 0.004
 bmin = 0.0
 
 # S.O. surface boundary conditions and grid:
@@ -69,7 +69,7 @@ model.new_module(
         'L': 5e6,
         'KGM': 1000.,
         'c': 0.1,
-        'bvp_with_Ek': False
+        'bvp_with_Ek': True
     }, 'Psi SO'
 )
 # Add column module for adv-diff "Atlantic basin"
