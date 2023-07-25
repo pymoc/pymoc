@@ -132,10 +132,8 @@ m.new_module(
         m.get_module('amoc'),
         m.get_module('zoc'),
       ],
-    left_neighbors=[# 'direction': 'right',
-        m.get_module('so_atl'),
-        # 'direction': 'left',
-        # 'direction': 'right'
+    left_neighbors=[
+        m.get_module('so_atl')
     ],
 )
 
@@ -153,8 +151,7 @@ m.new_module(
     },
     'North',
     left_neighbors=[
-        m.get_module('amoc'),
-        # 'direction': 'left'
+        m.get_module('amoc')
     ]
 )
 
@@ -172,9 +169,7 @@ m.new_module(
     'Pac',
     left_neighbors=[
         m.get_module('zoc'),
-        # 'direction': 'left',
-        m.get_module('so_pac'),
-        # 'direction': 'left'
+        m.get_module('so_pac')
     ]
 )
 

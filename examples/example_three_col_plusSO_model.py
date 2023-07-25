@@ -10,7 +10,7 @@ from pymoc.modules import Psi_Thermwind, Psi_SO, Column, SO_ML
 from pymoc.plotting import Interpolate_channel
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
 
@@ -188,7 +188,8 @@ surflux[1:6] = -Bloss
 rest_mask = 0. * y
 rest_mask[6:-1] = 1.
 bminSO = 0.0 
-bs_SO_eq = 0.*y + bminSO
+#bs_SO_eq = 0.*y + bminSO
+bs_SO_eq = bs_SO
 vpist = 1.5 / 86400.    # Piston Vel for SO restoring
 
 model.new_module(
